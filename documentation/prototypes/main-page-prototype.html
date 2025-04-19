@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medical App - Fixed Layout</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            body {
+                background-color: #1c1c1c;
+                min-height: 100vh;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .frames-container {
+                display: flex;
+                flex-direction: column;
+                gap: 60px;
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto;
+                padding: 20px 0;
+            }
+
+            .laptop-frame {
+                background: #303030;
+                border-radius: 16px;
+                padding: 20px 20px 40px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+                width: 100%;
+            }
+
+            .frame-title {
+                color: white;
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            .laptop-screen {
+                background: #F8FAFC;
+                border-radius: 8px;
+                height: 700px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            /* HOME FRAME STYLES */
+            .app-layout {
+                display: flex;
+                height: 100%;
+            }
+
+            /* Left Sidebar */
+            .left-sidebar {
+                width: 80px;
+                background-color: #F8FAFC;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding-top: 24px;
+                gap: 32px;
+                border-right: 1px solid #f0f0f0;
+            }
+
+            .sidebar-icon {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                opacity: 0.6;
+                transition: opacity 0.2s ease;
+                cursor: pointer;
+            }
+
+            .sidebar-icon:hover {
+                opacity: 1;
+            }
+
+            /* Main Content */
+            .main-content {
+                flex: 1;
+                padding: 24px;
+                overflow-y: auto;
+                height: 100%;
+            }
+
+            .welcome-section {
+                display: flex;
+                align-items: center;
+                margin-bottom: 32px;
+            }
+
+            .welcome-icon {
+                width: 64px;
+                height: 64px;
+                min-width: 64px;
+                background: #3B82F6;
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                color: white;
+                margin-right: 24px;
+            }
+
+            .welcome-text h1 {
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            }
+
+            .welcome-text p {
+                color: #6B7280;
+            }
+
+            /* Specialty Categories */
+            .specialty-section {
+                margin-bottom: 32px;
+            }
+
+            .specialty-grid {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .specialty-card {
+                background: white;
+                border-radius: 12px;
+                padding: 16px;
+                width: 110px;
+                height: 110px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                border: 1px solid #f0f0f0;
+            }
+
+            .specialty-card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .specialty-card.active {
+                border: 2px solid #2563eb;
+                background: #EFF6FF;
+            }
+
+            .specialty-icon {
+                font-size: 28px;
+                margin-bottom: 12px;
+            }
+
+            .specialty-card span {
+                font-size: 14px;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            /* Doctors Section */
+            .doctors-section h2 {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 24px;
+            }
+
+            .doctors-container {
+                display: flex;
+                gap: 24px;
+                overflow-x: auto;
+                padding-bottom: 16px;
+                margin-right: -24px;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .doctors-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .doctor-card {
+                background: white;
+                border-radius: 20px;
+                padding: 24px;
+                width: 300px;
+                flex-shrink: 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                border: 1px solid #f0f0f0;
+            }
+
+            .doctor-info {
+                display: flex;
+                margin-bottom: 16px;
+            }
+
+            .doctor-placeholder {
+                width: 80px;
+                height: 80px;
+                min-width: 80px;
+                background: white;
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                color: #111827;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                border: 1px solid #f0f0f0;
+                margin-right: 16px;
+            }
+
+            .doctor-details h3 {
+                font-size: 18px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            }
+
+            .doctor-specialty {
+                color: #6B7280;
+                margin-bottom: 8px;
+            }
+
+            .doctor-price {
+                color: #3B82F6;
+                font-weight: 600;
+            }
+
+            .booking-btn {
+                background: #3B82F6;
+                color: white;
+                padding: 12px;
+                border-radius: 8px;
+                text-align: center;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                width: 100%;
+                transition: background 0.2s ease;
+            }
+
+            .booking-btn:hover {
+                background: #2563EB;
+            }
+
+            /* Right Sidebar */
+            .right-sidebar {
+                width: 350px;
+                min-width: 350px;
+                background: white;
+                padding: 24px;
+                border-left: 1px solid #f0f0f0;
+                overflow-y: auto;
+                height: 100%;
+            }
+
+            .right-sidebar h2 {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 24px;
+            }
+
+            .schedule-stack {
+                position: relative;
+                margin-bottom: 40px;
+                height: 130px;
+            }
+
+            .schedule-card {
+                background: white;
+                border-radius: 16px;
+                padding: 16px;
+                border: 1px solid #f0f0f0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                position: absolute;
+                width: 100%;
+                transition: transform 0.3s ease, opacity 0.3s ease;
+            }
+
+            .schedule-card:nth-child(1) {
+                transform: translateY(0) scale(1);
+                z-index: 3;
+            }
+
+            .schedule-card:nth-child(2) {
+                transform: translateY(10px) scale(0.97);
+                z-index: 2;
+                opacity: 0.7;
+            }
+
+            .schedule-card:nth-child(3) {
+                transform: translateY(20px) scale(0.94);
+                z-index: 1;
+                opacity: 0.4;
+            }
+
+            .schedule-doctor {
+                display: flex;
+                align-items: center;
+                margin-bottom: 16px;
+            }
+
+            .doctor-small-placeholder {
+                width: 48px;
+                height: 48px;
+                min-width: 48px;
+                background: white;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                margin-right: 12px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                border: 1px solid #f0f0f0;
+            }
+
+            .schedule-info h3 {
+                font-weight: 600;
+                font-size: 16px;
+            }
+
+            .schedule-info p {
+                color: #6B7280;
+                font-size: 14px;
+            }
+
+            .schedule-time {
+                background: #EFF6FF;
+                color: #2563EB;
+                padding: 8px 16px;
+                border-radius: 12px;
+                font-size: 14px;
+                display: flex;
+                gap: 12px;
+            }
+
+            .doctor-profile {
+                border-top: 1px solid #f0f0f0;
+                padding-top: 24px;
+            }
+
+            .doctor-profile-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 24px;
+            }
+
+            .doctor-stats {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 24px;
+            }
+
+            .stat-item p:first-child {
+                color: #6B7280;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .stat-item p:last-child {
+                font-weight: 700;
+                font-size: 18px;
+            }
+
+            .about-section h4 {
+                color: #6B7280;
+                margin-bottom: 8px;
+            }
+
+            .about-section p {
+                color: #4B5563;
+                font-size: 14px;
+                line-height: 1.6;
+                margin-bottom: 24px;
+            }
+
+            /* View More Link */
+            .view-more {
+                text-align: center;
+                margin-bottom: 16px;
+                display: block;
+                text-decoration: none;
+                color: #374151;
+                font-size: 14px;
+            }
+
+            /* Divider */
+            .divider {
+                height: 1px;
+                background-color: #E5E7EB;
+                margin: 16px 0;
+            }
+
+            /* APPOINTMENT PAGE STYLES */
+            .appointment-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                padding: 24px;
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            .calendar {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .calendar-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .calendar-nav-btn {
+                background: none;
+                border: none;
+                color: #6B7280;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            .calendar-month {
+                font-weight: 600;
+                font-size: 18px;
+            }
+
+            .calendar-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .calendar-day-header {
+                text-align: center;
+                font-weight: 500;
+                color: #6B7280;
+                padding: 8px;
+            }
+
+            .calendar-day {
+                aspect-ratio: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                border: 1px solid #E5E7EB;
+            }
+
+            .calendar-day:hover {
+                background: #F3F4F6;
+            }
+
+            .calendar-day.active {
+                background: #3B82F6;
+                color: white;
+                border-color: #3B82F6;
+            }
+
+            .calendar-day.disabled {
+                color: #D1D5DB;
+                background: #F9FAFB;
+                cursor: not-allowed;
+            }
+
+            .time-slots {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-top: 20px;
+            }
+
+            .time-slot {
+                padding: 8px;
+                text-align: center;
+                border-radius: 6px;
+                border: 1px solid #E5E7EB;
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+            .time-slot:hover {
+                background: #F3F4F6;
+            }
+
+            .time-slot.active {
+                background: #3B82F6;
+                color: white;
+                border-color: #3B82F6;
+            }
+
+            .appointment-details {
+                background: white;
+                border-radius: 12px;
+                padding: 24px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .appointment-details h2 {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 24px;
+            }
+
+            .selected-doctor {
+                display: flex;
+                padding: 16px;
+                background: #EFF6FF;
+                border-radius: 12px;
+                margin-bottom: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-label {
+                display: block;
+                color: #6B7280;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #E5E7EB;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+
+            .selected-datetime {
+                background: #F9FAFB;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            textarea.form-control {
+                resize: vertical;
+                min-height: 100px;
+            }
+
+            /* PROFILE PAGE STYLES */
+            .profile-container {
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            .profile-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 32px;
+            }
+
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                background: #EFF6FF;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                color: #3B82F6;
+                margin-right: 24px;
+            }
+
+            .profile-name {
+                font-size: 24px;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+
+            .profile-member {
+                color: #6B7280;
+            }
+
+            .profile-form {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+
+            .profile-section {
+                margin-bottom: 24px;
+            }
+
+            .profile-section h3 {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 16px;
+            }
+
+            /* HISTORY PAGE STYLES */
+            .history-container {
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            .history-container h2 {
+                font-size: 24px;
+                font-weight: 600;
+                margin-bottom: 24px;
+            }
+
+            .history-item {
+                background: #F9FAFB;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .history-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .history-doctor h3 {
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+
+            .history-type {
+                color: #6B7280;
+                margin-bottom: 4px;
+            }
+
+            .history-date {
+                color: #3B82F6;
+            }
+
+            .history-status {
+                background: #DEF7EC;
+                color: #03543E;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 14px;
+            }
+
+            .history-status.cancelled {
+                background: #FDE8E8;
+                color: #9B1C1C;
+            }
+
+            .history-status.upcoming {
+                background: #E1EFFE;
+                color: #1E429F;
+            }
+
+            /* Utility Classes */
+            .hidden {
+                display: none;
+            }
+
+            /* AUTH PAGES STYLES */
+            .auth-container {
+                display: flex;
+                height: 100%;
+                background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .auth-container::before {
+                content: '';
+                position: absolute;
+                width: 1000px;
+                height: 1000px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                top: -400px;
+                right: -400px;
+            }
+
+            .auth-container::after {
+                content: '';
+                position: absolute;
+                width: 800px;
+                height: 800px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                bottom: -300px;
+                left: -300px;
+            }
+
+            .auth-form-container {
+                background: white;
+                border-radius: 24px;
+                padding: 32px;
+                width: 400px;
+                position: relative;
+                z-index: 1;
+                margin: auto;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            }
+
+            .auth-header {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+
+            .auth-header h1 {
+                font-size: 22px;
+                font-weight: 700;
+                color: #111827;
+                margin-bottom: 4px;
+            }
+
+            .auth-header p {
+                color: #6B7280;
+                font-size: 13px;
+            }
+
+            .auth-form {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .form-group {
+                position: relative;
+                margin-bottom: 0;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 4px;
+                color: #374151;
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1px solid #E5E7EB;
+                border-radius: 10px;
+                font-size: 13px;
+                transition: all 0.2s ease;
+            }
+
+            .auth-divider {
+                margin: 20px 0;
+                font-size: 13px;
+            }
+
+            .social-auth {
+                display: flex;
+                gap: 10px;
+            }
+
+            .social-btn {
+                flex: 1;
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .social-btn img {
+                width: 18px;
+                height: 18px;
+            }
+
+            .auth-footer {
+                margin-top: 20px;
+                font-size: 13px;
+            }
+
+            .auth-btn {
+                padding: 10px;
+                border-radius: 10px;
+                font-size: 14px;
+                margin-top: 4px;
+            }
+        </style>
+    </head>
+<body>
+    <div class="frames-container">
+        <!-- HOME PAGE FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Home</div>
+            <div class="laptop-screen">
+                <div class="app-layout">
+                    <!-- Left Sidebar -->
+                    <div class="left-sidebar">
+                        <div class="sidebar-icon">📅</div>
+                        <div class="sidebar-icon">⚙️</div>
+                        <div class="sidebar-icon">❓</div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content">
+                        <div class="welcome-section">
+                            <div class="welcome-icon">H</div>
+                            <div class="welcome-text">
+                                <h1>Welcome, Kayden!</h1>
+                                <p>Hello there! Welcome to our medical app, how can we assist you?</p>
+                            </div>
+                        </div>
+
+                        <!-- Specialty Categories -->
+                        <div class="specialty-section">
+                            <div class="specialty-grid">
+                                <div class="specialty-card" data-specialty="gp">
+                                    <div class="specialty-icon">🩺</div>
+                                    <span>GP</span>
+                                </div>
+                                <div class="specialty-card" data-specialty="cardiologist">
+                                    <div class="specialty-icon">❤️</div>
+                                    <span>Cardiologist</span>
+                                </div>
+                                <div class="specialty-card active" data-specialty="dentist">
+                                    <div class="specialty-icon">🦷</div>
+                                    <span>Dentist</span>
+                                </div>
+                                <div class="specialty-card" data-specialty="oncologist">
+                                    <div class="specialty-icon">🧪</div>
+                                    <span>Oncologist</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctors Section -->
+                        <div class="doctors-section">
+                            <h2>Available Doctors</h2>
+                            <div class="doctors-container" id="dentist-doctors">
+                                <div class="doctor-card">
+                                    <div class="doctor-info">
+                                        <div class="doctor-placeholder">X</div>
+                                        <div class="doctor-details">
+                                            <h3>Dr. Adam Hall</h3>
+                                            <p class="doctor-specialty">Dentist</p>
+                                            <p class="doctor-price">RM 99/h</p>
+                                        </div>
+                                    </div>
+                                    <button class="booking-btn" data-doctor="Dr. Adam Hall" data-specialty="Dentist" data-price="RM 99/h">Book Appointment</button>
+                                </div>
+                                <div class="doctor-card">
+                                    <div class="doctor-info">
+                                        <div class="doctor-placeholder">X</div>
+                                        <div class="doctor-details">
+                                            <h3>Dr. Adam Lim</h3>
+                                            <p class="doctor-specialty">Dentist</p>
+                                            <p class="doctor-price">RM 99/h</p>
+                                        </div>
+                                    </div>
+                                    <button class="booking-btn" data-doctor="Dr. Adam Lim" data-specialty="Dentist" data-price="RM 99/h">Book Appointment</button>
+                                </div>
+                                <div class="doctor-card">
+                                    <div class="doctor-info">
+                                        <div class="doctor-placeholder">X</div>
+                                        <div class="doctor-details">
+                                            <h3>Prof Dr. Brandon</h3>
+                                            <p class="doctor-specialty">Dentist</p>
+                                            <p class="doctor-price">RM 99/h</p>
+                                        </div>
+                                    </div>
+                                    <button class="booking-btn" data-doctor="Prof Dr. Brandon" data-specialty="Dentist" data-price="RM 99/h">Book Appointment</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar -->
+                    <div class="right-sidebar">
+                        <h2>Upcoming Schedule</h2>
+                        <div class="schedule-stack">
+                            <div class="schedule-card">
+                                <div class="schedule-doctor">
+                                    <div class="doctor-small-placeholder">X</div>
+                                    <div class="schedule-info">
+                                        <h3>Dr. Adam Lim</h3>
+                                        <p>Cardiologist</p>
+                                    </div>
+                                </div>
+                                <div class="schedule-time">
+                                    <span>📅 June 3, 2025</span>
+                                    <span>🕒 9:00AM - 10:00AM</span>
+                                </div>
+                            </div>
+                            <div class="schedule-card">
+                                <div class="schedule-doctor">
+                                    <div class="doctor-small-placeholder">X</div>
+                                    <div class="schedule-info">
+                                        <h3>Dr. Sarah Lee</h3>
+                                        <p>GP</p>
+                                    </div>
+                                </div>
+                                <div class="schedule-time">
+                                    <span>📅 June 5, 2025</span>
+                                    <span>🕒 2:00PM - 3:00PM</span>
+                                </div>
+                            </div>
+                            <div class="schedule-card">
+                                <div class="schedule-doctor">
+                                    <div class="doctor-small-placeholder">X</div>
+                                    <div class="schedule-info">
+                                        <h3>Dr. Rebecca Wong</h3>
+                                        <p>Oncologist</p>
+                                    </div>
+                                </div>
+                                <div class="schedule-time">
+                                    <span>📅 June 10, 2025</span>
+                                    <span>🕒 11:00AM - 12:00PM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="doctor-profile" class="doctor-profile">
+                            <div class="doctor-profile-header">
+                                <div class="doctor-small-placeholder">X</div>
+                                <div class="schedule-info">
+                                    <h3>Prof Dr. Brandon</h3>
+                                    <p>Dentist</p>
+                                    <p class="doctor-price">RM 99/h</p>
+                                </div>
+                            </div>
+                            
+                            <div class="doctor-stats">
+                                <div class="stat-item">
+                                    <p>Experience</p>
+                                    <p>5 Years</p>
+                                </div>
+                                <div class="stat-item">
+                                    <p>Review</p>
+                                    <p>50K</p>
+                                </div>
+                            </div>
+
+                            <div class="about-section">
+                                <h4>About</h4>
+                                <p>Dr. Emily Chen is a passionate and detail-oriented dentist with over 10 years of experience in general and cosmetic dental care. She is dedicated to creating a comfortable experience for patients of all ages and believes that a healthy smile builds lasting confidence.</p>
+                            </div>
+
+                            <button class="booking-btn">Booking Appointment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPOINTMENT FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Book Appointment</div>
+            <div class="laptop-screen">
+                <div class="appointment-container">
+                    <!-- Calendar Section -->
+                    <div class="calendar">
+                        <div class="calendar-header">
+                            <button class="calendar-nav-btn">◀</button>
+                            <span class="calendar-month">June 2025</span>
+                            <button class="calendar-nav-btn">▶</button>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">Sun</div>
+                            <div class="calendar-day-header">Mon</div>
+                            <div class="calendar-day-header">Tue</div>
+                            <div class="calendar-day-header">Wed</div>
+                            <div class="calendar-day-header">Thu</div>
+                            <div class="calendar-day-header">Fri</div>
+                            <div class="calendar-day-header">Sat</div>
+                            
+                            <div class="calendar-day disabled">28</div>
+                            <div class="calendar-day disabled">29</div>
+                            <div class="calendar-day disabled">30</div>
+                            <div class="calendar-day disabled">31</div>
+                            <div class="calendar-day">1</div>
+                            <div class="calendar-day">2</div>
+                            <div class="calendar-day">3</div>
+                            
+                            <div class="calendar-day">4</div>
+                            <div class="calendar-day">5</div>
+                            <div class="calendar-day">6</div>
+                            <div class="calendar-day">7</div>
+                            <div class="calendar-day">8</div>
+                            <div class="calendar-day">9</div>
+                            <div class="calendar-day">10</div>
+                            
+                            <div class="calendar-day">11</div>
+                            <div class="calendar-day">12</div>
+                            <div class="calendar-day">13</div>
+                            <div class="calendar-day">14</div>
+                            <div class="calendar-day active">15</div>
+                            <div class="calendar-day">16</div>
+                            <div class="calendar-day">17</div>
+                            
+                            <div class="calendar-day">18</div>
+                            <div class="calendar-day">19</div>
+                            <div class="calendar-day">20</div>
+                            <div class="calendar-day">21</div>
+                            <div class="calendar-day">22</div>
+                            <div class="calendar-day">23</div>
+                            <div class="calendar-day">24</div>
+                            
+                            <div class="calendar-day">25</div>
+                            <div class="calendar-day">26</div>
+                            <div class="calendar-day">27</div>
+                            <div class="calendar-day">28</div>
+                            <div class="calendar-day">29</div>
+                            <div class="calendar-day">30</div>
+                            <div class="calendar-day disabled">1</div>
+                        </div>
+                        
+                        <div class="time-slots">
+                            <div class="time-slot active">9:00 AM</div>
+                            <div class="time-slot">10:00 AM</div>
+                            <div class="time-slot">11:00 AM</div>
+                            <div class="time-slot">12:00 PM</div>
+                            <div class="time-slot">2:00 PM</div>
+                            <div class="time-slot">3:00 PM</div>
+                            <div class="time-slot">4:00 PM</div>
+                            <div class="time-slot">5:00 PM</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointment Details -->
+                    <div class="appointment-details">
+                        <h2>Appointment Details</h2>
+                        <div class="selected-doctor">
+                            <div class="doctor-placeholder">X</div>
+                            <div class="doctor-details">
+                                <h3>Dr. Adam Lim</h3>
+                                <p class="doctor-specialty">Dentist</p>
+                                <p class="doctor-price">RM 99/h</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Selected Date & Time</label>
+                            <div class="selected-datetime">
+                                June 15, 2025 • 9:00 AM
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Reason for Visit</label>
+                            <input type="text" class="form-control" placeholder="Enter reason">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" rows="4" placeholder="Any specific concerns or requirements?"></textarea>
+                        </div>
+                        
+                        <button class="booking-btn">Confirm Booking</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Profile</div>
+            <div class="laptop-screen">
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar">K</div>
+                        <div>
+                            <h1 class="profile-name">Kayden Wong</h1>
+                            <p class="profile-member">Member since 2023</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-form">
+                        <div class="profile-section">
+                            <h3>Personal Information</h3>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="kayden@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" value="+60 12-345-6789">
+                            </div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>Medical Information</h3>
+                            <div class="form-group">
+                                <label class="form-label">Blood Type</label>
+                                <input type="text" class="form-control" value="A+">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Allergies</label>
+                                <input type="text" class="form-control" value="None">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Appointment History</div>
+            <div class="laptop-screen">
+                <div class="history-container">
+                    <h2>Appointment History</h2>
+                    
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-doctor">
+                                <h3>Dr. Adam Lim</h3>
+                                <p class="history-type">Dental Check-up</p>
+                                <p class="history-date">June 3, 2023 • 9:00 AM</p>
+                            </div>
+                            <span class="history-status">Completed</span>
+                        </div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-doctor">
+                                <h3>Dr. Sarah Chen</h3>
+                                <p class="history-type">General Consultation</p>
+                                <p class="history-date">May 15, 2023 • 2:00 PM</p>
+                            </div>
+                            <span class="history-status">Completed</span>
+                        </div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-doctor">
+                                <h3>Dr. Rebecca Wong</h3>
+                                <p class="history-type">Follow-up Consultation</p>
+                                <p class="history-date">April 28, 2023 • 11:00 AM</p>
+                            </div>
+                            <span class="history-status cancelled">Cancelled</span>
+                        </div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-doctor">
+                                <h3>Prof Dr. Brandon</h3>
+                                <p class="history-type">Dental Surgery</p>
+                                <p class="history-date">June 20, 2025 • 10:00 AM</p>
+                            </div>
+                            <span class="history-status upcoming">Upcoming</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIGN IN FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Sign In</div>
+            <div class="laptop-screen">
+                <div class="auth-container">
+                    <div class="auth-form-container">
+                        <div class="auth-header">
+                            <h1>Welcome Back!</h1>
+                            <p>Sign in to continue to your account</p>
+                        </div>
+                        <form class="auth-form">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" placeholder="Enter your email">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" placeholder="Enter your password">
+                            </div>
+                            <div class="remember-forgot">
+                                <label class="remember-me">
+                                    <input type="checkbox">
+                                    <span>Remember me</span>
+                                </label>
+                                <a href="#" class="forgot-password">Forgot password?</a>
+                            </div>
+                            <button type="submit" class="auth-btn">Sign In</button>
+                        </form>
+                        <div class="auth-divider">
+                            <span>or continue with</span>
+                        </div>
+                        <div class="social-auth">
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z'/%3E%3Cpath fill='%23FF3D00' d='m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z'/%3E%3C/svg%3E" alt="Google">
+                            </button>
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23039BE5' d='M24 5a19 19 0 1 0 0 38 19 19 0 1 0 0-38z'/%3E%3Cpath fill='%23FFF' d='M26.572 29.036h4.917l.772-4.995h-5.69v-2.73c0-2.075.678-3.915 2.619-3.915h3.119v-4.359c-.548-.074-1.707-.236-3.897-.236-4.573 0-7.254 2.415-7.254 7.917v3.323h-4.701v4.995h4.701v13.729c.931.14 1.874.235 2.842.235.875 0 1.729-.08 2.572-.194v-13.77z'/%3E%3C/svg%3E" alt="Facebook">
+                            </button>
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23000000' d='M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm11.1 20.1c0 .3 0 .6-.1.9 0 .1 0 .3-.1.4 0 .1 0 .2-.1.3 0 .1 0 .2-.1.3-.3.9-.9 1.7-1.7 2.4-.1.1-.2.2-.3.2-.1.1-.2.1-.3.2-.1.1-.2.1-.4.2-.1 0-.2.1-.3.1-.1 0-.3.1-.4.1-.1 0-.2 0-.3.1-.3.1-.7.1-1 .1h-8c-4.4 0-8-3.6-8-8s3.6-8 8-8h8c.3 0 .7 0 1 .1.1 0 .2 0 .3.1.1 0 .3.1.4.1.1 0 .2.1.3.1.1.1.2.1.4.2.1.1.2.2.3.2.8.7 1.4 1.5 1.7 2.4 0 .1 0 .2.1.3 0 .1 0 .2.1.3 0 .1 0 .3.1.4.1.3.1.6.1.9z'/%3E%3C/svg%3E" alt="Apple">
+                            </button>
+                        </div>
+                        <div class="auth-footer">
+                            Don't have an account? <a href="#">Sign up</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIGN UP FRAME -->
+        <div class="laptop-frame">
+            <div class="frame-title">Sign Up</div>
+            <div class="laptop-screen">
+                <div class="auth-container">
+                    <div class="auth-form-container">
+                        <div class="auth-header">
+                            <h1>Create Account</h1>
+                            <p>Join us and start your journey to better health</p>
+                        </div>
+                        <form class="auth-form">
+                            <div class="form-group">
+                                <label for="fullname">Full Name</label>
+                                <input type="text" id="fullname" placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-email">Email</label>
+                                <input type="email" id="signup-email" placeholder="Enter your email">
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-password">Password</label>
+                                <input type="password" id="signup-password" placeholder="Create a password">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Confirm Password</label>
+                                <input type="password" id="confirm-password" placeholder="Confirm your password">
+                            </div>
+                            <button type="submit" class="auth-btn">Create Account</button>
+                        </form>
+                        <div class="auth-divider">
+                            <span>or sign up with</span>
+                        </div>
+                        <div class="social-auth">
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z'/%3E%3Cpath fill='%23FF3D00' d='m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z'/%3E%3C/svg%3E" alt="Google">
+                            </button>
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23039BE5' d='M24 5a19 19 0 1 0 0 38 19 19 0 1 0 0-38z'/%3E%3Cpath fill='%23FFF' d='M26.572 29.036h4.917l.772-4.995h-5.69v-2.73c0-2.075.678-3.915 2.619-3.915h3.119v-4.359c-.548-.074-1.707-.236-3.897-.236-4.573 0-7.254 2.415-7.254 7.917v3.323h-4.701v4.995h4.701v13.729c.931.14 1.874.235 2.842.235.875 0 1.729-.08 2.572-.194v-13.77z'/%3E%3C/svg%3E" alt="Facebook">
+                            </button>
+                            <button class="social-btn">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23000000' d='M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm11.1 20.1c0 .3 0 .6-.1.9 0 .1 0 .3-.1.4 0 .1 0 .2-.1.3 0 .1 0 .2-.1.3-.3.9-.9 1.7-1.7 2.4-.1.1-.2.2-.3.2-.1.1-.2.1-.3.2-.1.1-.2.1-.4.2-.1 0-.2.1-.3.1-.1 0-.3.1-.4.1-.1 0-.2 0-.3.1-.3.1-.7.1-1 .1h-8c-4.4 0-8-3.6-8-8s3.6-8 8-8h8c.3 0 .7 0 1 .1.1 0 .2 0 .3.1.1 0 .3.1.4.1.1 0 .2.1.3.1.1.1.2.1.4.2.1.1.2.2.3.2.8.7 1.4 1.5 1.7 2.4 0 .1 0 .2.1.3 0 .1 0 .2.1.3 0 .1 0 .3.1.4.1.3.1.6.1.9z'/%3E%3C/svg%3E" alt="Apple">
+                            </button>
+                        </div>
+                        <div class="auth-footer">
+                            Already have an account? <a href="#">Sign in</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functionality for specialty selection
+        document.querySelectorAll('.specialty-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all cards
+                document.querySelectorAll('.specialty-card').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked card
+                this.classList.add('active');
+                
+                // Get specialty type
+                const specialty = this.getAttribute('data-specialty');
+                
+                // Update doctors section title
+                document.querySelector('.doctors-section h2').textContent = `Available ${specialty.charAt(0).toUpperCase() + specialty.slice(1)}s`;
+                
+                // Hide all doctor containers
+                document.querySelectorAll('.doctors-container').forEach(container => {
+                    container.classList.add('hidden');
+                });
+                
+                // Show the relevant doctor container if it exists
+                const doctorContainer = document.getElementById(`${specialty}-doctors`);
+                if (doctorContainer) {
+                    doctorContainer.classList.remove('hidden');
+                } else {
+                    // If we don't have specific doctors for this specialty, show the dentist doctors as fallback
+                    document.getElementById('dentist-doctors').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Book appointment button functionality
+        document.querySelectorAll('.booking-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const doctorName = this.getAttribute('data-doctor');
+                const specialty = this.getAttribute('data-specialty');
+                const price = this.getAttribute('data-price');
+                
+                if (doctorName && specialty && price) {
+                    // Update doctor profile in right sidebar
+                    const profileHeader = document.querySelector('.doctor-profile-header');
+                    if (profileHeader) {
+                        profileHeader.querySelector('h3').textContent = doctorName;
+                        profileHeader.querySelector('p').textContent = specialty;
+                        const priceElement = profileHeader.querySelector('.doctor-price');
+                        if (priceElement) {
+                            priceElement.textContent = price;
+                        }
+                    }
+                }
+            });
+        });
+
+        // Calendar day selection
+        document.querySelectorAll('.calendar-day:not(.disabled)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update selected date display
+                const month = document.querySelector('.calendar-month').textContent;
+                const selectedTime = document.querySelector('.time-slot.active')?.textContent || '9:00 AM';
+                document.querySelector('.selected-datetime').textContent = `${month.split(' ')[0]} ${this.textContent}, ${month.split(' ')[1]} • ${selectedTime}`;
+            });
+        });
+
+        // Time slot selection
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.addEventListener('click', function() {
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update selected time display
+                const selectedDate = document.querySelector('.selected-datetime').textContent.split('•')[0].trim();
+                document.querySelector('.selected-datetime').textContent = `${selectedDate} • ${this.textContent}`;
+            });
+        });
+
+        // Schedule card stack hover effect
+        const scheduleStacks = document.querySelectorAll('.schedule-stack');
+        scheduleStacks.forEach(stack => {
+            const cards = stack.querySelectorAll('.schedule-card');
+            
+            stack.addEventListener('mouseover', function() {
+                cards.forEach((card, index) => {
+                    // Reduce the transform effect when hovering
+                    card.style.transform = `translateY(${index * 5}px) scale(${1 - index * 0.01})`;
+                    card.style.opacity = 1 - index * 0.1;
+                });
+            });
+            
+            stack.addEventListener('mouseout', function() {
+                cards.forEach((card, index) => {
+                    // Restore original transform
+                    if (index === 0) {
+                        card.style.transform = 'translateY(0) scale(1)';
+                        card.style.opacity = 1;
+                    } else if (index === 1) {
+                        card.style.transform = 'translateY(10px) scale(0.97)';
+                        card.style.opacity = 0.7;
+                    } else {
+                        card.style.transform = 'translateY(20px) scale(0.94)';
+                        card.style.opacity = 0.4;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
