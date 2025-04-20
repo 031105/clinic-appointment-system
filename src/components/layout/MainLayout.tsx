@@ -1,21 +1,26 @@
-import { ReactNode } from 'react';
+'use client';
+
+import React from 'react';
 import Sidebar from './Sidebar';
-import Header from './Header';
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-export default function MainLayout({ children }: MainLayoutProps) {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+    <div className="flex h-screen bg-gray-50">
+      {/* Fixed Sidebar */}
+      <div className="fixed left-0 top-0 bottom-0">
         <Sidebar />
-        <div className="flex-1">
-          <Header />
-          <main className="p-6">{children}</main>
-        </div>
       </div>
+      
+      {/* Main Content with padding for sidebar */}
+      <main className="flex-1 ml-20 p-8 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
     </div>
   );
-} 
+}; 

@@ -22,10 +22,10 @@ const SpecialtyCard: React.FC<SpecialtyCardProps> = ({
     <button
       onClick={onClick}
       className={twMerge(
-        'flex h-32 w-32 flex-col items-center justify-center rounded-xl border p-4 text-center transition-all hover:border-blue-500 hover:shadow-md',
+        'flex h-28 w-28 flex-col items-center justify-center rounded-xl border p-4 text-center transition-all',
         isSelected
           ? 'border-blue-500 bg-blue-50 text-blue-600'
-          : 'border-gray-200 bg-white text-gray-700',
+          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:shadow-md',
         className
       )}
     >
@@ -36,4 +36,4 @@ const SpecialtyCard: React.FC<SpecialtyCardProps> = ({
   );
 };
 
-export default SpecialtyCard; 
+export default SpecialtyCard;

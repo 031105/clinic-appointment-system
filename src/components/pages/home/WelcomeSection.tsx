@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui/Button';
 import { twMerge } from 'tailwind-merge';
 
 interface WelcomeSectionProps {
@@ -17,16 +18,19 @@ export function WelcomeSection() {
           <p className="text-xl mb-8">
             Book appointments with top healthcare professionals
           </p>
-          <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+          <Button 
+            variant="primary"
+            className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+          >
             Book an Appointment
-          </button>
+          </Button>
         </div>
       </div>
     </section>
   );
 }
 
-const WelcomeSectionComponent: React.FC<WelcomeSectionProps> = ({
+const WelcomeSectionDashboard: React.FC<WelcomeSectionProps> = ({
   userName = 'Guest',
   className,
 }) => {
@@ -40,15 +44,21 @@ const WelcomeSectionComponent: React.FC<WelcomeSectionProps> = ({
         visits.
       </p>
       <div className="mt-4 flex gap-4">
-        <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        <Button 
+          variant="primary"
+          className="rounded-lg px-4 py-2 text-sm font-medium"
+        >
           Book Appointment
-        </button>
-        <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+        </Button>
+        <Button
+          variant="outline"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
           View History
-        </button>
+        </Button>
       </div>
     </div>
   );
 };
 
-export default WelcomeSectionComponent; 
+export default WelcomeSectionDashboard;

@@ -1,43 +1,65 @@
+'use client';
+
 import Link from 'next/link';
-import { 
-  CalendarIcon, 
-  UserGroupIcon, 
-  CogIcon, 
-  QuestionMarkCircleIcon 
-} from '@heroicons/react/24/outline';
+import { usePathname } from 'next/navigation';
+import { HomeIcon, ClockIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
   const navigation = [
-    { name: 'Appointments', href: '/appointments', icon: CalendarIcon },
-    { name: 'Doctors', href: '/doctors', icon: UserGroupIcon },
-    { name: 'Settings', href: '/settings', icon: CogIcon },
-    { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon },
+    {
+      name: 'Home',
+      href: '/',
+      icon: HomeIcon,
+    },
+    {
+      name: 'View History',
+      href: '/appointments',
+      icon: ClockIcon,
+    },
+    {
+      name: 'Settings',
+      href: '/settings',
+      icon: Cog6ToothIcon,
+    },
   ];
 
   return (
-    <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-      <div className="flex flex-col flex-grow pt-5 bg-white overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-4">
-          <img
-            className="h-8 w-auto"
-            src="/logo.svg"
-            alt="Clinic Logo"
-          />
-        </div>
-        <div className="mt-5 flex-grow flex flex-col">
-          <nav className="flex-1 px-2 space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-              >
-                <item.icon className="mr-3 h-6 w-6" />
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
+    <div className="w-20 h-screen bg-white border-r border-gray-200 flex flex-col items-center py-6">
+      {/* Logo */}
+      <div className="mb-8">
+        <Link href="/" className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-xl">
+          <span className="text-xl font-bold">C</span>
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 flex flex-col items-center gap-4">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors ${
+                isActive
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-500 hover:bg-gray-50'
+              }`}
+              title={item.name}
+            >
+              <item.icon className="w-6 h-6" />
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* User Menu */}
+      <div className="mt-auto">
+        <button className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+          <span className="text-lg font-medium text-gray-600">K</span>
+        </button>
       </div>
     </div>
   );

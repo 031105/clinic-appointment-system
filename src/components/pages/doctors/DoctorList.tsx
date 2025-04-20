@@ -1,84 +1,60 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { Doctor, User, Specialty, Schedule } from '@prisma/client';
-
-type DoctorWithRelations = Doctor & {
-  user: User;
-  specialty: Specialty;
-  schedules: Schedule[];
-};
+import { Doctor } from '@/lib/mockData';
+import { Rating } from '@/components/ui/Rating';
 
 interface DoctorListProps {
-  doctors: DoctorWithRelations[];
+  doctors: Doctor[];
+  onDoctorSelect: (doctor: Doctor) => void;
+  selectedDoctorId?: string;
 }
 
-const DoctorList = ({ doctors }: DoctorListProps) => {
+const DoctorList = ({ doctors, onDoctorSelect, selectedDoctorId }: DoctorListProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {doctors.map((doctor) => (
-        <Link
-          href={`/doctors/${doctor.id}`}
-          key={doctor.id}
-          className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          <div className="p-6">
-            <div className="flex items-center mb-4">
-              <div className="h-16 w-16 rounded-full overflow-hidden">
-                <Image
-                  src={doctor.user.image || '/images/default-doctor.jpg'}
-                  alt={doctor.user.name}
-                  width={64}
-                  height={64}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="ml-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Dr. {doctor.user.name}
-                </h2>
-                <p className="text-blue-600">{doctor.specialty.name}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-gray-600">
-                {doctor.education || 'Medical Professional'}
-              </p>
-              <p className="text-gray-600">
-                Experience: {doctor.yearsOfExperience} years
-              </p>
-              <div className="flex items-center text-gray-500">
-                <svg
-                  className="h-5 w-5 text-yellow-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 15.585l-4.146 2.18.792-4.615L3.293 9.797l4.622-.672L10 5l2.085 4.125 4.622.672-3.353 3.353.792 4.615L10 15.585z"
-                    clipRule="evenodd"
+    <div className="overflow-x-auto pb-4 -mr-6">
+      <div className="flex gap-6 min-w-max pr-6">
+        {doctors.map((doctor) => (
+          <button
+            key={doctor.id}
+            onClick={() => onDoctorSelect(doctor)}
+            className={`text-left w-80 flex-shrink-0 bg-white rounded-xl shadow-sm border transition-all duration-300 transform hover:scale-102 hover:shadow-md ${
+              selectedDoctorId === doctor.id
+                ? 'border-blue-600 ring-1 ring-blue-600 scale-102 shadow-md'
+                : 'border-gray-100 hover:border-blue-600/30'
+            }`}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 transform transition-transform duration-200 hover:scale-105">
+                  <Image
+                    src={`/images/doctor-${doctor.id}.jpg`}
+                    alt={doctor.name}
+                    width={80}
+                    height={80}
+                    className="h-full w-full object-cover"
                   />
-                </svg>
-                <span className="ml-1">
-                  {doctor.rating || '4.5'} ({doctor.reviewCount || '0'} reviews)
-                </span>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Dr. {doctor.name}
+                  </h2>
+                  <p className="text-blue-600 text-sm">{doctor.specialty}</p>
+                  <div className="mt-2">
+                    <Rating value={doctor.rating} size="sm" readOnly />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>Medical Professional</p>
+                <p>Experience: {doctor.experience} years</p>
+                <p className="text-blue-600 font-medium">
+                  $100 per consultation
+                </p>
               </div>
             </div>
-
-            <div className="mt-4">
-              <p className="text-sm text-gray-500">
-                Next available: {doctor.schedules[0]?.startTime
-                  ? new Date(doctor.schedules[0].startTime).toLocaleDateString()
-                  : 'No availability'}
-              </p>
-            </div>
-
-            <button className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-              Book Appointment
-            </button>
-          </div>
-        </Link>
-      ))}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

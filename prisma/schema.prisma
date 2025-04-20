@@ -12,20 +12,32 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
+  name          String
   email         String    @unique
   password      String
   role          Role      @default(PATIENT)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  doctor        Doctor?
-  patient       Patient?
+  appointments  Appointment[]
+  medicalHistory MedicalHistory[]
+  notifications Notification[]
+  medicalReports MedicalReport[]
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctors   Doctor[]
 }
 
 model Doctor {
   id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
   name          String
+  email         String    @unique
+  password      String
   specialty     String
   experience    Int
   rating        Float     @default(0)
@@ -33,53 +45,82 @@ model Doctor {
   department    Department @relation(fields: [departmentId], references: [id])
   appointments  Appointment[]
   schedules     Schedule[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-model Patient {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  name          String
-  phone         String?
-  appointments  Appointment[]
+  reviews       Review[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model Appointment {
-  id            String    @id @default(cuid())
-  doctorId      String
-  doctor        Doctor    @relation(fields: [doctorId], references: [id])
-  patientId     String
-  patient       Patient   @relation(fields: [patientId], references: [id])
-  date          DateTime
-  status        AppointmentStatus @default(PENDING)
-  notes         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-model Department {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  description   String?
-  doctors       Doctor[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  userId      String
+  doctorId    String
+  date        DateTime
+  time        String
+  status      Status    @default(UPCOMING)
+  notes       String?
+  user        User      @relation(fields: [userId], references: [id])
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Schedule {
-  id            String    @id @default(cuid())
-  doctorId      String
-  doctor        Doctor    @relation(fields: [doctorId], references: [id])
-  dayOfWeek     Int       // 0-6 (Sunday-Saturday)
-  startTime     DateTime
-  endTime       DateTime
-  isAvailable   Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  doctorId  String
+  day       String
+  startTime String
+  endTime   String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  doctorId  String
+  userId    String
+  rating    Int
+  comment   String?
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  condition String
+  diagnosis String
+  treatment String
+  date      DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalReport {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  content     String
+  date        DateTime
+  doctorId    String
+  user        User      @relation(fields: [userId], references: [id])
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 enum Role {
@@ -88,9 +129,8 @@ enum Role {
   PATIENT
 }
 
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
+enum Status {
+  UPCOMING
   COMPLETED
   CANCELLED
 } 
