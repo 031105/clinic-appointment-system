@@ -4,11 +4,13 @@ import type { NextRequest } from 'next/server';
 // Paths that don't require authentication
 const publicPaths = ['/login', '/register', '/forgot-password'];
 
+// Dashboard routes are all under the (dashboard) group
+// The root path is also public during development
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Check if path is public
-  if (publicPaths.some(path => pathname.startsWith(path))) {
+  if (publicPaths.some(path => pathname.startsWith(path)) || pathname === '/') {
     return NextResponse.next();
   }
   
