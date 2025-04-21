@@ -18,25 +18,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-
-    try {
-      // In a real implementation, you would use an API call or auth library here
-      // For demo purposes, this is just a simulation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate login success
-      if (email === 'demo@example.com' && password === 'password') {
-        router.push('/');
-      } else {
-        throw new Error('Invalid email or password');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to login');
-      setShowToast(true);
-    } finally {
-      setIsLoading(false);
-    }
+    
+    // Simply redirect to home page after a short delay to simulate processing
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Direct login without authentication for development
+    router.push('/');
+    
+    setIsLoading(false);
   };
 
   return (

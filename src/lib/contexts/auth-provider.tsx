@@ -6,15 +6,6 @@ import {
   useState, 
   useEffect, 
   ReactNode 
-}
-
-// Custom hook to use the auth context
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 } from 'react';
 
 interface User {
@@ -33,6 +24,15 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Custom hook to use the auth context
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -70,25 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       throw error;
-    }     finally {
+    } finally {
       setLoading(false);
     }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        register,
-        logout
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -125,3 +109,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}

@@ -13,7 +13,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 p-4 relative overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 overflow-hidden">
       {/* Background circles */}
       <div className="absolute w-[800px] h-[800px] rounded-full bg-white/10 -bottom-[300px] -left-[300px] z-0" />
       <div className="absolute w-[1000px] h-[1000px] rounded-full bg-white/10 -top-[400px] -right-[400px] z-0" />
