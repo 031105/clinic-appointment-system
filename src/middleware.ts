@@ -4,11 +4,14 @@ import type { NextRequest } from 'next/server';
 // Paths that don't require authentication
 const publicPaths = ['/login', '/register', '/forgot-password'];
 
-// Dashboard routes are all under the (dashboard) group
-// The root path is also public during development
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // During development, bypass authentication checks
+  // Comment out the next line and uncomment the authentication logic when ready
+  return NextResponse.next();
+  
+  /* Authentication logic (commented out for development)
   // Check if path is public
   if (publicPaths.some(path => pathname.startsWith(path)) || pathname === '/') {
     return NextResponse.next();
@@ -23,9 +26,7 @@ export function middleware(request: NextRequest) {
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
-  
-  // If user is authenticated, proceed to the requested page
-  return NextResponse.next();
+  */
 }
 
 export const config = {
