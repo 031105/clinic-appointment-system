@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { ChevronRightIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Avatar } from '@/components/ui/Avatar';
@@ -708,56 +710,130 @@ const SettingsPage = () => {
                 </div>
                 
                 <div className="space-y-6">
-                  <p className="text-gray-600">
-                    Two-factor authentication adds an extra layer of security to your account. When enabled, you will need to provide a verification code in addition to your password when signing in.
-                  </p>
-                  
-                  {showVerificationForm ? (
-                    <div className="bg-gray-50 p-4 rounded-lg mt-4">
-                      <div className="mb-4 text-center">
-                        <p className="text-sm text-gray-600 mb-4">Scan this QR code with your authenticator app, then enter the verification code below.</p>
-                        <div className="inline-block border border-gray-200 p-2 bg-white">
-                          <img 
-                            src={qrCode}
-                            alt="2FA QR Code"
-                            className="h-48 w-48 object-contain"
-                          />
+                    <p className="text-gray-600">
+                        Two-factor authentication adds an extra layer of security to your account. When enabled, you will need to provide a verification code in addition to your password when signing in.
+                    </p>
+                    
+                    {showVerificationForm ? (
+                        <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                        <div className="mb-4 text-center">
+                            <p className="text-sm text-gray-600 mb-4">Scan this QR code with your authenticator app, then enter the verification code below.</p>
+                            <div className="inline-block border border-gray-200 p-2 bg-white">
+                            <img 
+                                src={qrCode}
+                                alt="2FA QR Code"
+                                className="h-48 w-48 object-contain"
+                            />
+                            </div>
                         </div>
-                      </div>
-                      
-                      <div className="max-w-xs mx-auto">
-                        <Input
-                          label="Verification Code"
-                          value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value)}
-                          fullWidth
-                        />
-                        <div className="mt-4 flex justify-center gap-2">
-                          <Button 
-                            variant="primary"
-                            onClick={handleVerify2FA}
-                            disabled={!verificationCode}
-                          >
-                            Verify Code
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            onClick={() => {
-                              setShowVerificationForm(false);
-                              setVerificationCode('');
-                            }}
-                          >
-                            Cancel
-                          </Button>
+                        
+                        <div className="max-w-xs mx-auto">
+                            <Input
+                            label="Verification Code"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value)}
+                            fullWidth
+                            />
+                            <div className="mt-4 flex justify-center gap-2">
+                            <Button 
+                                variant="primary"
+                                onClick={handleVerify2FA}
+                                disabled={!verificationCode}
+                            >
+                                Verify Code
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                onClick={() => {
+                                setShowVerificationForm(false);
+                                setVerificationCode('');
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            </div>
+                        </div>
+                        </div>
+                    ) : (
+                        <Button 
+                        variant={twoFactorEnabled ? "outline" : "primary"}
+                        onClick={handleToggle2FA}
+                        className={twoFactorEnabled ? "border-red-500 text-red-600 hover:bg-red-50" : ""}
+                        >
+                        {twoFactorEnabled ? "Disable Two-Factor Authentication" : "Enable Two-Factor Authentication"}
+                        </Button>
+                    )}
+                    </div>
+                  </div>
+                </Card>
+              )}
+              
+              {/* Account Deletion */}
+              {activeTab === 'delete-account' && (
+                <Card>
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Delete Account</h2>
+                    
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">Warning: Account Deletion is Permanent</h3>
+                          <div className="mt-2 text-sm text-red-700">
+                            <p>
+                              This action cannot be undone. Once you delete your account, all of your data, including medical history, appointments, and personal information will be permanently removed from our system.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <Button 
-                      variant={twoFactorEnabled ? "outline" : "primary"}
-                      onClick={handleToggle2FA}
-                      className={twoFactorEnabled ? "border-red-500 text-red-600 hover:bg-red-50" : ""}
-                    >
-                      {twoFactorEnabled ? "Disable Two-Factor Authentication" : "Enable Two-Factor Authentication"}
-                    </Button>
-                  )}
+                    
+                    <div className="space-y-4">
+                      <Input
+                        label="Confirm your password"
+                        type="password"
+                        placeholder="Enter your current password"
+                        fullWidth
+                      />
+                      
+                      <div className="flex items-center">
+                        <input
+                          id="confirm-delete"
+                          type="checkbox"
+                          className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                        />
+                        <label htmlFor="confirm-delete" className="ml-2 block text-sm text-gray-700">
+                          I understand that this action is permanent and cannot be undone
+                        </label>
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        className="border-red-500 text-red-600 hover:bg-red-50"
+                        onClick={() => showErrorToast('Account deletion is not available in the demo')}
+                      >
+                        Delete My Account
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </div>
+    
+          {showToast && (
+            <Toast
+              message={toastMessage}
+              type={toastMessage.toLowerCase().includes('error') ? 'error' : 'success'}
+              onClose={() => setShowToast(false)}
+            />
+        )}
+    </div>
+  );
+};
+    
+export default SettingsPage;
