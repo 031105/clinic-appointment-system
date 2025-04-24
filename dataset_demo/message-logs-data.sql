@@ -8,11 +8,11 @@ INSERT INTO message_logs (recipient_id, message_type, subject, content, status, 
 (21, 'email', 'Appointment Confirmation', 'Your appointment with Dr. Sarah Johnson has been confirmed for June 16, 2025 at 11:00 AM. Please arrive 15 minutes early to complete any necessary paperwork.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (25, 'email', 'Appointment Confirmation', 'Your appointment with Dr. Brandon Lee has been confirmed for June 18, 2025 at 3:00 PM. Please arrive 15 minutes early to complete any necessary paperwork.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
--- Appointment Reminders
-(21, 'sms', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. John Smith tomorrow at 9:30 AM. Reply Y to confirm.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(22, 'sms', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. John Smith tomorrow at 10:15 AM. Reply Y to confirm.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(24, 'sms', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. Emily Wong tomorrow at 10:30 AM. Reply Y to confirm.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(25, 'sms', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. Sophia Kumar tomorrow at 10:30 AM. Reply Y to confirm.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Appointment Reminders (converted from SMS to email)
+(21, 'email', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. John Smith tomorrow at 9:30 AM.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(22, 'email', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. John Smith tomorrow at 10:15 AM.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(24, 'email', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. Emily Wong tomorrow at 10:30 AM.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(25, 'email', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. Sophia Kumar tomorrow at 10:30 AM.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- Pending Appointment Notifications
 (23, 'email', 'Appointment Request', 'Your appointment request with Dr. Robert Chen for June 17, 2025 at 10:30 AM is pending confirmation. We will notify you once it is confirmed.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -27,8 +27,8 @@ INSERT INTO message_logs (recipient_id, message_type, subject, content, status, 
 (24, 'email', 'Prescription Ready', 'Your prescription for Tretinoin 0.025% cream is ready for pickup at the clinic pharmacy.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (25, 'email', 'Prescription Ready', 'Your prescription for Ketoconazole 2% shampoo is ready for pickup at the clinic pharmacy.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
--- Follow-up Notifications
-(21, 'sms', 'Appointment Follow-up', 'How are you feeling after your appointment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(22, 'sms', 'Appointment Follow-up', 'How are you doing after your recent appointment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(24, 'sms', 'Appointment Follow-up', 'How is your skin condition after starting the new treatment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(25, 'sms', 'Appointment Follow-up', 'How is your treatment progressing? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Follow-up Notifications (converted from SMS to email)
+(21, 'email', 'Appointment Follow-up', 'How are you feeling after your appointment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(22, 'email', 'Appointment Follow-up', 'How are you doing after your recent appointment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(24, 'email', 'Appointment Follow-up', 'How is your skin condition after starting the new treatment? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(25, 'email', 'Appointment Follow-up', 'How is your treatment progressing? Please let us know if you have any questions or concerns.', 'sent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
