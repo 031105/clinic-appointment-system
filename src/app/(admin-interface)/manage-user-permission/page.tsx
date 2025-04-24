@@ -797,41 +797,4 @@ export const userApi = {
     const user = tempUsers.find(u => u.id === userId);
     return user ? user.permissions : [];
   }
-}; focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter username"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email*</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={newUser.email}
-                      onChange={handleUserFormChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-                    <input
-                      type="text"
-                      id="phone"
-                      name="phone"
-                      value={newUser.phone}
-                      onChange={handleUserFormChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role*</label>
-                    <select
-                      id="role"
-                      name="role"
-                      value={newUser.role}
-                      onChange={handleUserFormChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+}; 

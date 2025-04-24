@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 
 // Temporary appointment data
@@ -432,5 +434,3 @@ export default function AppointmentManagement() {
           </div>
         </div>
       )}
-    </div>
-  );

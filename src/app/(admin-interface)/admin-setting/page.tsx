@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 
 // Temporary settings data
@@ -324,6 +326,192 @@ export default function SettingsConfiguration() {
                     value={isEditing ? tempEditSettings.general.clinicName : settings.general.clinicName}
                     onChange={handleGeneralChange}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicLogo" className="block text-sm font-medium text-gray-700">Clinic Logo</label>
+                  <input
+                    type="text"
+                    id="clinicLogo"
+                    name="clinicLogo"
+                    value={isEditing ? tempEditSettings.general.clinicLogo : settings.general.clinicLogo}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicPhone" className="block text-sm font-medium text-gray-700">Clinic Phone</label>
+                  <input
+                    type="text"
+                    id="clinicPhone"
+                    name="clinicPhone"
+                    value={isEditing ? tempEditSettings.general.clinicPhone : settings.general.clinicPhone}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="clinicEmail" className="block text-sm font-medium text-gray-700">Clinic Email</label>
+                  <input
+                    type="email"
+                    id="clinicEmail"
+                    name="clinicEmail"
+                    value={isEditing ? tempEditSettings.general.clinicEmail : settings.general.clinicEmail}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="clinicAddress" className="block text-sm font-medium text-gray-700">Clinic Address</label>
+                  <textarea
+                    id="clinicAddress"
+                    name="clinicAddress"
+                    value={isEditing ? tempEditSettings.general.clinicAddress : settings.general.clinicAddress}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    rows="3"
+                    disabled={!isEditing}
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="clinicWebsite" className="block text-sm font-medium text-gray-700">Clinic Website</label>
+                  <input
+                    type="text"
+                    id="clinicWebsite"
+                    name="clinicWebsite"
+                    value={isEditing ? tempEditSettings.general.clinicWebsite : settings.general.clinicWebsite}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700">Time Zone</label>
+                  <select
+                    id="timeZone"
+                    name="timeZone"
+                    value={isEditing ? tempEditSettings.general.timeZone : settings.general.timeZone}
+                    onChange={handleGeneralChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                  >
+                    <option value="Asia/Kuala_Lumpur">Malaysia (UTC+8)</option>
+                    <option value="Asia/Singapore">Singapore (UTC+8)</option>
+                    <option value="Asia/Jakarta">Indonesia (UTC+7)</option>
+                    <option value="Asia/Bangkok">Thailand (UTC+7)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Working Hours Settings */}
+          {activeSection === 'workingHours' && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h2>
+              <div className="space-y-4">
+                {Object.entries(isEditing ? tempEditSettings.workingHours : settings.workingHours).map(([day, hours]) => (
+                  <div key={day} className="grid grid-cols-4 gap-4 items-center">
+                    <div className="col-span-1 font-medium capitalize">{day}</div>
+                    <div className="col-span-3 flex items-center gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`${day}-isOpen`}
+                          checked={hours.isOpen}
+                          onChange={(e) => handleWorkingHoursChange(day, 'isOpen', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                          disabled={!isEditing}
+                        />
+                        <label htmlFor={`${day}-isOpen`} className="ml-2 text-sm text-gray-700">
+                          Open
+                        </label>
+                      </div>
+                      
+                      {hours.isOpen && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="time"
+                            value={hours.startTime}
+                            onChange={(e) => handleWorkingHoursChange(day, 'startTime', e.target.value)}
+                            className="px-2 py-1 border border-gray-300 rounded"
+                            disabled={!isEditing}
+                          />
+                          <span>to</span>
+                          <input
+                            type="time"
+                            value={hours.endTime}
+                            onChange={(e) => handleWorkingHoursChange(day, 'endTime', e.target.value)}
+                            className="px-2 py-1 border border-gray-300 rounded"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Appointments Settings */}
+          {activeSection === 'appointments' && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Appointment Settings</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="defaultDuration" className="block text-sm font-medium text-gray-700">Default Duration (minutes)</label>
+                  <input
+                    type="number"
+                    id="defaultDuration"
+                    name="defaultDuration"
+                    value={isEditing ? tempEditSettings.appointments.defaultDuration : settings.appointments.defaultDuration}
+                    onChange={handleAppointmentsChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                    min="5"
+                    step="5"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="timeSlotInterval" className="block text-sm font-medium text-gray-700">Time Slot Interval (minutes)</label>
+                  <input
+                    type="number"
+                    id="timeSlotInterval"
+                    name="timeSlotInterval"
+                    value={isEditing ? tempEditSettings.appointments.timeSlotInterval : settings.appointments.timeSlotInterval}
+                    onChange={handleAppointmentsChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                    min="5"
+                    step="5"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="maxDaysInAdvance" className="block text-sm font-medium text-gray-700">Maximum Days in Advance</label>
+                  <input
+                    type="number"
+                    id="maxDaysInAdvance"
+                    name="maxDaysInAdvance"
+                    value={isEditing ? tempEditSettings.appointments.maxDaysInAdvance : settings.appointments.maxDaysInAdvance}
+                    onChange={handleAppointmentsChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                    min="1"
+                  />
+                </div>
+                <div className="flex items-center h-full pt-6">
+                  <input
+                    type="checkbox"
+                    id="allowSameDayBooking"
+                    name="allowSameDayBooking"
+                    checked={isEditing ? tempEditSettings.appointments.allowSameDayBooking : settings.appointments.allowSameDayBooking}
+                    onChange={handleAppointmentsChange}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
                     disabled={!isEditing}
                   />
                   <label htmlFor="allowSameDayBooking" className="ml-2 text-sm text-gray-700">
@@ -717,221 +905,3 @@ export default function SettingsConfiguration() {
     </div>
   );
 }
-
-// API functions to connect with backend later
-export const settingsApi = {
-  // Get all settings
-  getSettings: async () => {
-    // This will be replaced with actual API call
-    // Example: return await fetch('/api/settings')
-    return tempSettings; // Currently returns mock data
-  },
-  
-  // Update settings
-  updateSettings: async (settingsData) => {
-    // Example:
-    // return await fetch('/api/settings', {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(settingsData)
-    // })
-    console.log('Updating settings:', settingsData);
-    return { success: true }; // Mock response
-  },
-  
-  // Perform manual backup
-  performBackup: async () => {
-    // Example:
-    // return await fetch('/api/settings/backup', {
-    //   method: 'POST'
-    // })
-    console.log('Performing manual backup');
-    return { success: true, backupId: Date.now().toString() }; // Mock response
-  }
-};
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicLogo" className="block text-sm font-medium text-gray-700">Clinic Logo</label>
-                  <input
-                    type="text"
-                    id="clinicLogo"
-                    name="clinicLogo"
-                    value={isEditing ? tempEditSettings.general.clinicLogo : settings.general.clinicLogo}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicPhone" className="block text-sm font-medium text-gray-700">Clinic Phone</label>
-                  <input
-                    type="text"
-                    id="clinicPhone"
-                    name="clinicPhone"
-                    value={isEditing ? tempEditSettings.general.clinicPhone : settings.general.clinicPhone}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicEmail" className="block text-sm font-medium text-gray-700">Clinic Email</label>
-                  <input
-                    type="email"
-                    id="clinicEmail"
-                    name="clinicEmail"
-                    value={isEditing ? tempEditSettings.general.clinicEmail : settings.general.clinicEmail}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label htmlFor="clinicAddress" className="block text-sm font-medium text-gray-700">Clinic Address</label>
-                  <textarea
-                    id="clinicAddress"
-                    name="clinicAddress"
-                    value={isEditing ? tempEditSettings.general.clinicAddress : settings.general.clinicAddress}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    rows="3"
-                    disabled={!isEditing}
-                  ></textarea>
-                </div>
-                <div>
-                  <label htmlFor="clinicWebsite" className="block text-sm font-medium text-gray-700">Clinic Website</label>
-                  <input
-                    type="text"
-                    id="clinicWebsite"
-                    name="clinicWebsite"
-                    value={isEditing ? tempEditSettings.general.clinicWebsite : settings.general.clinicWebsite}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700">Time Zone</label>
-                  <select
-                    id="timeZone"
-                    name="timeZone"
-                    value={isEditing ? tempEditSettings.general.timeZone : settings.general.timeZone}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  >
-                    <option value="Asia/Kuala_Lumpur">Malaysia (UTC+8)</option>
-                    <option value="Asia/Singapore">Singapore (UTC+8)</option>
-                    <option value="Asia/Jakarta">Indonesia (UTC+7)</option>
-                    <option value="Asia/Bangkok">Thailand (UTC+7)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Working Hours Settings */}
-          {activeSection === 'workingHours' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h2>
-              <div className="space-y-4">
-                {Object.entries(isEditing ? tempEditSettings.workingHours : settings.workingHours).map(([day, hours]) => (
-                  <div key={day} className="grid grid-cols-4 gap-4 items-center">
-                    <div className="col-span-1 font-medium capitalize">{day}</div>
-                    <div className="col-span-3 flex items-center gap-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`${day}-isOpen`}
-                          checked={hours.isOpen}
-                          onChange={(e) => handleWorkingHoursChange(day, 'isOpen', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                          disabled={!isEditing}
-                        />
-                        <label htmlFor={`${day}-isOpen`} className="ml-2 text-sm text-gray-700">
-                          Open
-                        </label>
-                      </div>
-                      
-                      {hours.isOpen && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="time"
-                            value={hours.startTime}
-                            onChange={(e) => handleWorkingHoursChange(day, 'startTime', e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded"
-                            disabled={!isEditing}
-                          />
-                          <span>to</span>
-                          <input
-                            type="time"
-                            value={hours.endTime}
-                            onChange={(e) => handleWorkingHoursChange(day, 'endTime', e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Appointments Settings */}
-          {activeSection === 'appointments' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Appointment Settings</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="defaultDuration" className="block text-sm font-medium text-gray-700">Default Duration (minutes)</label>
-                  <input
-                    type="number"
-                    id="defaultDuration"
-                    name="defaultDuration"
-                    value={isEditing ? tempEditSettings.appointments.defaultDuration : settings.appointments.defaultDuration}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="5"
-                    step="5"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="timeSlotInterval" className="block text-sm font-medium text-gray-700">Time Slot Interval (minutes)</label>
-                  <input
-                    type="number"
-                    id="timeSlotInterval"
-                    name="timeSlotInterval"
-                    value={isEditing ? tempEditSettings.appointments.timeSlotInterval : settings.appointments.timeSlotInterval}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="5"
-                    step="5"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="maxDaysInAdvance" className="block text-sm font-medium text-gray-700">Maximum Days in Advance</label>
-                  <input
-                    type="number"
-                    id="maxDaysInAdvance"
-                    name="maxDaysInAdvance"
-                    value={isEditing ? tempEditSettings.appointments.maxDaysInAdvance : settings.appointments.maxDaysInAdvance}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="1"
-                  />
-                </div>
-                <div className="flex items-center h-full pt-6">
-                  <input
-                    type="checkbox"
-                    id="allowSameDayBooking"
-                    name="allowSameDayBooking"
-                    checked={isEditing ? tempEditSettings.appointments.allowSameDayBooking : settings.appointments.allowSameDayBooking}
-                    onChange={handleAppointmentsChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}

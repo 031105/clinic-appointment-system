@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 
 // Temporary patient data
@@ -430,57 +432,3 @@ export default function PatientManagement() {
     </div>
   );
 }
-
-// API functions to connect with backend later
-export const patientApi = {
-  // Get all patients
-  getPatients: async (filters = {}) => {
-    // This will be replaced with actual API call
-    // Example: return await fetch('/api/patients?' + new URLSearchParams(filters))
-    return tempPatients; // Currently returns mock data
-  },
-  
-  // Get a single patient
-  getPatient: async (id) => {
-    // Example: return await fetch(`/api/patients/${id}`)
-    return tempPatients.find(patient => patient.id === id);
-  },
-  
-  // Create new patient
-  createPatient: async (patientData) => {
-    // Example: 
-    // return await fetch('/api/patients', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(patientData)
-    // })
-    console.log('Creating patient:', patientData);
-    return { success: true, id: Date.now().toString() }; // Mock response
-  },
-  
-  // Update patient
-  updatePatient: async (id, patientData) => {
-    // Example:
-    // return await fetch(`/api/patients/${id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(patientData)
-    // })
-    console.log('Updating patient:', id, patientData);
-    return { success: true }; // Mock response
-  },
-  
-  // Get patient medical records
-  getMedicalRecords: async (patientId) => {
-    // Example: return await fetch(`/api/patients/${patientId}/medical-records`)
-    const patient = tempPatients.find(p => p.id === patientId);
-    return patient ? patient.medicalRecords : [];
-  },
-  
-  // Get patient appointments
-  getPatientAppointments: async (patientId) => {
-    // Example: return await fetch(`/api/patients/${patientId}/appointments`)
-    console.log('Getting appointments for patient:', patientId);
-    return []; // Mock empty response
-  }
-};

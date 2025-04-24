@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -8,7 +10,7 @@ import {
   Calendar,
   Users,
   Building2,
-  User,
+  UserCog,
   Settings,
   BarChart3,
   LogOut,
@@ -20,16 +22,19 @@ import {
 
 // Admin interface components
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Appointments', href: '/admin/appointments', icon: Calendar },
-  { name: 'Patients', href: '/admin/patients', icon: Users },
-  { name: 'Departments', href: '/admin/departments', icon: Building2 },
-  { name: 'Users', href: '/admin/users', icon: User },
-  { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Dashboard', href: '/admin-dashboard', icon: LayoutDashboard },
+  { name: 'Appointments', href: '/manage-appointment', icon: Calendar },
+  { name: 'Patients', href: '/manage-patient', icon: Users },
+  { name: 'Departments', href: '/manage-department', icon: Building2 },
+  { name: 'Users', href: '/manage-user-permission', icon: UserCog },
+  { name: 'Settings', href: '/admin-setting', icon: Settings },
 ];
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -203,13 +208,13 @@ export default function AdminLayout({ children }) {
                 {userMenuOpen && (
                   <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <Link
-                      href="/admin/profile"
+                      href="/admin-profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Your Profile
                     </Link>
                     <Link
-                      href="/admin/settings"
+                      href="/admin-setting"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Settings
