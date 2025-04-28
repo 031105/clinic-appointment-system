@@ -1,11 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { HomeIcon, ClockIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { useRouter, usePathname } from 'next/navigation';
+import { 
+  HomeIcon, 
+  ClockIcon, 
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon
+} from '@heroicons/react/24/outline';
+import { toast } from '@/components/ui/use-toast';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // 清除用户角色信息
+    localStorage.removeItem('clinic-user-role');
+    
+    // 显示登出成功提示
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+      variant: "default",
+    });
+    
+    // 重定向到登录页面
+    router.push('/login');
+  };
 
   const navigation = [
     {
@@ -55,8 +77,18 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* User Menu */}
-      <div className="mt-auto">
+      {/* Logout and User Menu */}
+      <div className="mt-auto flex flex-col items-center gap-4">
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-12 h-12 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-50 transition-colors"
+          title="Logout"
+        >
+          <ArrowRightOnRectangleIcon className="w-6 h-6" />
+        </button>
+        
+        {/* User Avatar */}
         <button className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
           <span className="text-lg font-medium text-gray-600">K</span>
         </button>

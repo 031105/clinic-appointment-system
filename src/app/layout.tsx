@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+
+// FullCalendar CSS imports removed - will use custom CSS instead
+
 import './globals.css'
 import { AuthProvider } from '@/lib/contexts/auth-provider'
 

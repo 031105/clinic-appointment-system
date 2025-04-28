@@ -4,14 +4,57 @@ import React, { useState } from 'react';
 import { ChevronRightIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
-import Toast from '@/components/ui/Toast';
+import { Input } from '@/components/ui/Input';
+import { toast } from '@/components/ui/use-toast';
 import Card from '@/components/ui/Card';
-import Input from '@/components/forms/Input';
+import { Label } from '@/components/ui/Label';
+import { z } from "zod";
+
+// Form validation schemas
+const profileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(8, "Phone number must be at least 8 characters"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine((data: { newPassword: string; confirmPassword: string; }) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  helperText?: string;
+  error?: string;
+}
+
+const FormInput: React.FC<FormInputProps> = ({ 
+  label, 
+  helperText, 
+  error, 
+  className = "", 
+  ...props 
+}) => {
+  return (
+    <div className="space-y-2">
+      {label && <Label>{label}</Label>}
+      <Input
+        className={`w-full ${error ? "border-red-500" : ""} ${className}`}
+        {...props}
+      />
+      {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+};
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
   
   // Profile state
   const [profileImage, setProfileImage] = useState('/placeholder.jpg');
@@ -38,7 +81,7 @@ const SettingsPage = () => {
   ]);
   const [newAllergy, setNewAllergy] = useState('');
   const [allergySeverity, setAllergySeverity] = useState('Medium');
-  const [editingAllergyId, setEditingAllergyId] = useState(null);
+  const [editingAllergyId, setEditingAllergyId] = useState<number | null>(null);
   
   // Emergency contact state
   const [emergencyContacts, setEmergencyContacts] = useState([
@@ -47,7 +90,7 @@ const SettingsPage = () => {
   const [newContactName, setNewContactName] = useState('');
   const [newContactRelationship, setNewContactRelationship] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
-  const [editingContactId, setEditingContactId] = useState(null);
+  const [editingContactId, setEditingContactId] = useState<number | null>(null);
   
   // 2FA state
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -55,29 +98,77 @@ const SettingsPage = () => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [qrCode, setQrCode] = useState('/qr-placeholder.png');
   
-  const handleProfileSave = () => {
-    setEditingProfile(false);
-    showSuccessToast('Profile updated successfully!');
-  };
-  
-  const handlePasswordChange = () => {
-    if (newPassword !== confirmPassword) {
-      showErrorToast('Passwords do not match');
-      return;
+  const handleProfileSave = async () => {
+    try {
+      const result = profileSchema.safeParse({
+        name,
+        email,
+        phone,
+        address,
+      });
+
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error.issues[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // TODO: API call to save profile
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     }
-    
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    showSuccessToast('Password changed successfully!');
   };
   
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+  const handlePasswordChange = async () => {
+    try {
+      const result = passwordSchema.safeParse({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error.issues[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // TODO: API call to change password
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update password",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileImage(e.target.result);
+        if (e.target?.result) {
+          setProfileImage(e.target.result as string);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -100,96 +191,81 @@ const SettingsPage = () => {
     
     setNewAllergy('');
     setAllergySeverity('Medium');
-    showSuccessToast('Allergy information updated');
+    toast({
+      title: 'Success',
+      description: 'Allergy information updated',
+      variant: 'default',
+    });
   };
   
-  const handleEditAllergy = (id) => {
-    const allergy = allergies.find(a => a.id === id);
-    if (allergy) {
-      setNewAllergy(allergy.name);
-      setAllergySeverity(allergy.severity);
-      setEditingAllergyId(id);
+  const handleAddEmergencyContact = () => {
+    if (!newContactName.trim() || !newContactPhone.trim() || !newContactRelationship.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all contact fields',
+        variant: 'destructive',
+      });
+      return;
     }
-  };
-  
-  const handleDeleteAllergy = (id) => {
-    setAllergies(allergies.filter(allergy => allergy.id !== id));
-    showSuccessToast('Allergy removed');
-  };
-  
-  const handleAddContact = () => {
-    if (!newContactName.trim() || !newContactPhone.trim()) return;
-    
+
     if (editingContactId !== null) {
-      setEmergencyContacts(emergencyContacts.map(contact => 
-        contact.id === editingContactId 
-          ? { ...contact, name: newContactName, relationship: newContactRelationship, phone: newContactPhone } 
+      setEmergencyContacts(contacts => contacts.map(contact =>
+        contact.id === editingContactId
+          ? { ...contact, name: newContactName, relationship: newContactRelationship, phone: newContactPhone }
           : contact
       ));
       setEditingContactId(null);
     } else {
       const newId = emergencyContacts.length > 0 ? Math.max(...emergencyContacts.map(c => c.id)) + 1 : 1;
-      setEmergencyContacts([...emergencyContacts, { 
-        id: newId, 
-        name: newContactName, 
-        relationship: newContactRelationship, 
-        phone: newContactPhone 
+      setEmergencyContacts([...emergencyContacts, {
+        id: newId,
+        name: newContactName,
+        relationship: newContactRelationship,
+        phone: newContactPhone
       }]);
     }
-    
+
     setNewContactName('');
     setNewContactRelationship('');
     setNewContactPhone('');
-    showSuccessToast('Emergency contact updated');
-  };
-  
-  const handleEditContact = (id) => {
-    const contact = emergencyContacts.find(c => c.id === id);
-    if (contact) {
-      setNewContactName(contact.name);
-      setNewContactRelationship(contact.relationship);
-      setNewContactPhone(contact.phone);
-      setEditingContactId(id);
-    }
-  };
-  
-  const handleDeleteContact = (id) => {
-    setEmergencyContacts(emergencyContacts.filter(contact => contact.id !== id));
-    showSuccessToast('Emergency contact removed');
-  };
-  
-  const handleToggle2FA = () => {
-    if (!twoFactorEnabled) {
-      // Here you would typically generate a QR code from the backend
-      setShowVerificationForm(true);
-    } else {
-      setTwoFactorEnabled(false);
-      showSuccessToast('Two-factor authentication disabled');
-    }
+    toast({
+      title: 'Success',
+      description: 'Emergency contact updated',
+      variant: 'default',
+    });
   };
   
   const handleVerify2FA = () => {
-    // Here you would normally verify the code with the backend
-    if (verificationCode === '123456') { // Simulated correct code
-      setTwoFactorEnabled(true);
-      setShowVerificationForm(false);
-      setVerificationCode('');
-      showSuccessToast('Two-factor authentication enabled');
-    } else {
-      showErrorToast('Invalid verification code');
+    if (verificationCode.length !== 6) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a valid 6-digit code',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    setTwoFactorEnabled(true);
+    setShowVerificationForm(false);
+    setVerificationCode('');
+    toast({
+      title: 'Success',
+      description: 'Two-factor authentication enabled successfully',
+      variant: 'default',
+    });
   };
-  
-  const showSuccessToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-  
-  const showErrorToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+
+  const handleToggle2FA = () => {
+    if (twoFactorEnabled) {
+      setTwoFactorEnabled(false);
+      toast({
+        title: 'Success',
+        description: 'Two-factor authentication disabled',
+        variant: 'default',
+      });
+    } else {
+      setShowVerificationForm(true);
+    }
   };
 
   return (
@@ -324,34 +400,30 @@ const SettingsPage = () => {
                   </div>
 
                   <div className="w-full space-y-4">
-                    <Input
+                    <FormInput
                       label="Full Name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       disabled={!editingProfile}
-                      fullWidth
                     />
-                    <Input
+                    <FormInput
                       label="Email Address"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       disabled={!editingProfile}
-                      fullWidth
                     />
-                    <Input
+                    <FormInput
                       label="Phone Number"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       disabled={!editingProfile}
-                      fullWidth
                     />
-                    <Input
+                    <FormInput
                       label="Address"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       disabled={!editingProfile}
-                      fullWidth
                     />
                   </div>
                 </div>
@@ -365,28 +437,25 @@ const SettingsPage = () => {
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Change Password</h2>
                 <div className="space-y-4">
-                  <Input
+                  <FormInput
                     label="Current Password"
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    fullWidth
                   />
-                  <Input
+                  <FormInput
                     label="New Password"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    fullWidth
-                    helperText="Password must be at least 8 characters"
+                    helperText="Password must be at least 6 characters"
                   />
-                  <Input
+                  <FormInput
                     label="Confirm New Password"
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    fullWidth
-                    error={newPassword !== confirmPassword ? "Passwords don't match" : ""}
+                    error={newPassword !== confirmPassword ? "Passwords don't match" : undefined}
                   />
                   <div className="pt-2">
                     <Button 
@@ -478,7 +547,11 @@ const SettingsPage = () => {
                   <div className="pt-2">
                     <Button 
                       variant="primary"
-                      onClick={() => showSuccessToast('Reminder settings updated')}
+                      onClick={() => toast({
+                        title: 'Success',
+                        description: 'Reminder settings updated',
+                        variant: 'default',
+                      })}
                     >
                       Save Reminder Settings
                     </Button>
@@ -495,101 +568,80 @@ const SettingsPage = () => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Allergies</h2>
                 
                 <div className="space-y-6">
+                  {/* Existing allergies */}
                   <div className="space-y-4">
-                    {allergies.length > 0 ? (
-                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <ul className="divide-y divide-gray-200">
-                          {allergies.map((allergy) => (
-                            <li key={allergy.id} className="flex items-center justify-between p-4">
-                              <div>
-                                <h3 className="font-medium text-gray-900">{allergy.name}</h3>
-                                <div className="flex items-center mt-1">
-                                  <span className="text-sm text-gray-500">Severity:</span>
-                                  <span className={`ml-2 text-sm font-medium px-2 py-0.5 rounded-full ${
-                                    allergy.severity === 'High' 
-                                      ? 'bg-red-100 text-red-800' 
-                                      : allergy.severity === 'Medium'
-                                        ? 'bg-yellow-100 text-yellow-800'
-                                        : 'bg-green-100 text-green-800'
-                                  }`}>
-                                    {allergy.severity}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => handleEditAllergy(allergy.id)}
-                                  className="p-1 text-blue-600 hover:text-blue-800"
-                                >
-                                  <PencilIcon className="h-5 w-5" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteAllergy(allergy.id)}
-                                  className="p-1 text-red-600 hover:text-red-800"
-                                >
-                                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">No allergies added yet</p>
-                      </div>
-                    )}
-                    
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-base font-medium text-gray-900 mb-3">
-                        {editingAllergyId !== null ? 'Edit Allergy' : 'Add New Allergy'}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Allergy name"
-                          value={newAllergy}
-                          onChange={(e) => setNewAllergy(e.target.value)}
-                          fullWidth
-                        />
+                    {allergies.map((allergy) => (
+                      <div 
+                        key={allergy.id}
+                        className="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-100"
+                      >
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Severity
-                          </label>
-                          <select
-                            value={allergySeverity}
-                            onChange={(e) => setAllergySeverity(e.target.value)}
-                            className="block w-full px-3 py-2 text-base rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          <div className="font-medium">{allergy.name}</div>
+                          <div className="text-sm text-gray-500">Severity: {allergy.severity}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setNewAllergy(allergy.name);
+                              setAllergySeverity(allergy.severity);
+                              setEditingAllergyId(allergy.id);
+                            }}
                           >
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
-                          </select>
+                            <PencilIcon className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setAllergies(allergies.filter(a => a.id !== allergy.id));
+                              toast({
+                                title: 'Success',
+                                description: 'Allergy removed',
+                                variant: 'default',
+                              });
+                            }}
+                          >
+                            <PlusIcon className="h-4 w-4 rotate-45" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="mt-4">
-                        <Button 
-                          variant="primary"
-                          onClick={handleAddAllergy}
-                          disabled={!newAllergy.trim()}
+                    ))}
+                  </div>
+                  
+                  {/* Add/Edit allergy form */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-base font-medium text-gray-900 mb-3">
+                      {editingAllergyId !== null ? 'Edit Allergy' : 'Add New Allergy'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormInput
+                        placeholder="Allergy name"
+                        value={newAllergy}
+                        onChange={(e) => setNewAllergy(e.target.value)}
+                      />
+                      <div>
+                        <Label>Severity</Label>
+                        <select
+                          value={allergySeverity}
+                          onChange={(e) => setAllergySeverity(e.target.value)}
+                          className="block w-full px-3 py-2 text-base rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                          {editingAllergyId !== null ? 'Update Allergy' : 'Add Allergy'}
-                        </Button>
-                        {editingAllergyId !== null && (
-                          <Button 
-                            variant="outline"
-                            onClick={() => {
-                              setEditingAllergyId(null);
-                              setNewAllergy('');
-                              setAllergySeverity('Medium');
-                            }}
-                            className="ml-2"
-                          >
-                            Cancel
-                          </Button>
-                        )}
+                          <option value="Low">Low</option>
+                          <option value="Medium">Medium</option>
+                          <option value="High">High</option>
+                        </select>
                       </div>
+                    </div>
+                    <div className="mt-4">
+                      <Button 
+                        variant="primary"
+                        onClick={handleAddAllergy}
+                        disabled={!newAllergy.trim()}
+                      >
+                        {editingAllergyId !== null ? 'Update Allergy' : 'Add Allergy'}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -604,92 +656,82 @@ const SettingsPage = () => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Emergency Contacts</h2>
                 
                 <div className="space-y-6">
+                  {/* Existing contacts */}
                   <div className="space-y-4">
-                    {emergencyContacts.length > 0 ? (
-                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <ul className="divide-y divide-gray-200">
-                          {emergencyContacts.map((contact) => (
-                            <li key={contact.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4">
-                              <div>
-                                <h3 className="font-medium text-gray-900">{contact.name}</h3>
-                                <p className="text-sm text-gray-500">{contact.relationship}</p>
-                                <p className="text-sm text-gray-600 mt-1">{contact.phone}</p>
-                              </div>
-                              <div className="flex gap-2 mt-2 sm:mt-0">
-                                <button 
-                                  onClick={() => handleEditContact(contact.id)}
-                                  className="p-1 text-blue-600 hover:text-blue-800"
-                                >
-                                  <PencilIcon className="h-5 w-5" />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteContact(contact.id)}
-                                  className="p-1 text-red-600 hover:text-red-800"
-                                >
-                                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">No emergency contacts added yet</p>
-                      </div>
-                    )}
-                    
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-base font-medium text-gray-900 mb-3">
-                        {editingContactId !== null ? 'Edit Contact' : 'Add New Emergency Contact'}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Full Name"
-                          value={newContactName}
-                          onChange={(e) => setNewContactName(e.target.value)}
-                          fullWidth
-                        />
-                        <Input
-                          placeholder="Relationship"
-                          value={newContactRelationship}
-                          onChange={(e) => setNewContactRelationship(e.target.value)}
-                          fullWidth
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <Input
-                          placeholder="Phone Number"
-                          value={newContactPhone}
-                          onChange={(e) => setNewContactPhone(e.target.value)}
-                          fullWidth
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <Button 
-                          variant="primary"
-                          onClick={handleAddContact}
-                          disabled={!newContactName.trim() || !newContactPhone.trim()}
-                        >
-                          {editingContactId !== null ? 'Update Contact' : 'Add Contact'}
-                        </Button>
-                        {editingContactId !== null && (
+                    {emergencyContacts.map((contact) => (
+                      <div 
+                        key={contact.id}
+                        className="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-100"
+                      >
+                        <div>
+                          <div className="font-medium">{contact.name}</div>
+                          <div className="text-sm text-gray-500">{contact.relationship}</div>
+                          <div className="text-sm text-gray-500">{contact.phone}</div>
+                        </div>
+                        <div className="flex gap-2">
                           <Button 
-                            variant="outline"
+                            variant="ghost" 
+                            size="sm"
                             onClick={() => {
-                              setEditingContactId(null);
-                              setNewContactName('');
-                              setNewContactRelationship('');
-                              setNewContactPhone('');
+                              setNewContactName(contact.name);
+                              setNewContactRelationship(contact.relationship);
+                              setNewContactPhone(contact.phone);
+                              setEditingContactId(contact.id);
                             }}
-                            className="ml-2"
                           >
-                            Cancel
+                            <PencilIcon className="h-4 w-4" />
                           </Button>
-                        )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setEmergencyContacts(contacts => contacts.filter(c => c.id !== contact.id));
+                              toast({
+                                title: 'Success',
+                                description: 'Emergency contact removed',
+                                variant: 'default',
+                              });
+                            }}
+                          >
+                            <PlusIcon className="h-4 w-4 rotate-45" />
+                          </Button>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                  
+                  {/* Add/Edit contact form */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-base font-medium text-gray-900 mb-3">
+                      {editingContactId !== null ? 'Edit Contact' : 'Add New Emergency Contact'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormInput
+                        placeholder="Full Name"
+                        value={newContactName}
+                        onChange={(e) => setNewContactName(e.target.value)}
+                      />
+                      <FormInput
+                        placeholder="Relationship"
+                        value={newContactRelationship}
+                        onChange={(e) => setNewContactRelationship(e.target.value)}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <FormInput
+                        placeholder="Phone Number"
+                        value={newContactPhone}
+                        onChange={(e) => setNewContactPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <Button 
+                        variant="primary"
+                        onClick={handleAddEmergencyContact}
+                        disabled={!newContactName.trim() || !newContactPhone.trim() || !newContactRelationship.trim()}
+                      >
+                        {editingContactId !== null ? 'Update Contact' : 'Add Contact'}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -710,130 +752,66 @@ const SettingsPage = () => {
                 </div>
                 
                 <div className="space-y-6">
-                    <p className="text-gray-600">
-                        Two-factor authentication adds an extra layer of security to your account. When enabled, you will need to provide a verification code in addition to your password when signing in.
-                    </p>
-                    
-                    {showVerificationForm ? (
-                        <div className="bg-gray-50 p-4 rounded-lg mt-4">
-                        <div className="mb-4 text-center">
-                            <p className="text-sm text-gray-600 mb-4">Scan this QR code with your authenticator app, then enter the verification code below.</p>
-                            <div className="inline-block border border-gray-200 p-2 bg-white">
-                            <img 
-                                src={qrCode}
-                                alt="2FA QR Code"
-                                className="h-48 w-48 object-contain"
-                            />
-                            </div>
-                        </div>
-                        
-                        <div className="max-w-xs mx-auto">
-                            <Input
-                            label="Verification Code"
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            fullWidth
-                            />
-                            <div className="mt-4 flex justify-center gap-2">
-                            <Button 
-                                variant="primary"
-                                onClick={handleVerify2FA}
-                                disabled={!verificationCode}
-                            >
-                                Verify Code
-                            </Button>
-                            <Button 
-                                variant="outline"
-                                onClick={() => {
-                                setShowVerificationForm(false);
-                                setVerificationCode('');
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            </div>
-                        </div>
-                        </div>
-                    ) : (
-                        <Button 
-                        variant={twoFactorEnabled ? "outline" : "primary"}
-                        onClick={handleToggle2FA}
-                        className={twoFactorEnabled ? "border-red-500 text-red-600 hover:bg-red-50" : ""}
-                        >
-                        {twoFactorEnabled ? "Disable Two-Factor Authentication" : "Enable Two-Factor Authentication"}
-                        </Button>
-                    )}
-                    </div>
-                  </div>
-                </Card>
-              )}
-              
-              {/* Account Deletion */}
-              {activeTab === 'delete-account' && (
-                <Card>
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Delete Account</h2>
-                    
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-red-800">Warning: Account Deletion is Permanent</h3>
-                          <div className="mt-2 text-sm text-red-700">
-                            <p>
-                              This action cannot be undone. Once you delete your account, all of your data, including medical history, appointments, and personal information will be permanently removed from our system.
-                            </p>
-                          </div>
+                  <p className="text-gray-600">
+                    Two-factor authentication adds an extra layer of security to your account. When enabled, you will need to provide a verification code in addition to your password when signing in.
+                  </p>
+                  
+                  {showVerificationForm ? (
+                    <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                      <div className="mb-4 text-center">
+                        <p className="text-sm text-gray-600 mb-4">Scan this QR code with your authenticator app, then enter the verification code below.</p>
+                        <div className="inline-block border border-gray-200 p-2 bg-white">
+                          <img 
+                            src={qrCode}
+                            alt="2FA QR Code"
+                            className="h-48 w-48 object-contain"
+                          />
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <Input
-                        label="Confirm your password"
-                        type="password"
-                        placeholder="Enter your current password"
-                        fullWidth
-                      />
                       
-                      <div className="flex items-center">
-                        <input
-                          id="confirm-delete"
-                          type="checkbox"
-                          className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                      <div className="max-w-xs mx-auto">
+                        <FormInput
+                          label="Verification Code"
+                          value={verificationCode}
+                          onChange={(e) => setVerificationCode(e.target.value)}
                         />
-                        <label htmlFor="confirm-delete" className="ml-2 block text-sm text-gray-700">
-                          I understand that this action is permanent and cannot be undone
-                        </label>
+                        <div className="mt-4 flex justify-center gap-2">
+                          <Button 
+                            variant="primary"
+                            onClick={handleVerify2FA}
+                            disabled={!verificationCode}
+                          >
+                            Verify Code
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              setShowVerificationForm(false);
+                              setVerificationCode('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      
-                      <Button
-                        variant="outline"
-                        className="border-red-500 text-red-600 hover:bg-red-50"
-                        onClick={() => showErrorToast('Account deletion is not available in the demo')}
-                      >
-                        Delete My Account
-                      </Button>
                     </div>
-                  </div>
-                </Card>
-              )}
-            </div>
-          </div>
-    
-          {showToast && (
-            <Toast
-              message={toastMessage}
-              type={toastMessage.toLowerCase().includes('error') ? 'error' : 'success'}
-              onClose={() => setShowToast(false)}
-            />
-        )}
+                  ) : (
+                    <Button 
+                      variant={twoFactorEnabled ? "outline" : "primary"}
+                      onClick={handleToggle2FA}
+                      className={twoFactorEnabled ? "border-red-500 text-red-600 hover:bg-red-50" : ""}
+                    >
+                      {twoFactorEnabled ? "Disable Two-Factor Authentication" : "Enable Two-Factor Authentication"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-    
+
 export default SettingsPage;

@@ -1,8 +1,11 @@
+'use client';
+
 import React, { useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line
 } from 'recharts';
+import { StatCard } from '@/components/admin';
 
 // Temporary data for dashboard
 const statCards = [
@@ -39,10 +42,10 @@ const recentActivity = [
 ];
 
 export default function AdminDashboard() {
-  const [dateRange, setDateRange] = useState('week');
+  const [dateRange, setDateRange] = useState<'week' | 'month' | 'year'>('week');
 
   // Function to handle date range changes
-  const handleDateRangeChange = (range) => {
+  const handleDateRangeChange = (range: 'week' | 'month' | 'year') => {
     setDateRange(range);
     // In a real application, this would fetch new data based on the range
   };
@@ -73,21 +76,16 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stat Cards */}
+      {/* Stat Cards - Now using the StatCard component */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {statCards.map((card, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-500">{card.title}</p>
-                <p className="text-2xl font-bold mt-1">{card.value}</p>
-                <p className={`text-sm mt-1 ${card.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                  {card.change} from last month
-                </p>
-              </div>
-              <div className="text-2xl bg-blue-50 p-3 rounded-lg text-blue-600">{card.icon}</div>
-            </div>
-          </div>
+          <StatCard
+            key={index}
+            title={card.title}
+            value={card.value}
+            change={card.change}
+            icon={card.icon}
+          />
         ))}
       </div>
 
