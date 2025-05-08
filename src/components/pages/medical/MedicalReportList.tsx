@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { patientClient } from '@/lib/api';
 
 interface MedicalReport {
   id: string;
@@ -19,9 +20,22 @@ export default function MedicalReportList() {
   useEffect(() => {
     const fetchMedicalReports = async () => {
       try {
-        const response = await fetch('/api/medical-reports');
-        const data = await response.json();
-        setMedicalReports(data);
+        // 使用新的patientClient获取医疗记录
+        const data = await patientClient.getMedicalRecords();
+        
+        // 转换数据格式以匹配组件需要的结构
+        const formattedReports = data.map(record => ({
+          id: record.id.toString(),
+          title: `Medical Record #${record.id}`,
+          content: record.diagnosis || record.notes,
+          date: record.createdAt,
+          doctor: {
+            name: record.doctor?.user?.firstName + ' ' + record.doctor?.user?.lastName || 'Unknown',
+            specialty: 'Specialist'
+          }
+        }));
+        
+        setMedicalReports(formattedReports);
       } catch (error) {
         console.error('Failed to fetch medical reports:', error);
       }

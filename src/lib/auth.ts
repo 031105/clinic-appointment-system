@@ -1,7 +1,33 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import prisma from './prisma';
 import bcrypt from 'bcryptjs';
+import { authClient } from './api';
+
+// 定义用户角色类型
+type UserRole = 'ADMIN' | 'DOCTOR' | 'PATIENT';
+
+// 定义API响应中的用户类型
+interface ApiUser {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role_name: string;
+}
+
+// 定义API响应类型
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: ApiUser;
+}
+
+// 角色映射，将后端返回的角色转换为前端需要的格式
+const roleMapping: Record<string, UserRole> = {
+  'admin': 'ADMIN',
+  'doctor': 'DOCTOR',
+  'patient': 'PATIENT'
+};
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,31 +42,33 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials');
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+        try {
+          // 使用新的authClient进行登录
+          const response = await authClient.login({
+            email: credentials.email, 
+            password: credentials.password
+          }) as LoginResponse;
+          
+          // 从响应中提取用户信息
+          const { user } = response;
+          
+          if (!user) {
+            throw new Error('Login failed');
+          }
 
-        if (!user) {
-          throw new Error('User not found');
+          // 将后端角色映射为前端角色格式
+          const role = roleMapping[user.role_name.toLowerCase()] || 'PATIENT';
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            role
+          };
+        } catch (error) {
+          console.error('Authentication error:', error);
+          throw new Error('Authentication failed');
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          throw new Error('Invalid password');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -54,8 +82,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token) {
-        session.user.role = token.role;
-        session.user.id = token.id;
+        session.user.role = token.role as UserRole;
+        session.user.id = token.id as string;
       }
       return session;
     },
