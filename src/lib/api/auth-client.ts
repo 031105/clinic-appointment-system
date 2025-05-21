@@ -64,96 +64,80 @@ export interface VerifyEmailRequest {
   token: string;
 }
 
-// 认证相关的API客户端
+// 认证客户端API
 const authClient = {
-  // 用户注册
-  register: async (data: RegisterRequest): Promise<ApiResponse<any>> => {
+  // 登录
+  login: async (loginData: LoginRequest) => {
     try {
-      const response = await httpClient.post('/auth/register', data);
+      const { email, password } = loginData;
       
-      // 保存认证token
-      if (response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
+      // 调用后端登录API - 使用新的API路径
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      });
+      
+      // 检查响应状态
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Login API error:', errorData);
+        throw new Error(errorData.message || '登录失败');
       }
       
-      return response.data;
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    }
-  },
-
-  // 用户登录
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    try {
-      const response = await httpClient.post('/auth/login', data);
+      // 解析响应数据
+      const data = await response.json();
       
-      // 保存认证token
-      if (response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
+      console.log('API login response:', {
+        success: !!data.success,
+        hasUser: !!data.user
+      });
+      
+      // 保存令牌到本地存储
+      if (data.user && data.user.token) {
+        localStorage.setItem('accessToken', data.user.token);
       }
       
-      return response.data;
+      return data;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
     }
   },
 
-  // 用户登出
-  logout: async (): Promise<void> => {
+  // 注册
+  register: async (userData: any) => {
     try {
-      // 发送登出请求
-      await httpClient.post('/auth/logout');
-      
-      // 移除本地存储的token
+      const response = await httpClient.post('/auth/register', userData);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
+  },
+  
+  // 退出登录
+  logout: async () => {
+    try {
+      // 清理本地存储中的令牌
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      
+      return { success: true, message: '已成功退出登录' };
     } catch (error) {
       console.error('Logout error:', error);
-      
-      // 即使API请求失败，也清除本地token
+      // 即使失败，也清理本地存储
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      
       throw error;
     }
   },
 
-  // 刷新token
-  refreshToken: async (): Promise<{ accessToken: string; refreshToken: string }> => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-      
-      const response = await httpClient.post('/auth/refresh-token', { refreshToken });
-      
-      if (response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        
-        // 可能的刷新token更新
-        if (response.data.refreshToken) {
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-        }
-      }
-      
-      return response.data;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      throw error;
-    }
-  },
-
-  // 忘记密码请求
-  forgotPassword: async (email: string): Promise<any> => {
+  // 忘记密码
+  forgotPassword: async (email: string) => {
     try {
       const response = await httpClient.post('/auth/forgot-password', { email });
-      return response.data;
+      return handleApiResponse(response);
     } catch (error) {
       console.error('Forgot password error:', error);
       throw error;
@@ -161,10 +145,13 @@ const authClient = {
   },
 
   // 重置密码
-  resetPassword: async (data: ResetPasswordRequest): Promise<any> => {
+  resetPassword: async (token: string, newPassword: string) => {
     try {
-      const response = await httpClient.post('/auth/reset-password', data);
-      return response.data;
+      const response = await httpClient.post('/auth/reset-password', { 
+        token, 
+        newPassword 
+      });
+      return handleApiResponse(response);
     } catch (error) {
       console.error('Reset password error:', error);
       throw error;
@@ -172,10 +159,10 @@ const authClient = {
   },
 
   // 获取当前用户信息
-  getCurrentUser: async (): Promise<UserProfile> => {
+  getCurrentUser: async () => {
     try {
       const response = await httpClient.get('/users/me');
-      return handleApiResponse<UserProfile>(response);
+      return handleApiResponse(response);
     } catch (error) {
       console.error('Get current user error:', error);
       throw error;

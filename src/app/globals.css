@@ -13,6 +13,28 @@ body {
   background: rgb(var(--background-start-rgb));
 } 
 
+/* Add custom no-scrollbar class */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* Add custom style for department names */
+.dept-name {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 /* Modern FullCalendar Styles */
 .fc .fc-toolbar {
   margin-bottom: 1.5rem !important;

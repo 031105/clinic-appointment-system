@@ -1,17 +1,12 @@
-import type { Metadata } from 'next'
+'use client';
+
 import { Inter } from 'next/font/google'
+import './globals.css'
+import { Providers } from '@/components/providers'
 
 // FullCalendar CSS imports removed - will use custom CSS instead
 
-import './globals.css'
-import { AuthProvider } from '@/lib/contexts/auth-provider'
-
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Clinic Appointment System',
-  description: 'Book appointments with your preferred doctors',
-}
 
 export default function RootLayout({
   children,
@@ -21,9 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   )

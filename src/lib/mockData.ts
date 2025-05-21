@@ -3,6 +3,8 @@ export interface Department {
   id: string;
   name: string;
   description?: string;
+  icon?: string;
+  emojiIcon?: string;
 }
 
 export interface Doctor {
@@ -104,6 +106,17 @@ export const mockDoctors: Doctor[] = [
     reviewCount: 70,
     about: 'Specializes in bone and joint health.',
     image: '/images/doctors/doctor-4.jpg',
+  },
+  {
+    id: '7',
+    name: 'Robert Chen',
+    specialty: 'Neurology',
+    departmentId: '3',
+    experience: 14,
+    consultationFee: 60,
+    reviewCount: 85,
+    about: 'Experienced neurologist specializing in headache disorders and nerve conditions.',
+    image: '/images/doctors/doctor-7.jpg',
   },
 ];
 

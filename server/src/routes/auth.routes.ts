@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
-import { validateRequest } from '../middleware/validateRequest';
+import { validate } from '../middleware/validate';
 import { loginSchema, registerSchema, refreshTokenSchema } from '../schemas/auth.schema';
 
 const router = Router();
@@ -9,21 +9,21 @@ const authController = new AuthController();
 // Register routes
 router.post(
   '/register',
-  validateRequest(registerSchema),
+  validate(registerSchema),
   authController.register
 );
 
 // Login route
 router.post(
   '/login',
-  validateRequest(loginSchema),
+  validate(loginSchema),
   authController.login
 );
 
 // Refresh token route
 router.post(
   '/refresh-token',
-  validateRequest(refreshTokenSchema),
+  validate(refreshTokenSchema),
   authController.refreshToken
 );
 

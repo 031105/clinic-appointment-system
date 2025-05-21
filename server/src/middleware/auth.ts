@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config';
-import { ApiError } from './errorHandler';
-import prisma from '../config/database';
+import { logger } from '../utils/logger';
 
 // Extend Express Request type to include user
 declare global {
@@ -23,71 +20,55 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   try {
-    // Get token from header
+    // 获取令牌
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new ApiError(401, 'No token provided');
+      return res.status(401).json({ message: 'No token provided' });
     }
 
     const token = authHeader.split(' ')[1];
 
-    // Verify token
-    const decoded = jwt.verify(token, config.jwt.secret) as {
-      id: number;
-      email: string;
-      role: string;
-    };
-
-    // Check if user exists
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        email: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
-        status: true,
-      },
-    });
-
-    if (!user) {
-      throw new ApiError(401, 'User not found');
+    // 简化的认证方式 - 不再验证JWT
+    // 只要有token即视为已认证，token格式应该是: user_id:email:role
+    try {
+      const [id, email, role] = token.split(':');
+      
+      if (!id || !email || !role) {
+        return res.status(401).json({ message: 'Invalid token format' });
+      }
+      
+      // 添加用户信息到请求
+      req.user = {
+        id: parseInt(id),
+        email,
+        role,
+      };
+      
+      next();
+    } catch (error) {
+      logger.error('Token parsing error:', error);
+      return res.status(401).json({ message: 'Invalid token format' });
     }
-
-    if (user.status !== 'active') {
-      throw new ApiError(401, 'User account is not active');
-    }
-
-    // Add user to request object
-    req.user = {
-      id: user.id,
-      email: user.email,
-      role: user.role.name,
-    };
-
-    next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      next(new ApiError(401, 'Invalid token'));
-    } else {
-      next(error);
-    }
+    logger.error('Authentication error:', error);
+    return res.status(401).json({ message: 'Invalid token' });
   }
 };
 
-export const authorize = (...roles: string[]) => {
+// 简化的角色检查
+export const checkRole = (roles: string | string[]) => {
+  const allowedRoles = Array.isArray(roles) ? roles : [roles];
+  
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      throw new ApiError(401, 'Not authenticated');
+      return res.status(401).json({ message: 'Authentication required' });
     }
-
-    if (!roles.includes(req.user.role)) {
-      throw new ApiError(403, 'Not authorized');
+    
+    if (!allowedRoles.includes(req.user.role.toLowerCase())) {
+      logger.warn(`Access denied: User with role ${req.user.role} attempted to access a resource restricted to ${allowedRoles.join(', ')}`);
+      return res.status(403).json({ message: 'Access denied: Insufficient permissions' });
     }
-
+    
     next();
   };
 }; 

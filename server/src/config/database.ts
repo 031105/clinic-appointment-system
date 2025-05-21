@@ -1,39 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
+import dbClient from '../utils/db-client';
 
-const prisma = new PrismaClient({
-  log: [
-    {
-      emit: 'event',
-      level: 'query',
-    },
-    {
-      emit: 'event',
-      level: 'error',
-    },
-    {
-      emit: 'event',
-      level: 'info',
-    },
-    {
-      emit: 'event',
-      level: 'warn',
-    },
-  ],
-});
+/**
+ * 导出数据库客户端
+ * 该文件是为了保持与原来导入路径的兼容性
+ */
 
-// Log queries in development
-if (process.env.NODE_ENV === 'development') {
-  prisma.$on('query', (e: any) => {
-    logger.debug('Query: ' + e.query);
-    logger.debug('Params: ' + e.params);
-    logger.debug('Duration: ' + e.duration + 'ms');
-  });
-}
+// 记录数据库初始化日志
+logger.info('Database client initialized');
 
-// Log errors
-prisma.$on('error', (e: any) => {
-  logger.error('Prisma Error: ' + e.message);
-});
-
-export default prisma; 
+export default dbClient; 

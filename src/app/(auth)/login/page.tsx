@@ -12,39 +12,77 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Demo: 根据邮箱前缀判断角色
-    const username = email.split('@')[0].toLowerCase();
-    let redirectPath = '';
-    
-    switch (username) {
-      case 'user':
-        redirectPath = '/user-dashboard';
-        break;
-      case 'doctor':
-        redirectPath = '/doctor-dashboard';
-        break;
-      case 'admin':
-        redirectPath = '/admin-dashboard';
-        break;
-      default:
-        // 在演示模式下，默认导航到用户仪表板
-        redirectPath = '/user-dashboard';
+    try {
+      // 显示登录中的提示
+      toast({
+        title: "登录中",
+        description: "正在验证您的登录信息...",
+      });
+      
+      // 直接调用登录API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+  
+      if (!response.ok || !data.success) {
+        console.error('Login error:', data.message);
+        setError('登录失败，请检查您的邮箱和密码');
+        toast({
+          title: "登录失败",
+          description: "邮箱或密码错误，请重试。",
+          variant: "destructive",
+        });
+      } else {
+        // 登录成功，将token和用户信息保存到localStorage
+        localStorage.setItem('accessToken', data.user.token);
+        localStorage.setItem('userData', JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          firstName: data.user.name.split(' ')[0],
+          lastName: data.user.name.split(' ')[1] || '',
+          role: data.user.role
+        }));
+        
+        // 根据用户角色重定向到对应页面
+        let redirectPath = '/user-dashboard';
+        
+        if (data.user.role === 'ADMIN') {
+          redirectPath = '/admin-dashboard';
+        } else if (data.user.role === 'DOCTOR') {
+          redirectPath = '/doctor-dashboard';
+        } else {
+          // For patients
+          redirectPath = '/user-dashboard';
+        }
+        
+        // 使用replace而不是push来避免浏览器历史问题
+        router.replace(redirectPath);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('发生了意外错误，请稍后重试');
+      toast({
+        title: "登录失败",
+        description: "发生了意外错误，请稍后重试。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    // 存储角色信息
-    localStorage.setItem('clinic-user-role', username === 'admin' ? 'admin' : username === 'doctor' ? 'doctor' : 'user');
-    
-    // 添加一个小延迟模拟处理过程
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 重定向到对应的仪表板
-    router.push(redirectPath);
-    setIsLoading(false);
   };
 
   return (
@@ -52,15 +90,15 @@ export default function LoginPage() {
       <div className="px-8 pt-8 pb-6 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h1>
         <p className="text-sm text-gray-600">Sign in to continue to your account</p>
-        <div className="mt-2 text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
-          <p className="font-medium">Demo Login:</p>
-          <p>user@example.com (Patient Interface)</p>
-          <p>doctor@example.com (Doctor Interface)</p>
-          <p>admin@example.com (Admin Interface)</p>
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-6">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email

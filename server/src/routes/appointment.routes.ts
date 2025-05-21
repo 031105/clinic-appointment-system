@@ -1,40 +1,36 @@
 import { Router } from 'express';
-import { AppointmentController } from '../controllers/appointment.controller';
-import { validateRequest } from '../middleware/validateRequest';
-import { authorize } from '../middleware/auth';
-import {
-  createAppointmentSchema,
-  updateAppointmentStatusSchema,
-} from '../schemas/appointment.schema';
+import { 
+  getAppointmentById, 
+  createAppointment, 
+  cancelAppointment, 
+  rescheduleAppointment, 
+  confirmAppointment,
+  getDoctorAvailableSlots,
+  getAppointmentMedicalRecord
+} from '../controllers/appointment.controller';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
-const appointmentController = new AppointmentController();
 
-// Create new appointment
-router.post(
-  '/',
-  authorize('patient'),
-  validateRequest(createAppointmentSchema),
-  appointmentController.createAppointment
-);
+// 获取预约详情
+router.get('/:id', authenticate, getAppointmentById);
 
-// Get all appointments (filtered by user role)
-router.get(
-  '/',
-  appointmentController.getAppointments
-);
+// 创建新预约
+router.post('/', authenticate, createAppointment);
 
-// Get appointment by ID
-router.get(
-  '/:id',
-  appointmentController.getAppointmentById
-);
+// 取消预约
+router.post('/:id/cancel', authenticate, cancelAppointment);
 
-// Update appointment status (cancel, complete, etc.)
-router.patch(
-  '/:id/status',
-  validateRequest(updateAppointmentStatusSchema),
-  appointmentController.updateAppointmentStatus
-);
+// 重新安排预约
+router.post('/:id/reschedule', authenticate, rescheduleAppointment);
 
-export default router; 
+// 确认预约
+router.post('/:id/confirm', authenticate, confirmAppointment);
+
+// 获取医生可用时间段
+router.get('/doctors/:doctorId/available-slots', getDoctorAvailableSlots);
+
+// 获取预约相关的医疗记录
+router.get('/:id/medical-record', authenticate, getAppointmentMedicalRecord);
+
+export default router;

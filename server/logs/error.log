@@ -1,0 +1,293 @@
+2025-05-16 20:55:26:5526 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 20:55:26:5526 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 20:55:26:5526 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 20:55:26:5526 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 20:55:26:5526 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 20:55:26:5526 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:10:05:105 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:10:05:105 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:10:05:105 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:10:05:105 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:14:07:147 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:14:07:147 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:14:07:147 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:14:07:147 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:33:18:3318 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:33:18:3318 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:33:18:3318 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:33:18:3318 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:33:36:3336 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:33:36:3336 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:33:36:3336 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:33:36:3336 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:37:10:3710 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:37:10:3710 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:37:10:3710 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:37:10:3710 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:37:34:3734 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:37:34:3734 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:37:34:3734 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:37:34:3734 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:39:24:3924 [31merror[39m: [31mError: Invalid credentials[39m
+2025-05-16 21:40:14:4014 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:40:14:4014 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:40:14:4014 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:40:14:4014 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:44:23:4423 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:44:23:4423 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:44:23:4423 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:44:23:4423 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 21:45:38:4538 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 21:50:47:5047 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:50:47:5047 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:50:47:5047 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 21:50:47:5047 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 21:50:47:5047 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 22:21:32:2132 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 22:21:32:2132 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 22:21:32:2132 [31merror[39m: [31mQuery error: column d.image_url does not exist[39m
+2025-05-16 22:21:32:2132 [31merror[39m: [31mError in getDepartments: column d.image_url does not exist[39m
+2025-05-16 22:21:33:2133 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 22:21:33:2133 [31merror[39m: [31mAuthentication error: jwt malformed[39m
+2025-05-16 22:37:25:3725 [31merror[39m: [31mAuthentication error: jwt expired[39m
+2025-05-16 22:37:25:3725 [31merror[39m: [31mAuthentication error: jwt expired[39m
+2025-05-17 11:09:43:943 [31merror[39m: [31mError: Invalid credentials[39m
+2025-05-17 12:28:16:2816 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:28:16:2816 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:28:16:2816 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:28:16:2816 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:34:3134 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:34:3134 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:47:3147 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:47:3147 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:47:3147 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:47:3147 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:56:3156 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:56:3156 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:56:3156 [31merror[39m: [31mQuery error: column d.emoji_icon does not exist[39m
+2025-05-17 12:31:56:3156 [31merror[39m: [31mError in getDepartments: column d.emoji_icon does not exist[39m
+2025-05-17 15:48:23:4823 [31merror[39m: [31mQuery error: column u.profile_image does not exist[39m
+2025-05-17 15:48:23:4823 [31merror[39m: [31mError in getDoctors: column u.profile_image does not exist[39m
+2025-05-17 15:49:17:4917 [31merror[39m: [31mQuery error: column u.profile_image does not exist[39m
+2025-05-17 15:49:17:4917 [31merror[39m: [31mError in getDoctors: column u.profile_image does not exist[39m
+2025-05-17 15:49:17:4917 [31merror[39m: [31mQuery error: column u.profile_image does not exist[39m
+2025-05-17 15:49:17:4917 [31merror[39m: [31mError in getDoctors: column u.profile_image does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:11:34:1134 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:19:2319 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:32:2332 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:32:2332 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:34:2334 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:34:2334 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:35:2335 [31merror[39m: [31mQuery error: column "profile_image_content_type" does not exist[39m
+2025-05-17 16:23:35:2335 [31merror[39m: [31mError fetching profile image: column "profile_image_content_type" does not exist[39m
+2025-05-18 09:55:45:5545 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 09:55:45:5545 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 09:55:45:5545 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 09:55:45:5545 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:02:28:228 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:02:28:228 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:02:28:228 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:02:28:228 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:03:56:356 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:03:56:356 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:04:01:41 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:04:01:41 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:05:33:533 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:05:33:533 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:05:33:533 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:05:33:533 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:05:44:544 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:05:44:544 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:05:44:544 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:05:44:544 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:10:55:1055 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:10:55:1055 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 10:10:55:1055 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 10:10:55:1055 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 12:10:45:1045 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 12:10:45:1045 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 12:10:45:1045 [31merror[39m: [31mQuery error: column p.blood_group does not exist[39m
+2025-05-18 12:10:45:1045 [31merror[39m: [31mError in getPatientProfile: column p.blood_group does not exist[39m
+2025-05-18 12:42:54:4254 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 12:42:54:4254 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 12:42:59:4259 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 12:42:59:4259 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 12:43:03:433 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 12:43:03:433 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 12:43:22:4322 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 12:43:22:4322 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 12:43:22:4322 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 12:43:22:4322 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 13:35:00:350 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 13:35:00:350 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 13:35:00:350 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 13:35:00:350 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 13:47:28:4728 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 13:47:28:4728 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 13:47:28:4728 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 13:47:28:4728 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 13:52:57:5257 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 13:52:57:5257 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 15:55:43:5543 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 15:55:43:5543 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 15:55:43:5543 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 15:55:43:5543 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 15:56:23:5623 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 15:56:23:5623 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 15:56:23:5623 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 15:56:23:5623 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:11:37:1137 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:11:37:1137 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:11:55:1155 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:11:55:1155 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:11:56:1156 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:11:56:1156 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:21:34:2134 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:21:34:2134 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:22:23:2223 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:22:23:2223 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:22:34:2234 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:22:34:2234 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 16:22:34:2234 [31merror[39m: [31mQuery error: column "is_primary" does not exist[39m
+2025-05-18 16:22:34:2234 [31merror[39m: [31mError in getPatientProfile: column "is_primary" does not exist[39m
+2025-05-18 17:22:45:2245 [31merror[39m: [31mError in addEmergencyContact: column "is_primary" of relation "emergency_contacts" does not exist[39m
+2025-05-18 18:59:39:5939 [31merror[39m: [31mQuery error: invalid input value for enum severity_level: "Low"[39m
+2025-05-18 18:59:39:5939 [31merror[39m: [31mError in addAllergy: invalid input value for enum severity_level: "Low"[39m
+2025-05-18 19:01:45:145 [31merror[39m: [31mError in updateEmergencyContact: column "is_primary" does not exist[39m
+2025-05-18 19:06:14:614 [31merror[39m: [31mQuery error: syntax error at or near "ORDER"[39m
+2025-05-18 20:56:22:5622 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 20:56:22:5622 [31merror[39m: [31mError details:[39m
+2025-05-18 20:56:28:5628 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 20:56:28:5628 [31merror[39m: [31mError details:[39m
+2025-05-18 20:56:51:5651 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 20:56:51:5651 [31merror[39m: [31mError details:[39m
+2025-05-18 20:57:02:572 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 20:57:02:572 [31merror[39m: [31mError details:[39m
+2025-05-18 20:57:03:573 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 20:57:03:573 [31merror[39m: [31mError details:[39m
+2025-05-18 21:32:44:3244 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 21:32:44:3244 [31merror[39m: [31mError details:[39m
+2025-05-18 21:45:19:4519 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 21:45:19:4519 [31merror[39m: [31mError details:[39m
+2025-05-18 22:44:28:4428 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 22:44:28:4428 [31merror[39m: [31mError details:[39m
+2025-05-18 23:00:08:08 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 23:00:08:08 [31merror[39m: [31mError details:[39m
+2025-05-18 23:16:38:1638 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-18 23:16:38:1638 [31merror[39m: [31mError details:[39m
+2025-05-19 09:32:40:3240 [31merror[39m: [31mError in updateProfile: could not determine data type of parameter $1[39m
+2025-05-19 09:32:40:3240 [31merror[39m: [31mError details:[39m
+2025-05-19 10:49:56:4956 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 10:49:56:4956 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 10:49:56:4956 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 10:49:56:4956 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:24:1024 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:24:1024 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:24:1024 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:24:1024 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:29:1029 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:29:1029 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:29:1029 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:29:1029 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:42:1042 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:42:1042 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:10:42:1042 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:10:42:1042 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:08:118 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:08:118 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:08:118 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:08:118 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:09:119 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:09:119 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:09:119 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:09:119 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:11:1111 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:11:1111 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:11:1111 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:11:1111 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:12:1112 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:12:1112 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:12:1112 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:12:1112 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:13:1113 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:13:1113 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:14:1114 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:14:1114 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:16:1116 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:16:1116 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 11:11:16:1116 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 11:11:16:1116 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 13:12:45:1245 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 13:12:45:1245 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 13:12:45:1245 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 13:12:45:1245 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 13:23:54:2354 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 13:23:54:2354 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 13:23:54:2354 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 13:23:54:2354 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:08:458 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:08:458 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:08:458 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:08:458 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:10:4510 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:10:4510 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:10:4510 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:10:4510 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:12:4512 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:12:4512 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:14:4514 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:14:4514 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:14:4514 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:14:4514 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:26:4526 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:26:4526 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:26:4526 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:26:4526 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 15:45:38:4538 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-19 15:45:38:4538 [31merror[39m: [31mError in getPatientMedicalRecords: column mr.attachments does not exist[39m
+2025-05-19 23:40:42:4042 [31merror[39m: [31mError in createAppointment: Invalid time value[39m
+2025-05-19 23:50:51:5051 [31merror[39m: [31mError in createAppointment: Invalid time value[39m
+2025-05-20 01:27:50:2750 [31merror[39m: [31mError in createAppointment: Invalid time value[39m
+2025-05-20 07:25:44:2544 [31merror[39m: [31mQuery error: invalid input value for enum appointment_status: "CANCELLED"[39m
+2025-05-20 07:25:44:2544 [31merror[39m: [31mError in createAppointment: invalid input value for enum appointment_status: "CANCELLED"[39m
+2025-05-20 07:33:23:3323 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-05-20 07:33:23:3323 [31merror[39m: [31mError in createAppointment: malformed array literal: "[]"[39m
+2025-05-20 07:34:02:342 [31merror[39m: [31mQuery error: malformed array literal: "["d s s"]"[39m
+2025-05-20 07:34:02:342 [31merror[39m: [31mError in createAppointment: malformed array literal: "["d s s"]"[39m
+2025-05-20 07:58:41:5841 [31merror[39m: [31mQuery error: malformed array literal: "["Fever"]"[39m
+2025-05-20 07:58:41:5841 [31merror[39m: [31mError in createAppointment: malformed array literal: "["Fever"]"[39m
+2025-05-20 08:12:04:124 [31merror[39m: [31mQuery error: null value in column "created_by" of relation "appointments" violates not-null constraint[39m
+2025-05-20 08:12:04:124 [31merror[39m: [31mError in createAppointment: null value in column "created_by" of relation "appointments" violates not-null constraint[39m
+2025-05-20 11:15:49:1549 [31merror[39m: [31mQuery error: column mr.medical_record_id does not exist[39m
+2025-05-20 11:15:49:1549 [31merror[39m: [31mError in getAppointmentById: column mr.medical_record_id does not exist[39m
+2025-05-20 11:15:49:1549 [31merror[39m: [31mQuery error: column mr.medical_record_id does not exist[39m
+2025-05-20 11:15:49:1549 [31merror[39m: [31mError in getAppointmentById: column mr.medical_record_id does not exist[39m
+2025-05-20 11:21:56:2156 [31merror[39m: [31mQuery error: column mr.medical_record_id does not exist[39m
+2025-05-20 11:21:56:2156 [31merror[39m: [31mError in getAppointmentById: column mr.medical_record_id does not exist[39m
+2025-05-20 11:21:56:2156 [31merror[39m: [31mQuery error: column mr.medical_record_id does not exist[39m
+2025-05-20 11:21:56:2156 [31merror[39m: [31mError in getAppointmentById: column mr.medical_record_id does not exist[39m
+2025-05-20 11:30:33:3033 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-20 11:30:33:3033 [31merror[39m: [31mError in getAppointmentById: column mr.attachments does not exist[39m
+2025-05-20 11:30:33:3033 [31merror[39m: [31mQuery error: column mr.attachments does not exist[39m
+2025-05-20 11:30:33:3033 [31merror[39m: [31mError in getAppointmentById: column mr.attachments does not exist[39m

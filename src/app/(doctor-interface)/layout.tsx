@@ -19,7 +19,6 @@ const navigation = [
   { name: 'Dashboard', href: '/doctor-dashboard', icon: LayoutDashboard },
   { name: 'Appointments', href: '/doctor-appointments', icon: Calendar },
   { name: 'Patients', href: '/doctor-patients', icon: Users },
-  { name: 'Availability', href: '/doctor-availability', icon: Clock },
   { name: 'Settings', href: '/doctor-settings', icon: Settings },
 ];
 

@@ -1,304 +1,129 @@
 import { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcryptjs';
-import { ApiError } from '../middleware/errorHandler';
-import prisma from '../config/database';
+import dbClient from '../utils/db-client';
 import { logger } from '../utils/logger';
+import { ApiError } from '../middleware/errorHandler';
+
+// Extended Request type with user information
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  }
+  file?: Express.Multer.File;
+}
 
 export class UserController {
-  // Get current user profile
-  async getCurrentUser(req: Request, res: Response, next: NextFunction) {
+  // Get the current user profile
+  async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id;
       if (!userId) {
         throw new ApiError(401, 'Not authenticated');
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          role: true,
-          doctor: {
-            include: {
-              department: true,
-            },
-          },
-          patient: true,
-          preferences: true,
-        },
-      });
+      const query = `
+        SELECT 
+          u.user_id as id,
+          u.email,
+          u.first_name as "firstName",
+          u.last_name as "lastName",
+          u.phone,
+          u.address,
+          u.profile_image_blob as "profileImage",
+          u.created_at as "createdAt",
+          u.updated_at as "updatedAt",
+          r.name as "role"
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE u.user_id = $1
+      `;
+      
+      const result = await dbClient.query(query, [userId]);
+      
+      if (result.rows.length === 0) {
+        throw new ApiError(404, 'User not found');
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      if (!user) {
+  // Upload profile image as BLOB
+  async uploadProfileImageBlob(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new ApiError(401, 'Not authenticated');
+      }
+
+      if (!req.file) {
+        throw new ApiError(400, 'No file uploaded');
+      }
+
+      // Get file buffer and content type
+      const imageBuffer = req.file.buffer;
+      
+      // Update image data in database
+      const query = `
+        UPDATE users
+        SET 
+          profile_image_blob = $1,
+          updated_at = NOW()
+        WHERE user_id = $2
+        RETURNING user_id
+      `;
+      
+      const result = await dbClient.query(query, [
+        imageBuffer,
+        userId
+      ]);
+      
+      if (result.rows.length === 0) {
         throw new ApiError(404, 'User not found');
       }
 
       res.json({
         status: 'success',
-        data: user,
+        message: 'Profile image uploaded successfully',
+        userId: result.rows[0].user_id
       });
     } catch (error) {
       next(error);
     }
   }
 
-  // Update user profile
-  async updateProfile(req: Request, res: Response, next: NextFunction) {
+  // Get profile image as BLOB
+  async getProfileImageBlob(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new ApiError(401, 'Not authenticated');
+      const userId = req.params.userId;
+      
+      const query = `
+        SELECT profile_image_blob
+        FROM users
+        WHERE user_id = $1
+      `;
+      
+      const result = await dbClient.query(query, [userId]);
+      
+      if (result.rows.length === 0 || !result.rows[0].profile_image_blob) {
+        // Return default placeholder image if no profile image is found
+        return res.status(404).json({ error: 'Image not found' });
       }
-
-      const {
-        firstName,
-        lastName,
-        phone,
-        address,
-      } = req.body;
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          firstName,
-          lastName,
-          phone,
-          address,
-        },
-        include: {
-          role: true,
-        },
-      });
-
-      res.json({
-        status: 'success',
-        data: updatedUser,
-      });
+      
+      const { profile_image_blob } = result.rows[0];
+      
+      // Set CORS headers to allow cross-origin access
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      
+      // Set content type to image/jpeg
+      res.set('Content-Type', 'image/jpeg');
+      res.send(profile_image_blob);
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Change password
-  async changePassword(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new ApiError(401, 'Not authenticated');
-      }
-
-      const { currentPassword, newPassword } = req.body;
-
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { passwordHash: true },
-      });
-
-      if (!user) {
-        throw new ApiError(404, 'User not found');
-      }
-
-      // Verify current password
-      const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
-      if (!isValidPassword) {
-        throw new ApiError(401, 'Current password is incorrect');
-      }
-
-      // Hash new password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-      // Update password
-      await prisma.user.update({
-        where: { id: userId },
-        data: { passwordHash: hashedPassword },
-      });
-
-      res.json({
-        status: 'success',
-        message: 'Password updated successfully',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get notification preferences
-  async getNotificationPreferences(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new ApiError(401, 'Not authenticated');
-      }
-
-      const preferences = await prisma.notificationPreference.findUnique({
-        where: { userId },
-      });
-
-      res.json({
-        status: 'success',
-        data: preferences || {},
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Update notification preferences
-  async updateNotificationPreferences(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new ApiError(401, 'Not authenticated');
-      }
-
-      const {
-        emailEnabled,
-        smsEnabled,
-        pushEnabled,
-        reminderTiming,
-        preferences,
-      } = req.body;
-
-      const updatedPreferences = await prisma.notificationPreference.upsert({
-        where: { userId },
-        create: {
-          userId,
-          emailEnabled,
-          smsEnabled,
-          pushEnabled,
-          reminderTiming,
-          preferences,
-        },
-        update: {
-          emailEnabled,
-          smsEnabled,
-          pushEnabled,
-          reminderTiming,
-          preferences,
-        },
-      });
-
-      res.json({
-        status: 'success',
-        data: updatedPreferences,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Admin only: Get all users
-  async getAllUsers(req: Request, res: Response, next: NextFunction) {
-    try {
-      const users = await prisma.user.findMany({
-        include: {
-          role: true,
-          doctor: {
-            include: {
-              department: true,
-            },
-          },
-          patient: true,
-        },
-      });
-
-      res.json({
-        status: 'success',
-        data: users,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Admin only: Get user by ID
-  async getUserById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const userId = parseInt(id);
-
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          role: true,
-          doctor: {
-            include: {
-              department: true,
-            },
-          },
-          patient: true,
-          preferences: true,
-        },
-      });
-
-      if (!user) {
-        throw new ApiError(404, 'User not found');
-      }
-
-      res.json({
-        status: 'success',
-        data: user,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Admin only: Update user
-  async updateUser(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const userId = parseInt(id);
-      const {
-        firstName,
-        lastName,
-        email,
-        phone,
-        address,
-        status,
-        roleId,
-      } = req.body;
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          firstName,
-          lastName,
-          email,
-          phone,
-          address,
-          status,
-          roleId,
-        },
-        include: {
-          role: true,
-        },
-      });
-
-      res.json({
-        status: 'success',
-        data: updatedUser,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Admin only: Delete user
-  async deleteUser(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const userId = parseInt(id);
-
-      await prisma.user.delete({
-        where: { id: userId },
-      });
-
-      res.json({
-        status: 'success',
-        message: 'User deleted successfully',
-      });
-    } catch (error) {
-      next(error);
+      logger.error('Error fetching profile image:', error);
+      res.status(500).json({ error: 'Failed to fetch profile image' });
     }
   }
 } 

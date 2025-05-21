@@ -1,11 +1,16 @@
 import winston from 'winston';
 import path from 'path';
+import { TransformableInfo } from 'logform';
 
-interface LogInfo {
-  timestamp: string;
-  level: string;
-  message: string;
-}
+// 修复类型错误，不再扩展TransformableInfo接口
+// 而是使用类型断言来处理timestamp属性
+const format = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.colorize({ all: true }),
+  winston.format.printf(
+    (info: TransformableInfo) => `${(info as any).timestamp} ${info.level}: ${info.message}`,
+  ),
+);
 
 // Define log levels
 const levels = {
@@ -34,15 +39,6 @@ const colors = {
 
 // Add colors to winston
 winston.addColors(colors);
-
-// Define the format for logging
-const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info: LogInfo) => `${info.timestamp} ${info.level}: ${info.message}`,
-  ),
-);
 
 // Define where to store the logs
 const transports = [

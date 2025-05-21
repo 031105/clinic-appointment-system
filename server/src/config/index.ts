@@ -8,14 +8,22 @@ interface Config {
   port: number;
   apiPrefix: string;
   frontendUrl: string;
+  api: {
+    url: string;
+  };
+  frontend: {
+    url: string;
+  };
   database: {
     url: string;
   };
   jwt: {
     secret: string;
-    expiresIn: string;
+    accessExpiresIn: string;
     refreshSecret: string;
     refreshExpiresIn: string;
+    resetSecret: string;
+    verifyEmailSecret: string;
   };
   email: {
     host: string;
@@ -40,17 +48,25 @@ interface Config {
 
 export const config: Config = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '3001', 10),
   apiPrefix: process.env.API_PREFIX || '/api/v1',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  api: {
+    url: process.env.API_URL || 'http://localhost:4000/api/v1',
+  },
+  frontend: {
+    url: process.env.FRONTEND_URL || 'http://localhost:3000',
+  },
   database: {
     url: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/clinic_appointment_system?schema=public',
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',
-    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '1h',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    resetSecret: process.env.JWT_RESET_SECRET || 'your-reset-secret-key',
+    verifyEmailSecret: process.env.JWT_VERIFY_EMAIL_SECRET || 'your-verify-email-secret',
   },
   email: {
     host: process.env.SMTP_HOST || 'smtp.example.com',

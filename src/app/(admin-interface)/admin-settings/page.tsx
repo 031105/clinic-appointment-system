@@ -5,58 +5,56 @@ import React, { useState } from 'react';
 // Temporary settings data
 const tempSettings = {
   general: {
-    clinicName: 'Medical Clinic',
-    clinicLogo: '/images/logo.png',
-    clinicAddress: '123 Main Street, City, Country',
-    clinicPhone: '+60 12-345-6789',
-    clinicEmail: 'info@medicalclinic.com',
-    clinicWebsite: 'www.medicalclinic.com',
-    timeZone: 'Asia/Kuala_Lumpur'
+    clinicName: 'HealthCare Clinic',
+    address: '123 Medical Ave, Health City, HC 12345',
+    phone: '(123) 456-7890',
+    email: 'contact@healthcareclinic.com',
+    website: 'www.healthcareclinic.com',
+    timezone: 'UTC-5'
   },
   workingHours: {
-    monday: { isOpen: true, startTime: '09:00', endTime: '18:00' },
-    tuesday: { isOpen: true, startTime: '09:00', endTime: '18:00' },
-    wednesday: { isOpen: true, startTime: '09:00', endTime: '18:00' },
-    thursday: { isOpen: true, startTime: '09:00', endTime: '18:00' },
-    friday: { isOpen: true, startTime: '09:00', endTime: '18:00' },
-    saturday: { isOpen: true, startTime: '09:00', endTime: '14:00' },
-    sunday: { isOpen: false, startTime: '09:00', endTime: '18:00' }
+    monday: { isOpen: true, start: '09:00', end: '17:00' },
+    tuesday: { isOpen: true, start: '09:00', end: '17:00' },
+    wednesday: { isOpen: true, start: '09:00', end: '17:00' },
+    thursday: { isOpen: true, start: '09:00', end: '17:00' },
+    friday: { isOpen: true, start: '09:00', end: '17:00' },
+    saturday: { isOpen: false, start: '09:00', end: '13:00' },
+    sunday: { isOpen: false, start: '09:00', end: '13:00' }
   },
   appointments: {
-    defaultDuration: 30,
-    timeSlotInterval: 15,
-    allowSameDayBooking: true,
-    maxDaysInAdvance: 30,
-    requireApproval: false,
-    emailNotifications: true,
-    smsNotifications: false
+    allowOnlineBooking: true,
+    slotDuration: 30,
+    bufferTime: 15,
+    maxDaysInAdvance: 60,
+    cancelationPolicy: 24
   },
   notifications: {
+    sendReminders: {
+      email: true,
+      sms: true,
+      hours: 24
+    },
     templates: {
       appointmentConfirmation: {
-        subject: 'Appointment Confirmation',
-        body: 'Dear {{patientName}},\n\nYour appointment with {{doctorName}} has been confirmed for {{appointmentDate}} at {{appointmentTime}}.\n\nPlease arrive 15 minutes early to complete any necessary paperwork.\n\nBest regards,\n{{clinicName}} Team'
+        subject: 'Your appointment has been confirmed',
+        body: 'Dear {patientName},\n\nYour appointment with {doctorName} has been confirmed for {appointmentDate} at {appointmentTime}.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
       },
       appointmentReminder: {
-        subject: 'Appointment Reminder',
-        body: 'Dear {{patientName}},\n\nThis is a reminder that you have an appointment with {{doctorName}} tomorrow at {{appointmentTime}}.\n\nBest regards,\n{{clinicName}} Team'
+        subject: 'Reminder: Your upcoming appointment',
+        body: 'Dear {patientName},\n\nThis is a reminder of your appointment with {doctorName} scheduled for {appointmentDate} at {appointmentTime}.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
       },
       appointmentCancellation: {
-        subject: 'Appointment Cancellation',
-        body: 'Dear {{patientName}},\n\nYour appointment with {{doctorName}} scheduled for {{appointmentDate}} at {{appointmentTime}} has been cancelled.\n\nPlease contact us to reschedule.\n\nBest regards,\n{{clinicName}} Team'
+        subject: 'Your appointment has been cancelled',
+        body: 'Dear {patientName},\n\nYour appointment with {doctorName} scheduled for {appointmentDate} at {appointmentTime} has been cancelled.\n\nPlease contact us if you need to reschedule.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
       }
-    },
-    sendReminders: {
-      enabled: true,
-      days: 1
     }
   },
   backup: {
     autoBackup: true,
-    backupFrequency: 'daily',
-    backupTime: '00:00',
-    storageLocation: 'local',
-    retentionDays: 30
+    frequency: 'daily',
+    backupTime: '02:00',
+    retentionDays: 30,
+    storageLocation: 'cloud'
   },
   security: {
     sessionTimeout: 30,
@@ -68,8 +66,7 @@ const tempSettings = {
       requireSpecialChars: true,
       expiryDays: 90
     },
-    loginAttempts: 5,
-    twoFactorAuth: false
+    loginAttempts: 5
   }
 };
 
@@ -791,20 +788,6 @@ export default function SettingsConfiguration() {
                         min="1"
                         disabled={!isEditing}
                       />
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="twoFactorAuth"
-                        name="twoFactorAuth"
-                        checked={isEditing ? tempEditSettings.security.twoFactorAuth : settings.security.twoFactorAuth}
-                        onChange={handleSecurityChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="twoFactorAuth" className="ml-2 text-sm text-gray-700">
-                        Enable two-factor authentication
-                      </label>
                     </div>
                   </div>
                 </div>

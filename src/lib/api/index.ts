@@ -1,3 +1,5 @@
+'use client';
+
 import httpClient, { handleApiResponse, createHttpClient } from './http-client';
 import authClient from './auth-client';
 import patientClient from './patient-client';

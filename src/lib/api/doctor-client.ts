@@ -11,7 +11,7 @@ export interface ProfileUpdateRequest {
   experienceYears?: number;
   consultationFee?: number;
   workingHours?: {
-    [key: string]: { // 星期一、星期二等
+    [key: string]: {
       start: string;
       end: string;
       isAvailable: boolean;
@@ -441,6 +441,62 @@ const doctorClient = {
       return handleApiResponse<Appointment>(response);
     } catch (error) {
       console.error('Cancel appointment error:', error);
+      throw error;
+    }
+  },
+
+  // 获取所有预约（支持过滤和搜索）
+  getAppointmentsWithFilters: async (params?: {
+    status?: 'all' | 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+    type?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<Appointment[]> => {
+    try {
+      const response = await httpClient.get('/doctors/appointments', { params });
+      return handleApiResponse<Appointment[]>(response);
+    } catch (error) {
+      console.error('Get appointments with filters error:', error);
+      throw error;
+    }
+  },
+
+  // 标记预约为已完成
+  markAppointmentAsCompleted: async (id: number, notes?: string): Promise<Appointment> => {
+    try {
+      const response = await httpClient.patch(`/doctors/appointments/${id}/status`, {
+        status: 'completed',
+        notes
+      });
+      return handleApiResponse<Appointment>(response);
+    } catch (error) {
+      console.error('Mark appointment as completed error:', error);
+      throw error;
+    }
+  },
+
+  // 标记预约为未出席
+  markAppointmentAsNoShow: async (id: number, notes?: string): Promise<Appointment> => {
+    try {
+      const response = await httpClient.patch(`/doctors/appointments/${id}/status`, {
+        status: 'no_show',
+        notes
+      });
+      return handleApiResponse<Appointment>(response);
+    } catch (error) {
+      console.error('Mark appointment as no-show error:', error);
+      throw error;
+    }
+  },
+
+  // 更新预约备注
+  updateAppointmentNotes: async (id: number, notes: string): Promise<Appointment> => {
+    try {
+      const response = await httpClient.patch(`/doctors/appointments/${id}/notes`, { notes });
+      return handleApiResponse<Appointment>(response);
+    } catch (error) {
+      console.error('Update appointment notes error:', error);
       throw error;
     }
   },

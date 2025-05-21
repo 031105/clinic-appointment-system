@@ -1,79 +1,23 @@
 import { Router } from 'express';
-import { PatientController } from '../controllers/patient.controller';
-import { validateRequest } from '../middleware/validateRequest';
-import { authorize } from '../middleware/auth';
-import {
-  updatePatientProfileSchema,
-  addAllergySchema,
-  updateAllergySchema,
-  addEmergencyContactSchema,
-  updateEmergencyContactSchema,
-} from '../schemas/patient.schema';
+import { authenticate } from '../middleware/auth';
+import * as patientSettingController from '../controllers/patient-setting.controller';
 
 const router = Router();
-const patientController = new PatientController();
 
-// Profile management
-router.get(
-  '/profile',
-  authorize('patient'),
-  patientController.getProfile
-);
+// 用户个人资料API
+router.put('/profile', authenticate, patientSettingController.updateProfile);
+router.post('/change-password', authenticate, patientSettingController.changePassword);
 
-router.patch(
-  '/profile',
-  authorize('patient'),
-  validateRequest(updatePatientProfileSchema),
-  patientController.updateProfile
-);
+// 过敏信息API
+router.get('/allergies', authenticate, patientSettingController.getAllergies);
+router.post('/allergies', authenticate, patientSettingController.addAllergy);
+router.put('/allergies/:id', authenticate, patientSettingController.updateAllergy);
+router.delete('/allergies/:id', authenticate, patientSettingController.deleteAllergy);
 
-// Medical records
-router.get(
-  '/medical-records',
-  authorize('patient'),
-  patientController.getMedicalRecords
-);
-
-// Allergy management
-router.post(
-  '/allergies',
-  authorize('patient'),
-  validateRequest(addAllergySchema),
-  patientController.addAllergy
-);
-
-router.patch(
-  '/allergies/:id',
-  authorize('patient'),
-  validateRequest(updateAllergySchema),
-  patientController.updateAllergy
-);
-
-router.delete(
-  '/allergies/:id',
-  authorize('patient'),
-  patientController.deleteAllergy
-);
-
-// Emergency contact management
-router.post(
-  '/emergency-contacts',
-  authorize('patient'),
-  validateRequest(addEmergencyContactSchema),
-  patientController.addEmergencyContact
-);
-
-router.patch(
-  '/emergency-contacts/:id',
-  authorize('patient'),
-  validateRequest(updateEmergencyContactSchema),
-  patientController.updateEmergencyContact
-);
-
-router.delete(
-  '/emergency-contacts/:id',
-  authorize('patient'),
-  patientController.deleteEmergencyContact
-);
+// 紧急联系人API
+router.get('/emergency-contacts', authenticate, patientSettingController.getEmergencyContacts);
+router.post('/emergency-contacts', authenticate, patientSettingController.addEmergencyContact);
+router.put('/emergency-contacts/:id', authenticate, patientSettingController.updateEmergencyContact);
+router.delete('/emergency-contacts/:id', authenticate, patientSettingController.deleteEmergencyContact);
 
 export default router; 

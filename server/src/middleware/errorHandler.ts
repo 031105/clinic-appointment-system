@@ -1,17 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
 import { ZodError } from 'zod';
-import { Prisma } from '@prisma/client';
 
-// Custom error class for API errors
+// Custom API Error class
 export class ApiError extends Error {
-  constructor(
-    public statusCode: number,
-    message: string,
-    public isOperational = true,
-    public errors?: any
-  ) {
+  statusCode: number;
+  errors?: any[];
+
+  constructor(statusCode: number, message: string, errors?: any[]) {
     super(message);
+    this.statusCode = statusCode;
+    this.errors = errors;
+
+    // This is needed because we're extending a built in class
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
@@ -48,34 +49,34 @@ export const errorHandler = (
     });
   }
 
-  // Handle Prisma errors
+  // Handle PostgreSQL errors
   if (err instanceof Error) {
-    if (err.name === 'PrismaClientKnownRequestError') {
-      const prismaError = err as Prisma.PrismaClientKnownRequestError;
-      switch (prismaError.code) {
-        case 'P2002':
-          return res.status(409).json({
-            status: 'error',
-            message: 'Unique constraint violation',
-            error: `A record with this ${(prismaError.meta as any)?.target} already exists`,
-          });
-        case 'P2025':
-          return res.status(404).json({
-            status: 'error',
-            message: 'Record not found',
-          });
-        default:
-          return res.status(500).json({
-            status: 'error',
-            message: 'Database error',
-          });
-      }
+    const pgError = err as any;
+    
+    // PostgreSQL unique constraint violation (code 23505)
+    if (pgError.code === '23505') {
+      return res.status(409).json({
+        status: 'error',
+        message: 'Unique constraint violation',
+        error: pgError.detail || 'A record with the same unique key already exists',
+      });
     }
-
-    if (err.name === 'PrismaClientValidationError') {
+    
+    // PostgreSQL foreign key violation (code 23503)
+    if (pgError.code === '23503') {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid data provided',
+        message: 'Foreign key constraint violation',
+        error: pgError.detail || 'Referenced record does not exist',
+      });
+    }
+    
+    // PostgreSQL not null violation (code 23502) 
+    if (pgError.code === '23502') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Not null constraint violation',
+        error: pgError.detail || 'A required field is missing',
       });
     }
   }

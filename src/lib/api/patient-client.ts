@@ -1,4 +1,5 @@
-import httpClient, { handleApiResponse } from './http-client';
+import httpClient, { handleApiResponse, createSessionHttpClient, cachedGet } from './http-client';
+import { useSession } from '@/contexts/auth/SessionContext';
 
 // 个人资料更新请求类型
 export interface ProfileUpdateRequest {
@@ -163,6 +164,7 @@ export interface Department {
   name: string;
   description: string;
   imageUrl?: string;
+  emojiIcon?: string;
   createdAt: string;
   updatedAt: string;
   doctorCount?: number;
@@ -178,7 +180,6 @@ export interface MedicalRecord {
   prescription: any[];
   notes: string;
   attachments?: string[];
-  followUpDate?: string;
   createdAt: string;
   updatedAt: string;
   doctor?: {
@@ -187,6 +188,64 @@ export interface MedicalRecord {
       lastName: string;
     }
   };
+}
+
+// Medical record attachment type
+export interface MedicalRecordAttachment {
+  attachmentId: number;
+  recordId: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+  uploadedAt: string;
+}
+
+// 获取当前会话以供API客户端使用
+let sessionHttpClient = httpClient;
+let sessionCachedGet = cachedGet;
+
+// 用于设置session的函数，在导入时调用
+export function initializeWithSession(session: any) {
+  console.log('[Patient Client] Initializing with session:', session?.user?.token ? 'Token present' : 'No token');
+  
+  if (session?.user?.token) {
+    console.log('[Patient Client] Setting up authenticated client with token');
+    const axiosInstance = createSessionHttpClient({
+      user: {
+        token: session.user.token
+      }
+    });
+    
+    // 替换所有HTTP方法
+    sessionHttpClient = {
+      ...httpClient,
+      get: axiosInstance.get,
+      post: axiosInstance.post,
+      put: axiosInstance.put,
+      delete: axiosInstance.delete,
+      patch: axiosInstance.patch
+    };
+    
+    // 创建带会话的cachedGet
+    sessionCachedGet = async <T>(url: string, config?: any, cacheTime = 60000): Promise<T> => {
+      // 确保config中包含会话token
+      const sessionConfig = {
+        ...config,
+        headers: {
+          ...config?.headers,
+          Authorization: `Bearer ${session.user.token}`
+        }
+      };
+      return cachedGet<T>(url, sessionConfig, cacheTime);
+    };
+    
+    console.log('[Patient Client] Session token successfully configured for API client');
+  } else {
+    console.warn('[Patient Client] No session token available, using default HTTP client');
+    sessionHttpClient = httpClient;
+    sessionCachedGet = cachedGet;
+  }
 }
 
 // 患者API客户端
@@ -198,7 +257,7 @@ const patientClient = {
   // 获取个人资料
   getProfile: async () => {
     try {
-      const response = await httpClient.get('/patients/profile');
+      const response = await sessionHttpClient.get('/patients/profile');
       return handleApiResponse(response);
     } catch (error) {
       console.error('Get profile error:', error);
@@ -209,7 +268,7 @@ const patientClient = {
   // 更新个人资料
   updateProfile: async (data: ProfileUpdateRequest) => {
     try {
-      const response = await httpClient.put('/patients/profile', data);
+      const response = await sessionHttpClient.put('/patients/profile', data);
       return handleApiResponse(response);
     } catch (error) {
       console.error('Update profile error:', error);
@@ -220,7 +279,7 @@ const patientClient = {
   // 更改密码
   changePassword: async (currentPassword: string, newPassword: string) => {
     try {
-      const response = await httpClient.post('/users/change-password', {
+      const response = await sessionHttpClient.post('/users/change-password', {
         currentPassword,
         newPassword
       });
@@ -234,7 +293,7 @@ const patientClient = {
   // 获取通知偏好
   getNotificationPreferences: async () => {
     try {
-      const response = await httpClient.get('/users/notification-preferences');
+      const response = await sessionHttpClient.get('/users/notification-preferences');
       return handleApiResponse(response);
     } catch (error) {
       console.error('Get notification preferences error:', error);
@@ -245,7 +304,7 @@ const patientClient = {
   // 更新通知偏好
   updateNotificationPreferences: async (data: NotificationPreferencesRequest) => {
     try {
-      const response = await httpClient.put('/users/notification-preferences', data);
+      const response = await sessionHttpClient.put('/users/notification-preferences', data);
       return handleApiResponse(response);
     } catch (error) {
       console.error('Update notification preferences error:', error);
@@ -260,7 +319,7 @@ const patientClient = {
   // 获取所有过敏信息
   getAllergies: async (): Promise<Allergy[]> => {
     try {
-      const response = await httpClient.get('/patients/allergies');
+      const response = await sessionHttpClient.get('/patients/allergies');
       return handleApiResponse<Allergy[]>(response);
     } catch (error) {
       console.error('Get allergies error:', error);
@@ -271,7 +330,7 @@ const patientClient = {
   // 添加过敏信息
   addAllergy: async (data: AllergyRequest): Promise<Allergy> => {
     try {
-      const response = await httpClient.post('/patients/allergies', data);
+      const response = await sessionHttpClient.post('/patients/allergies', data);
       return handleApiResponse<Allergy>(response);
     } catch (error) {
       console.error('Add allergy error:', error);
@@ -282,7 +341,7 @@ const patientClient = {
   // 更新过敏信息
   updateAllergy: async (id: number, data: Partial<AllergyRequest>): Promise<Allergy> => {
     try {
-      const response = await httpClient.put(`/patients/allergies/${id}`, data);
+      const response = await sessionHttpClient.put(`/patients/allergies/${id}`, data);
       return handleApiResponse<Allergy>(response);
     } catch (error) {
       console.error('Update allergy error:', error);
@@ -293,7 +352,7 @@ const patientClient = {
   // 删除过敏信息
   deleteAllergy: async (id: number) => {
     try {
-      const response = await httpClient.delete(`/patients/allergies/${id}`);
+      const response = await sessionHttpClient.delete(`/patients/allergies/${id}`);
       return response.data;
     } catch (error) {
       console.error('Delete allergy error:', error);
@@ -308,7 +367,7 @@ const patientClient = {
   // 获取所有紧急联系人
   getEmergencyContacts: async (): Promise<EmergencyContact[]> => {
     try {
-      const response = await httpClient.get('/patients/emergency-contacts');
+      const response = await sessionHttpClient.get('/patients/emergency-contacts');
       return handleApiResponse<EmergencyContact[]>(response);
     } catch (error) {
       console.error('Get emergency contacts error:', error);
@@ -319,7 +378,7 @@ const patientClient = {
   // 添加紧急联系人
   addEmergencyContact: async (data: EmergencyContactRequest): Promise<EmergencyContact> => {
     try {
-      const response = await httpClient.post('/patients/emergency-contacts', data);
+      const response = await sessionHttpClient.post('/patients/emergency-contacts', data);
       return handleApiResponse<EmergencyContact>(response);
     } catch (error) {
       console.error('Add emergency contact error:', error);
@@ -330,7 +389,7 @@ const patientClient = {
   // 更新紧急联系人
   updateEmergencyContact: async (id: number, data: Partial<EmergencyContactRequest>): Promise<EmergencyContact> => {
     try {
-      const response = await httpClient.put(`/patients/emergency-contacts/${id}`, data);
+      const response = await sessionHttpClient.put(`/patients/emergency-contacts/${id}`, data);
       return handleApiResponse<EmergencyContact>(response);
     } catch (error) {
       console.error('Update emergency contact error:', error);
@@ -341,7 +400,7 @@ const patientClient = {
   // 删除紧急联系人
   deleteEmergencyContact: async (id: number) => {
     try {
-      const response = await httpClient.delete(`/patients/emergency-contacts/${id}`);
+      const response = await sessionHttpClient.delete(`/patients/emergency-contacts/${id}`);
       return response.data;
     } catch (error) {
       console.error('Delete emergency contact error:', error);
@@ -353,14 +412,11 @@ const patientClient = {
   // 预约管理
   //=====================================================
   
-  // 获取所有预约
-  getAppointments: async (params?: {
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<Appointment[]> => {
+  // 获取预约列表
+  getAppointments: async (status?: string): Promise<Appointment[]> => {
     try {
-      const response = await httpClient.get('/appointments', { params });
+      const params = status ? { params: { status } } : undefined;
+      const response = await sessionHttpClient.get('/dashboard/patient-appointments', params);
       return handleApiResponse<Appointment[]>(response);
     } catch (error) {
       console.error('Get appointments error:', error);
@@ -371,7 +427,7 @@ const patientClient = {
   // 获取单个预约详情
   getAppointmentById: async (id: number): Promise<Appointment> => {
     try {
-      const response = await httpClient.get(`/appointments/${id}`);
+      const response = await sessionHttpClient.get(`/appointments/${id}`);
       return handleApiResponse<Appointment>(response);
     } catch (error) {
       console.error('Get appointment error:', error);
@@ -379,13 +435,14 @@ const patientClient = {
     }
   },
 
-  // 创建新预约
-  createAppointment: async (data: AppointmentRequest): Promise<Appointment> => {
+  // 创建预约
+  createAppointment: async (appointmentData: AppointmentRequest): Promise<Appointment> => {
     try {
-      const response = await httpClient.post('/appointments', data);
+      console.log(`[Patient Client] Creating appointment via API endpoint`);
+      const response = await sessionHttpClient.post('/appointments', appointmentData);
       return handleApiResponse<Appointment>(response);
     } catch (error) {
-      console.error('Create appointment error:', error);
+      console.error('Error creating appointment:', error);
       throw error;
     }
   },
@@ -393,7 +450,7 @@ const patientClient = {
   // 取消预约
   cancelAppointment: async (id: number, reason: string): Promise<Appointment> => {
     try {
-      const response = await httpClient.post(`/appointments/${id}/cancel`, { reason });
+      const response = await sessionHttpClient.post(`/appointments/${id}/cancel`, { reason });
       return handleApiResponse<Appointment>(response);
     } catch (error) {
       console.error('Cancel appointment error:', error);
@@ -401,15 +458,50 @@ const patientClient = {
     }
   },
 
+  // 确认预约
+  confirmAppointment: async (id: number): Promise<Appointment> => {
+    try {
+      const response = await sessionHttpClient.post(`/appointments/${id}/confirm`);
+      return handleApiResponse<Appointment>(response);
+    } catch (error) {
+      console.error('Confirm appointment error:', error);
+      throw error;
+    }
+  },
+
   // 重新安排预约
   rescheduleAppointment: async (id: number, newDateTime: string): Promise<Appointment> => {
     try {
-      const response = await httpClient.post(`/appointments/${id}/reschedule`, { 
+      const response = await sessionHttpClient.post(`/appointments/${id}/reschedule`, { 
         appointmentDateTime: newDateTime 
       });
       return handleApiResponse<Appointment>(response);
     } catch (error) {
       console.error('Reschedule appointment error:', error);
+      throw error;
+    }
+  },
+
+  // 获取医生可用时间段
+  getDoctorAvailableSlots: async (doctorId: number, date: string) => {
+    try {
+      const response = await sessionHttpClient.get(
+        `/appointments/doctors/${doctorId}/available-slots?date=${date}`
+      );
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error('Get doctor available slots error:', error);
+      throw error;
+    }
+  },
+
+  // 获取预约相关的医疗记录
+  getAppointmentMedicalRecord: async (appointmentId: number): Promise<MedicalRecord> => {
+    try {
+      const response = await sessionHttpClient.get(`/appointments/${appointmentId}/medical-record`);
+      return handleApiResponse<MedicalRecord>(response);
+    } catch (error) {
+      console.error('Get appointment medical record error:', error);
       throw error;
     }
   },
@@ -421,18 +513,36 @@ const patientClient = {
   // 获取所有医疗记录
   getMedicalRecords: async (): Promise<MedicalRecord[]> => {
     try {
-      const response = await httpClient.get('/patients/medical-records');
-      return handleApiResponse<MedicalRecord[]>(response);
-    } catch (error) {
+      console.log('Patient client: Attempting to fetch medical records');
+      const response = await sessionHttpClient.get('/medical-records/patient/records');
+      const records = handleApiResponse<MedicalRecord[]>(response);
+      console.log(`Successfully fetched ${records.length} medical records`);
+      return records;
+    } catch (error: any) {
+      // Provide more detailed error information
       console.error('Get medical records error:', error);
-      throw error;
+      
+      // Log detailed error info when available
+      if (error.response) {
+        console.error(`API response error: ${error.response.status} - ${error.response.statusText}`);
+        console.error('Response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received from server');
+      } else {
+        console.error('Error setting up request:', error.message);
+      }
+      
+      // Return an empty array instead of throwing the error
+      // This prevents the UI from breaking while still logging the error
+      console.log('Returning empty array due to API error');
+      return [];
     }
   },
 
   // 获取单个医疗记录详情
   getMedicalRecordById: async (id: number): Promise<MedicalRecord> => {
     try {
-      const response = await httpClient.get(`/medical-records/${id}`);
+      const response = await sessionHttpClient.get(`/medical-records/${id}`);
       return handleApiResponse<MedicalRecord>(response);
     } catch (error) {
       console.error('Get medical record error:', error);
@@ -440,14 +550,15 @@ const patientClient = {
     }
   },
 
-  // 获取预约相关的医疗记录
-  getMedicalRecordByAppointment: async (appointmentId: number): Promise<MedicalRecord> => {
+  // 获取医疗记录的附件
+  getMedicalRecordAttachments: async (recordId: number): Promise<MedicalRecordAttachment[]> => {
     try {
-      const response = await httpClient.get(`/appointments/${appointmentId}/medical-record`);
-      return handleApiResponse<MedicalRecord>(response);
+      const response = await sessionHttpClient.get(`/medical-records/${recordId}/attachments`);
+      // Assume the API returns an array of attachments with correct field names
+      return handleApiResponse<MedicalRecordAttachment[]>(response);
     } catch (error) {
-      console.error('Get appointment medical record error:', error);
-      throw error;
+      console.error('Get medical record attachments error:', error);
+      return [];
     }
   },
 
@@ -458,7 +569,7 @@ const patientClient = {
   // 获取所有部门
   getDepartments: async (): Promise<Department[]> => {
     try {
-      const response = await httpClient.get('/departments');
+      const response = await sessionHttpClient.get('/dashboard/departments');
       return handleApiResponse<Department[]>(response);
     } catch (error) {
       console.error('Get departments error:', error);
@@ -469,7 +580,7 @@ const patientClient = {
   // 获取单个部门详情
   getDepartmentById: async (id: number): Promise<Department> => {
     try {
-      const response = await httpClient.get(`/departments/${id}`);
+      const response = await sessionHttpClient.get(`/departments/${id}`);
       return handleApiResponse<Department>(response);
     } catch (error) {
       console.error('Get department error:', error);
@@ -478,13 +589,9 @@ const patientClient = {
   },
 
   // 获取所有医生
-  getDoctors: async (params?: {
-    departmentId?: number;
-    specialization?: string;
-    searchTerm?: string;
-  }): Promise<Doctor[]> => {
+  getDoctors: async (): Promise<Doctor[]> => {
     try {
-      const response = await httpClient.get('/doctors', { params });
+      const response = await sessionHttpClient.get('/dashboard/doctors');
       return handleApiResponse<Doctor[]>(response);
     } catch (error) {
       console.error('Get doctors error:', error);
@@ -492,13 +599,25 @@ const patientClient = {
     }
   },
 
-  // 获取单个医生详情
-  getDoctorById: async (id: number): Promise<Doctor> => {
+  // 获取医生详情
+  getDoctorById: async (doctorId: number | string) => {
     try {
-      const response = await httpClient.get(`/doctors/${id}`);
-      return handleApiResponse<Doctor>(response);
+      console.log(`[Patient Client] Fetching doctor info using API endpoint, ID: ${doctorId}`);
+      const response = await sessionHttpClient.get(`/dashboard/doctors/${doctorId}`);
+      return handleApiResponse(response);
     } catch (error) {
-      console.error('Get doctor error:', error);
+      console.error('Error fetching doctor:', error);
+      throw error;
+    }
+  },
+
+  // 获取可用医生列表
+  getAvailableDoctors: async (date: string): Promise<Doctor[]> => {
+    try {
+      // 使用带缓存的请求，1分钟缓存时间 (因为可用性会变化)
+      return await sessionCachedGet<Doctor[]>(`/doctors/available?date=${date}`, undefined, 60000);
+    } catch (error) {
+      console.error('Get available doctors error:', error);
       throw error;
     }
   },
@@ -512,7 +631,7 @@ const patientClient = {
     }
   ) => {
     try {
-      const response = await httpClient.get(`/doctors/${doctorId}/schedule`, { params });
+      const response = await sessionHttpClient.get(`/doctors/${doctorId}/schedule`, { params });
       return handleApiResponse(response);
     } catch (error) {
       console.error('Get doctor schedule error:', error);
@@ -527,7 +646,7 @@ const patientClient = {
   // 提交医生评价
   submitReview: async (data: ReviewRequest): Promise<Review> => {
     try {
-      const response = await httpClient.post('/reviews', data);
+      const response = await sessionHttpClient.post('/reviews', data);
       return handleApiResponse<Review>(response);
     } catch (error) {
       console.error('Submit review error:', error);
@@ -538,7 +657,7 @@ const patientClient = {
   // 获取自己提交的评价
   getMyReviews: async (): Promise<Review[]> => {
     try {
-      const response = await httpClient.get('/patients/reviews');
+      const response = await sessionHttpClient.get('/patients/reviews');
       return handleApiResponse<Review[]>(response);
     } catch (error) {
       console.error('Get my reviews error:', error);
@@ -549,7 +668,7 @@ const patientClient = {
   // 更新评价
   updateReview: async (id: number, data: Partial<ReviewRequest>): Promise<Review> => {
     try {
-      const response = await httpClient.put(`/reviews/${id}`, data);
+      const response = await sessionHttpClient.put(`/reviews/${id}`, data);
       return handleApiResponse<Review>(response);
     } catch (error) {
       console.error('Update review error:', error);
@@ -560,50 +679,13 @@ const patientClient = {
   // 删除评价
   deleteReview: async (id: number) => {
     try {
-      const response = await httpClient.delete(`/reviews/${id}`);
+      const response = await sessionHttpClient.delete(`/reviews/${id}`);
       return response.data;
     } catch (error) {
       console.error('Delete review error:', error);
       throw error;
     }
   },
-
-  //=====================================================
-  // 支付相关
-  //=====================================================
-  
-  // 获取账单历史
-  getBillingHistory: async (): Promise<Bill[]> => {
-    try {
-      const response = await httpClient.get('/patients/billing');
-      return handleApiResponse<Bill[]>(response);
-    } catch (error) {
-      console.error('Get billing history error:', error);
-      throw error;
-    }
-  },
-
-  // 获取单个账单详情
-  getBillingById: async (id: number): Promise<Bill> => {
-    try {
-      const response = await httpClient.get(`/billing/${id}`);
-      return handleApiResponse<Bill>(response);
-    } catch (error) {
-      console.error('Get billing error:', error);
-      throw error;
-    }
-  },
-
-  // 支付账单
-  payBill: async (billingId: number, paymentMethod: string) => {
-    try {
-      const response = await httpClient.post(`/billing/${billingId}/pay`, { paymentMethod });
-      return handleApiResponse(response);
-    } catch (error) {
-      console.error('Pay bill error:', error);
-      throw error;
-    }
-  }
 };
 
 export default patientClient; 
