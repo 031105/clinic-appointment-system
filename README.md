@@ -1,209 +1,125 @@
 # 🏥 Clinic Appointment System
 
-A comprehensive web-based clinic management system built with Next.js, Node.js, and PostgreSQL. This system provides complete functionality for managing patients, doctors, appointments, medical records, and administrative tasks.
+A comprehensive web-based clinic management system built with Next.js 14, Node.js/Express, and PostgreSQL. This system provides functionality for managing patients, doctors, appointments, and administrative tasks with role-based access control.
 
-## ✨ Features
+## ✨ Key Features
+
+### 🔐 Authentication & Authorization
+- **Multi-role System**: Admin, Doctor, and Patient roles
+- **JWT-based Authentication**: Secure token-based authentication
+- **Email Verification**: Account verification via EmailJS
+- **Password Reset**: Secure password reset functionality
+- **Role-based Access Control**: Different interfaces for different user types
 
 ### 👥 User Management
-- **Multi-role System**: Patients, Doctors, and Administrators
-- **Secure Authentication**: Email verification, password reset, JWT tokens
-- **Profile Management**: Complete user profiles with images and personal information
-- **Role-based Permissions**: Different access levels for different user types
+- **Admin Dashboard**: Complete user management for administrators
+- **Profile Management**: User profile updates and image uploads
+- **Department Management**: Manage medical departments and services
+- **User Status Management**: Active/inactive user status control
 
-### 📅 Appointment Management
-- **Online Booking**: Patients can book appointments with available doctors
-- **Schedule Management**: Doctors can manage their availability and schedules
-- **Appointment Status Tracking**: Scheduled, completed, cancelled, no-show statuses
-- **Automated Reminders**: Email notifications for upcoming appointments
-- **Appointment Types**: Checkup, follow-up, consultation, emergency
+### 📅 Appointment System
+- **Appointment Booking**: Patients can book appointments with doctors
+- **Appointment Management**: Doctors and admins can manage appointments
+- **Status Tracking**: Multiple appointment statuses (scheduled, completed, cancelled)
+- **Calendar Integration**: Full calendar view with appointment management
+
+### 📊 Dashboard Analytics
+- **Admin Dashboard**: System-wide statistics and analytics
+- **Doctor Dashboard**: Doctor-specific appointment and patient statistics
+- **Patient Dashboard**: Personal appointment history and upcoming visits
 
 ### 🏥 Medical Records
-- **Patient History**: Complete medical history tracking
-- **Diagnosis Records**: Detailed diagnosis and treatment records
-- **Prescription Management**: Digital prescription handling
-- **Medical Notes**: Doctor notes and patient observations
-- **Allergy Tracking**: Patient allergy management
-- **Emergency Contacts**: Emergency contact information
+- **Patient Records**: Comprehensive patient information management  
+- **Medical History**: Track patient medical history and treatments
+- **Doctor Notes**: Medical notes and observations
+- **Report Generation**: Generate medical reports
 
-### 🏛️ Department Management
-- **Department Structure**: Multiple medical departments
-- **Service Catalog**: Department-specific services and procedures
-- **Doctor Assignment**: Assign doctors to specific departments
-- **Service Pricing**: Manage consultation fees and service costs
+## 🚀 Quick Start
 
-### 👨‍⚕️ Doctor Features
-- **Doctor Profiles**: Detailed doctor information with specializations
-- **Availability Management**: Set working hours and availability
-- **Patient Reviews**: Review and rating system
-- **Dashboard Analytics**: Appointment statistics and insights
-- **Medical Record Access**: Access to patient medical histories
+### Prerequisites
+- Node.js 18.0.0 or higher
+- PostgreSQL 14.0 or higher (can be auto-installed)
+- npm or yarn package manager
 
-### 📊 Administrative Features
-- **System Settings**: Configurable clinic settings and preferences
-- **User Management**: Create and manage user accounts
-- **Reports and Analytics**: Comprehensive reporting dashboard
-- **Backup Management**: Database backup and restore functionality
-- **Notification Settings**: Configure system-wide notifications
+### 🎯 One-Click Deployment (Recommended)
 
-### 🔔 Notification System
-- **Email Notifications**: Appointment confirmations, reminders, cancellations
-- **In-app Notifications**: Real-time system notifications
-- **Customizable Alerts**: Configurable notification preferences
-- **SMS Integration**: Optional SMS notification support
+1. **Get the Project**
+   ```bash
+   git clone https://github.com/031105/clinic-appointment-system.git
+   cd clinic-appointment-system
+   ```
 
-## 🚀 Complete Setup Guide
+2. **Run One-Click Setup**
+   ```bash
+   cd db_setup
+   ./DEPLOY_EVERYTHING.sh
+   ```
 
-This section provides a comprehensive, step-by-step guide to deploy the entire Clinic Appointment System from scratch on any compatible machine.
+3. **Install Dependencies & Start**
+   ```bash
+   cd ..
+   npm install
+   cd server && npm install && cd ..
+   ./start.sh
+   ```
 
-### 🎯 One-Click Deployment (Recommended for Beginners)
+4. **Access the System**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3001
 
-#### Step 1: Get the Project
+### 🔧 Manual Setup
+
+#### 1. Database Setup
 ```bash
-# Option A: Download and extract the project files
-# Download the project zip file and extract it to your desired location
-
-# Option B: If using Git
-git clone [your-repository-url]
-cd clinic-appointment-system-latest
-```
-
-#### Step 2: One-Command Database Setup
-```bash
-# Navigate to database setup directory
-cd db_setup
-
-# Run the magical one-click deployment
-./DEPLOY_EVERYTHING.sh
-```
-
-**What this does automatically:**
-- 🔍 Detects your operating system (Ubuntu/CentOS/Fedora/macOS)
-- 📦 Downloads and installs PostgreSQL if not present
-- ⚙️ Configures PostgreSQL service to auto-start
-- 🔐 Sets up database user and permissions
-- 🗄️ Creates `clinic_appointment_system` database
-- 📊 Imports all tables, data, and configurations
-- ✅ Verifies everything works correctly
-- 📋 Shows you connection details
-
-#### Step 3: Application Setup
-```bash
-# Go back to project root
-cd ..
-
-# Install frontend dependencies
-npm install
-
-# Install backend dependencies
-cd server
-npm install
-cd ..
-
-# Copy database configuration template
-cp db_setup/database_env_template.txt .env.local
-
-# Start the entire application
-npm run dev
-```
-
-#### Step 4: Access Your System
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **Database**: localhost:5432
-
-**🎉 That's it! Your clinic system is now running!**
-
----
-
-### 🔧 Advanced Setup (For Developers)
-
-#### Prerequisites Verification
-```bash
-# Check Node.js version (should be 18+)
-node --version
-
-# Check npm version
-npm --version
-
-# Check if PostgreSQL is installed (optional - script will install it)
-pg_config --version
-```
-
-#### Detailed Step-by-Step Process
-
-##### 1. Project Setup
-```bash
-# Clone the repository
-git clone [repository-url]
-cd clinic-appointment-system-latest
-
-# Verify project structure
-ls -la
-# You should see: db_setup/, server/, src/, package.json, etc.
-```
-
-##### 2. Database Deployment (Three Options)
-
-**Option A: Automated (Recommended)**
-```bash
-cd db_setup
-./deploy.sh
-```
-
-**Option B: Database Only (PostgreSQL already installed)**
-```bash
-cd db_setup
-./setup_database.sh
-```
-
-**Option C: Manual Setup**
-```bash
-# Create database
+# Create PostgreSQL database
 createdb -U postgres clinic_appointment_system
 
-# Import complete backup
-psql -U postgres -d clinic_appointment_system -f db_setup/complete_database_backup.sql
-
-# Or step-by-step:
-# psql -U postgres -d clinic_appointment_system -f db_setup/database_schema.sql
-# psql -U postgres -d clinic_appointment_system -f db_setup/database_data.sql
-# psql -U postgres -d clinic_appointment_system -f setup-admin-settings.sql
+# Import database structure and data
+cd db_setup
+psql -U postgres -d clinic_appointment_system -f complete_database_backup.sql
 ```
 
-##### 3. Environment Configuration
-
-**Create Environment Files:**
+#### 2. Environment Configuration
+Create `.env.local` in root directory:
 ```bash
-# Frontend environment (.env.local)
-cp db_setup/database_env_template.txt .env.local
+# Database
+DATABASE_URL=postgresql://postgres:password@localhost:5432/clinic_appointment_system
 
-# Backend environment (server/.env)
-cp db_setup/database_env_template.txt server/.env
-```
-
-**Essential Environment Variables:**
-```bash
-# Database Configuration
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/clinic_appointment_system
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=clinic_appointment_system
-DB_USER=postgres
-DB_PASSWORD=postgres
-
-# EmailJS Configuration (Alternative email service)
+# EmailJS Configuration
 EMAILJS_SERVICE_ID=your_service_id
-EMAILJS_TEMPLATE_ID_VERIFICATION=your_template_id
-EMAILJS_TEMPLATE_ID_RESET_PASSWORD=your_reset_template_id
+EMAILJS_TEMPLATE_ID_VERIFICATION=your_verification_template
+EMAILJS_TEMPLATE_ID_RESET_PASSWORD=your_reset_template
 EMAILJS_PUBLIC_KEY=your_public_key
 
-# Application Configuration
+# Application URLs
+FRONTEND_URL=http://localhost:3000
+API_URL=http://localhost:3001/api/v1
+```
+
+Create `server/.env`:
+```bash
+# Server Configuration
 NODE_ENV=development
 PORT=3001
-FRONTEND_URL=http://localhost:3000
 API_PREFIX=/api/v1
+FRONTEND_URL=http://localhost:3000
 
-# File Upload Configuration
+# Database
+DATABASE_URL=postgresql://postgres:password@localhost:5432/clinic_appointment_system
+
+# JWT Secrets
+JWT_SECRET=your-jwt-secret-key
+JWT_REFRESH_SECRET=your-refresh-secret-key
+JWT_RESET_SECRET=your-reset-secret-key
+JWT_VERIFY_EMAIL_SECRET=your-verify-email-secret
+
+# EmailJS (same as frontend)
+EMAILJS_SERVICE_ID=your_service_id
+EMAILJS_TEMPLATE_ID_VERIFICATION=your_verification_template
+EMAILJS_TEMPLATE_ID_RESET_PASSWORD=your_reset_template
+EMAILJS_PUBLIC_KEY=your_public_key
+
+# Upload Configuration
 UPLOAD_DIR=uploads
 MAX_FILE_SIZE=5242880
 
@@ -212,152 +128,28 @@ RATE_LIMIT_WINDOW=900000
 RATE_LIMIT_MAX=100
 ```
 
-##### 4. Dependencies Installation
+#### 3. Install Dependencies
 ```bash
-# Install frontend dependencies
+# Frontend dependencies
 npm install
 
-# Install backend dependencies
+# Backend dependencies
 cd server
 npm install
 cd ..
-
-# Verify installations
-npm list --depth=0
-cd server && npm list --depth=0 && cd ..
 ```
 
-##### 5. Build Process (For Production)
+#### 4. Start the Application
 ```bash
-# Build backend TypeScript
-cd server
-npm run build
-cd ..
-
-# Build frontend (for production)
-npm run build
-```
-
-##### 6. Start the Application
-
-**Development Mode:**
-```bash
-# Option 1: Start everything with one command
+# Development mode
 npm run dev
 
-# Option 2: Start services individually
-# Terminal 1 - Backend
+# Or start frontend and backend separately
+# Terminal 1:
 cd server && npm run dev
 
-# Terminal 2 - Frontend
-npm run dev:frontend
-
-# Option 3: Use the provided startup script
-./start.sh
-```
-
-**Production Mode:**
-```bash
-npm run start
-```
-
-##### 7. Verification and Testing
-
-**Database Verification:**
-```bash
-# Connect to database
-psql -h localhost -p 5432 -U postgres -d clinic_appointment_system
-
-# Check tables
-\dt
-
-# Verify data
-SELECT COUNT(*) FROM users;
-SELECT COUNT(*) FROM departments;
-SELECT COUNT(*) FROM system_settings;
-
-# Exit PostgreSQL
-\q
-```
-
-**Application Health Check:**
-```bash
-# Check frontend
-curl http://localhost:3000
-
-# Check backend API
-curl http://localhost:3001/api/v1/health
-
-# Check specific endpoints
-curl http://localhost:3001/api/v1/departments
-```
-
-**Test User Accounts:**
-After setup, you can use these test accounts:
-
-- **Admin**: admin@clinic.com / password123
-- **Doctor**: dr.smith@clinic.com / password123
-- **Patient**: patient@clinic.com / password123
-
-#### 8. Post-Deployment Configuration
-
-**System Settings (via Admin Panel):**
-1. Login as admin
-2. Go to Admin → Settings
-3. Configure:
-   - Clinic information
-   - Working hours
-   - Appointment settings
-   - Notification preferences
-   - Email settings
-
-**Security Hardening:**
-```bash
-# Change default passwords
-# Update JWT secrets
-# Configure firewall
-# Set up SSL certificates (for production)
-# Configure backup schedules
-```
-
----
-
-### 🌍 Production Deployment
-
-#### Server Requirements
-- **OS**: Ubuntu 20.04+, CentOS 8+, or macOS
-- **Memory**: 2GB+ RAM
-- **Storage**: 10GB+ available space
-- **Node.js**: 18.0.0+
-- **PostgreSQL**: 14.0+
-
-#### Production Checklist
-- [ ] Secure database with strong passwords
-- [ ] Configure environment variables properly
-- [ ] Set up SSL certificates
-- [ ] Configure reverse proxy (Nginx/Apache)
-- [ ] Set up process manager (PM2)
-- [ ] Configure firewall rules
-- [ ] Set up automated backups
-- [ ] Configure monitoring and logging
-- [ ] Test email functionality
-- [ ] Verify all features work correctly
-
-#### Production Environment Setup
-```bash
-# Install PM2 for process management
-npm install -g pm2
-
-# Start application with PM2
-pm2 start ecosystem.config.js
-
-# Configure PM2 to start on boot
-pm2 startup
-pm2 save
-
-# Set up automated backups
-crontab -e
-# Add: 0 2 * * * pg_dump clinic_appointment_system > /backup/db_$(date +\%Y\%m\%d).sql
+# Terminal 2:
+npm run dev
 ```
 
 ## 🛠️ Technology Stack
@@ -366,379 +158,212 @@ crontab -e
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **State Management**: React Query for server state
-- **Forms**: React Hook Form with Zod validation
-- **Charts**: Recharts for data visualization
-- **Icons**: Lucide React
-- **UI Components**: Custom component library
+- **State Management**: React Query (@tanstack/react-query)
+- **UI Components**: Radix UI primitives
+- **Forms**: Custom form handling with Zod validation
+- **Charts**: Recharts for analytics
+- **Icons**: Lucide React & Heroicons
+- **Calendar**: FullCalendar with React integration
+- **Notifications**: React Hot Toast
 
 ### Backend
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript
-- **Database**: PostgreSQL 14+
-- **Authentication**: JWT with email verification
-- **Validation**: Zod schema validation
+- **Database**: PostgreSQL with raw SQL queries
+- **Authentication**: JWT tokens with multiple secrets
+- **Validation**: Zod schema validation & Joi
+- **Email Service**: EmailJS (not SMTP)
 - **Logging**: Winston logger
-- **Email**: EmailJS integration
-- **File Upload**: Multer for file handling
+- **Security**: Helmet, CORS, Rate limiting
+- **File Upload**: Multer for image handling
 
 ### Database
 - **PostgreSQL Features**:
-  - Custom enum types
-  - Triggers and functions
-  - Indexes for performance
-  - Foreign key constraints
-  - JSONB for flexible data storage
-  - Full-text search capabilities
+  - Comprehensive schema with foreign keys
+  - User roles and permissions
+  - Appointment management tables
+  - Medical records and history
+  - Department and service management
+  - System settings and configurations
 
 ## 📁 Project Structure
 
 ```
 clinic-appointment-system/
-├── 🗂️ Frontend (Next.js)
-│   ├── src/app/           # Next.js app router pages
-│   ├── src/components/    # React components
-│   ├── src/hooks/         # Custom React hooks
-│   ├── src/lib/          # Utility functions and API clients
-│   └── src/types/        # TypeScript type definitions
-│
-├── 🖥️ Backend (Node.js/Express)
-│   ├── server/src/        # Server source code
-│   │   ├── controllers/   # Request handlers
-│   │   ├── routes/        # API route definitions
-│   │   ├── schemas/       # Validation schemas
-│   │   ├── middleware/    # Custom middleware
-│   │   ├── utils/         # Utility functions
-│   │   └── config/        # Configuration files
-│   └── server/dist/       # Compiled JavaScript
-│
-├── 🗄️ Database Setup
-│   ├── db_setup/          # Complete database deployment package
-│   │   ├── DEPLOY_EVERYTHING.sh    # One-click deployment
-│   │   ├── deploy.sh               # Advanced deployment
-│   │   ├── setup_database.sh       # Database-only setup
-│   │   ├── complete_database_backup.sql
-│   │   ├── database_schema.sql
-│   │   ├── database_data.sql
-│   │   ├── database_setup_guide.md
-│   │   ├── DEPLOYMENT_SUMMARY.md
-│   │   └── database_env_template.txt
-│   └── setup-admin-settings.sql
-│
-└── 📋 Configuration
-    ├── package.json       # Frontend dependencies
-    ├── tailwind.config.ts # Tailwind configuration
-    ├── tsconfig.json      # TypeScript configuration
-    └── start.sh          # Application startup script
+├── 📁 Frontend (Next.js 14)
+│   ├── src/app/                 # App Router pages
+│   │   ├── (admin-interface)/   # Admin pages
+│   │   ├── (doctor-interface)/  # Doctor pages  
+│   │   ├── (user-interface)/    # Patient pages
+│   │   ├── (auth)/              # Authentication pages
+│   │   └── api/                 # API routes (frontend)
+│   ├── src/components/          # React components
+│   │   ├── admin/               # Admin-specific components
+│   │   ├── doctor/              # Doctor-specific components
+│   │   └── ui/                  # Reusable UI components
+│   ├── src/contexts/            # React contexts
+│   ├── src/hooks/               # Custom React hooks
+│   ├── src/lib/                 # Utility libraries
+│   └── src/types/               # TypeScript type definitions
+├── 📁 Backend (Node.js/Express)
+│   ├── server/src/controllers/  # Route controllers
+│   ├── server/src/routes/       # API route definitions
+│   ├── server/src/middleware/   # Express middleware
+│   ├── server/src/schemas/      # Validation schemas
+│   ├── server/src/utils/        # Utility functions
+│   ├── server/src/config/       # Configuration files
+│   └── server/src/migrations/   # Database migrations
+├── 📁 Database Setup
+│   ├── db_setup/                # Database deployment scripts
+│   │   ├── DEPLOY_EVERYTHING.sh # One-click deployment
+│   │   ├── complete_database_backup.sql # Full database backup
+│   │   └── setup_database.sh    # Database-only setup
+└── 📁 Configuration
+    ├── package.json             # Frontend dependencies
+    ├── server/package.json      # Backend dependencies
+    ├── start.sh                 # Application startup script
+    └── .env.local               # Environment variables
 ```
 
-## 🗄️ Database Schema
-
-### Core Tables
-- **users** - User accounts (patients, doctors, admins)
-- **roles** - User role definitions and permissions
-- **patients** - Patient-specific information
-- **doctors** - Doctor profiles and specializations
-- **departments** - Medical departments
-- **appointments** - Appointment scheduling
-- **medical_records** - Patient medical history
-- **reviews** - Doctor reviews and ratings
-- **notifications** - System notifications
-- **system_settings** - Application configuration
-
-### Supporting Tables
-- **admins** - Administrator-specific data
-- **email_verifications** - Email verification and OTP management
-- **emergency_contacts** - Patient emergency contact information
-- **patient_allergies** - Patient allergy records
-- **services** - Medical services offered by departments
-
-### Key Features
-- 🔗 **Relational Integrity**: Proper foreign key relationships
-- 📊 **Performance Optimized**: Strategic indexes and query optimization
-- 🔧 **Extensible Design**: Easy to add new features and fields
-- 🛡️ **Data Validation**: Database-level constraints and triggers
-
-## 🔐 Security Features
-
-- **Authentication**: JWT-based authentication with refresh tokens
-- **Authorization**: Role-based access control
-- **Data Validation**: Input validation on both client and server
-- **SQL Injection Protection**: Parameterized queries
-- **Password Security**: Bcrypt hashing with salt
-- **File Upload Security**: Restricted file types and sizes
-- **Rate Limiting**: API rate limiting protection
-- **CORS Configuration**: Proper cross-origin resource sharing
-
-## 📊 API Endpoints
+## 🔗 API Endpoints
 
 ### Authentication
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Token refresh
-- `POST /api/v1/auth/forgot-password` - Password reset
+- `POST /api/v1/auth/logout` - User logout
+- `POST /api/v1/auth/forgot-password` - Password reset request
+- `POST /api/v1/auth/reset-password` - Password reset
 
-### Appointments
-- `GET /api/v1/appointments` - List appointments
-- `POST /api/v1/appointments` - Create appointment
-- `PUT /api/v1/appointments/:id` - Update appointment
-- `DELETE /api/v1/appointments/:id` - Cancel appointment
-
-### Medical Records
-- `GET /api/v1/medical-records` - List medical records
-- `POST /api/v1/medical-records` - Create medical record
-- `GET /api/v1/medical-records/:id` - Get specific record
-
-### Admin Features
+### Admin Routes
+- `GET /api/v1/admin/dashboard` - Admin dashboard statistics
 - `GET /api/v1/admin/users` - Manage users
+- `GET /api/v1/admin/appointments` - Manage appointments
+- `GET /api/v1/admin/departments` - Manage departments
+- `GET /api/v1/admin/patients` - Manage patients
 - `GET /api/v1/admin/settings` - System settings
-- `POST /api/v1/admin/departments` - Manage departments
 
-## 🚨 Troubleshooting
+### Doctor Routes
+- `GET /api/v1/doctor/dashboard` - Doctor dashboard
+- `GET /api/v1/doctor/appointments` - Doctor appointments
+- `GET /api/v1/doctor/patients` - Doctor patients
+- `GET /api/v1/doctor/settings` - Doctor settings
 
-### Common Setup Issues
+### Patient Routes
+- `GET /api/v1/appointments` - Patient appointments
+- `GET /api/v1/user-dashboard` - Patient dashboard
+- `POST /api/v1/appointments` - Book appointment
+- `GET /api/v1/medical-records` - Medical records
 
-#### 1. PostgreSQL Installation Problems
+## 🚀 Deployment
+
+### Development
 ```bash
-# Ubuntu/Debian
-sudo apt-get update
-sudo apt-get install postgresql postgresql-contrib
+# Start development servers
+npm run dev                    # Frontend (Next.js)
+cd server && npm run dev       # Backend (Express)
 
-# CentOS/RHEL
-sudo yum install postgresql-server postgresql-contrib
-sudo postgresql-setup initdb
-
-# macOS (if Homebrew fails)
-# Download from: https://www.postgresql.org/download/macosx/
+# Or use the startup script
+./start.sh
 ```
 
-#### 2. Database Connection Issues
+### Production Build
+```bash
+# Build backend
+cd server && npm run build
+
+# Build frontend
+npm run build
+
+# Start production
+npm run start
+```
+
+### Database Backup & Restore
+```bash
+# Create backup
+pg_dump clinic_appointment_system > backup.sql
+
+# Restore backup
+psql -d clinic_appointment_system -f backup.sql
+```
+
+## 🛡️ Security Features
+
+- **JWT Authentication**: Secure token-based authentication
+- **Role-based Access Control**: Strict permission system
+- **Rate Limiting**: API request rate limiting
+- **CORS Protection**: Configured cross-origin resource sharing
+- **Security Headers**: Helmet.js security headers
+- **Input Validation**: Comprehensive input validation with Zod/Joi
+- **SQL Injection Prevention**: Parameterized queries
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Database Connection Issues:**
 ```bash
 # Check PostgreSQL status
-pg_isready -h localhost -p 5432
+systemctl status postgresql
 
-# Check if PostgreSQL is running
-sudo systemctl status postgresql  # Linux
-brew services list | grep postgresql  # macOS
-
-# Restart PostgreSQL
-sudo systemctl restart postgresql  # Linux
-brew services restart postgresql  # macOS
-
-# Check PostgreSQL logs
-sudo tail -f /var/log/postgresql/postgresql-*.log  # Linux
-tail -f /usr/local/var/log/postgres.log  # macOS
+# Check database exists
+psql -U postgres -l | grep clinic
 ```
 
-#### 3. Permission Issues
-```bash
-# Fix script permissions
-chmod +x db_setup/*.sh
-chmod +x start.sh
-
-# PostgreSQL user issues
-sudo -u postgres psql
-# In psql: ALTER USER postgres PASSWORD 'postgres';
-```
-
-#### 4. Port Conflicts
+**Port Already in Use:**
 ```bash
 # Check what's using port 3000/3001
 lsof -i :3000
 lsof -i :3001
 
-# Kill process using port
-kill -9 $(lsof -t -i:3000)
+# Kill process if needed
+kill -9 <PID>
 ```
 
-#### 5. Node.js/npm Issues
+**Email Not Working:**
+- Verify EmailJS configuration in environment variables
+- Check EmailJS service status and template IDs
+- Ensure correct public key is configured
+
+**Build Errors:**
 ```bash
-# Check Node.js version
-node --version  # Should be 18+
+# Clear Next.js cache
+rm -rf .next
 
-# Clear npm cache
-npm cache clean --force
-
-# Delete node_modules and reinstall
+# Clear node_modules and reinstall
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-#### 6. Environment Variable Issues
-```bash
-# Verify .env.local exists and has correct values
-cat .env.local
+## 📝 Default Test Accounts
 
-# Check if environment variables are loaded
-echo $DATABASE_URL
-```
+After database setup, these accounts are available:
+- **Admin**: Check the database for admin users
+- **Doctor**: Check the database for doctor users  
+- **Patient**: Check the database for patient users
 
-### Error Messages and Solutions
-
-**"Database does not exist"**
-```bash
-# Ensure database was created
-createdb -U postgres clinic_appointment_system
-```
-
-**"relation does not exist"**
-```bash
-# Re-run database setup
-cd db_setup && ./setup_database.sh
-```
-
-**"permission denied for database"**
-```bash
-# Fix PostgreSQL permissions
-sudo -u postgres psql
-ALTER USER postgres WITH SUPERUSER;
-```
-
-**"EADDRINUSE: address already in use"**
-```bash
-# Kill processes using the ports
-killall node
-# Or change ports in configuration
-```
-
-**"Module not found"**
-```bash
-# Reinstall dependencies
-rm -rf node_modules
-npm install
-cd server && rm -rf node_modules && npm install
-```
-
-### Performance Issues
-
-**Slow database queries:**
-```sql
--- Check if indexes exist
-\di
-
--- Analyze query performance
-EXPLAIN ANALYZE SELECT * FROM appointments;
-```
-
-**High memory usage:**
-```bash
-# Monitor Node.js processes
-top -p $(pgrep node)
-
-# Use PM2 for production
-npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 monit
-```
-
-### Logs and Debugging
-
-**Check application logs:**
-```bash
-# Frontend logs (browser console)
-# Backend logs
-tail -f server/logs/app.log
-
-# Database logs
-sudo tail -f /var/log/postgresql/postgresql-*.log
-```
-
-**Enable debug mode:**
-```bash
-# Add to .env.local
-DEBUG=true
-LOG_LEVEL=debug
-```
-
-## 🧪 Testing
-
-```bash
-# Run frontend tests
-npm test
-
-# Run backend tests
-cd server && npm test
-
-# Run end-to-end tests
-npm run test:e2e
-
-# Manual testing endpoints
-curl -X GET http://localhost:3001/api/v1/health
-curl -X GET http://localhost:3001/api/v1/departments
-```
-
-## 📈 Performance
-
-- **Database**: Optimized queries with proper indexing
-- **Frontend**: Next.js optimizations with code splitting
-- **Caching**: React Query for efficient data caching
-- **Images**: Optimized image loading and resizing
-- **Bundle Size**: Tree shaking and lazy loading
+*Note: Check the actual database content for correct login credentials*
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new functionality
+4. Add tests if applicable
 5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the ISC License - see the package.json for details.
 
 ## 🆘 Support
 
-For issues and questions:
+For support and questions:
 1. Check the troubleshooting section above
-2. Review the database setup guide in `db_setup/database_setup_guide.md`
-3. Check existing issues in the repository
-4. Create a new issue with detailed information
-
-## 🎯 Roadmap
-
-- [ ] Mobile app development
-- [ ] Telemedicine features
-- [ ] Advanced reporting and analytics
-- [ ] Integration with external medical systems
-- [ ] Multi-language support
-- [ ] Advanced scheduling algorithms
+2. Review the database setup guide in `db_setup/`
+3. Check the GitHub issues for common problems
+4. Ensure all environment variables are correctly configured
 
 ---
 
-**Built with ❤️ for modern healthcare management**
-
-### 📞 Quick Help
-
-**Need immediate help?** Try these common solutions:
-
-1. **One-command fix for most issues:**
-   ```bash
-   cd db_setup && ./DEPLOY_EVERYTHING.sh
-   cd .. && npm install && cd server && npm install && cd .. && npm run dev
-   ```
-
-2. **Reset everything:**
-   ```bash
-   # Stop all processes
-   killall node
-   
-   # Reset database
-   dropdb -U postgres clinic_appointment_system
-   cd db_setup && ./setup_database.sh && cd ..
-   
-   # Reinstall dependencies
-   rm -rf node_modules server/node_modules
-   npm install && cd server && npm install && cd ..
-   
-   # Start fresh
-   npm run dev
-   ```
-
-3. **Check system health:**
-   ```bash
-   # Verify all services
-   pg_isready && echo "✅ PostgreSQL OK" || echo "❌ PostgreSQL Failed"
-   node --version && echo "✅ Node.js OK" || echo "❌ Node.js Failed"
-   npm --version && echo "✅ npm OK" || echo "❌ npm Failed"
-   ``` 
+**🎉 Ready to deploy? Run `./db_setup/DEPLOY_EVERYTHING.sh` and get started in minutes!** 
