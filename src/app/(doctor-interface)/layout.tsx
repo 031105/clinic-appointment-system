@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DoctorSidebar } from '@/components/doctor';
 import { 
   LayoutDashboard,
@@ -13,6 +13,8 @@ import {
 import { Toaster } from '@/components/ui/Toaster';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
+import { useSession } from '@/contexts/auth/SessionContext';
+import doctorSettingsClient, { DoctorProfile } from '@/lib/api/doctor-settings';
 
 // Doctor interface navigation items
 const navigation = [
@@ -29,13 +31,52 @@ export default function DoctorLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const { data, status } = useSession();
+  
+  // State for doctor profile - now using proper DoctorProfile type
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Fallback user profile for compatibility
+  const [userProfile, setUserProfile] = useState({
+    name: '',
+    email: '',
+    department: ''
+  });
+  
+  // Fetch doctor profile data
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      if (status === 'authenticated' && data.user) {
+        try {
+          setLoading(true);
+          // Use the doctor settings API to get complete profile data
+          const profileData = await doctorSettingsClient.getProfile();
+          setDoctorProfile(profileData);
+          
+          // Also set fallback userProfile for compatibility
+          setUserProfile({
+            name: `Dr. ${profileData.firstName || ''} ${profileData.lastName || ''}`,
+            email: profileData.email || data.user.email,
+            department: profileData.departmentName || 'Cardiology'
+          });
+        } catch (error) {
+          console.error('Error fetching doctor profile:', error);
+          
+          // Fallback to user data from session if API fails
+          setUserProfile({
+            name: `Dr. ${data.user.name || 'John Smith'}`,
+            email: data.user.email || 'john.smith@healthclinic.com',
+            department: 'Cardiology'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
 
-  // Sample doctor profile
-  const doctorProfile = {
-    name: 'Dr. Sarah Johnson',
-    email: 'sarah.johnson@clinic.com',
-    department: 'Cardiology'
-  };
+    fetchDoctorProfile();
+  }, [status, data.user]);
 
   // Handle logout
   const handleLogout = () => {
@@ -60,7 +101,8 @@ export default function DoctorLayout({
         navigationItems={navigation}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        userProfile={doctorProfile}
+        userProfile={userProfile}
+        doctorProfile={doctorProfile}
         onLogout={handleLogout}
       />
 

@@ -23,6 +23,23 @@ body {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
+  /* Modal fix for gray screen issue */
+  .modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 9999 !important;
+  }
+
+  .modal-content {
+    position: relative !important;
+    z-index: 10000 !important;
+    background-color: white !important;
+  }
 }
 
 /* Add custom style for department names */

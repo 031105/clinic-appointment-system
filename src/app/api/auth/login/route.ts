@@ -38,15 +38,19 @@ export async function POST(req: NextRequest) {
       }
 
       // 将后端角色名称映射为前端使用的格式
-      const roleMapping: Record<string, 'ADMIN' | 'DOCTOR' | 'PATIENT'> = {
-        'admin': 'ADMIN',
-        'doctor': 'DOCTOR',
-        'patient': 'PATIENT'
+      const roleMapping: Record<string, 'admin' | 'doctor' | 'patient'> = {
+        'admin': 'admin',
+        'doctor': 'doctor',
+        'patient': 'patient'
       };
       
-      const role = roleMapping[userData.user.role?.toLowerCase()] || 'PATIENT';
+      // 直接使用后端返回的角色（它们已经是正确的格式了）
+      const role = roleMapping[userData.user.role?.toLowerCase()] || 'patient';
 
-      console.log('[Login API] 登录成功，获取到token:', userData.token);
+      // 构造正确格式的token (user_id:email:role) - 使用映射后的角色
+      const formattedToken = `${userData.user.id}:${userData.user.email}:${role}`;
+
+      console.log('[Login API] 登录成功，原始角色:', userData.user.role, '映射后角色:', role, 'token:', formattedToken);
 
       // 返回用户信息和token，供前端存储
       return NextResponse.json({
@@ -57,7 +61,7 @@ export async function POST(req: NextRequest) {
           email: userData.user.email,
           name: `${userData.user.firstName} ${userData.user.lastName}`,
           role: role,
-          token: userData.token
+          token: formattedToken
         }
       });
     } catch (error: any) {

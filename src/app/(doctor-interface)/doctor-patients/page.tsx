@@ -3,7 +3,58 @@
 import React, { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { useDoctorPatients } from '@/hooks/doctor/useDoctorPatients';
+import { useDoctorPatients, PatientWithFullInfo } from '@/hooks/doctor/useDoctorPatients';
+import { useRouter } from 'next/navigation';
+
+// Helper function to format dates
+interface FormattedDate {
+  fullDate: string;
+  time: string;
+}
+
+const formatDate = (dateString: string | undefined | null): FormattedDate => {
+  console.log('Formatting date string:', dateString); // Debug log
+  if (!dateString) {
+    console.log('Date string is null or undefined'); // Debug log
+    return { fullDate: 'Invalid Date', time: 'Invalid Time' };
+  }
+
+  try {
+    const date = new Date(dateString);
+    console.log('Parsed date object:', date); // Debug log
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date object'); // Debug log
+      return { fullDate: 'Invalid Date', time: 'Invalid Time' };
+    }
+
+    // Format the date using Intl.DateTimeFormat for consistent formatting
+    const dateFormatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'Asia/Singapore',
+    });
+
+    const timeFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Singapore',
+    });
+
+    const formattedDate = dateFormatter.format(date);
+    const formattedTime = timeFormatter.format(date);
+
+    return {
+      fullDate: `${formattedDate} at ${formattedTime}`,
+      time: formattedTime
+    };
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return { fullDate: 'Invalid Date', time: 'Invalid Time' };
+  }
+};
 
 export default function DoctorPatients() {
   const {
@@ -18,13 +69,19 @@ export default function DoctorPatients() {
   } = useDoctorPatients();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'info' | 'medical' | 'appointments' | 'notes'>('info');
-  const [showAddNoteForm, setShowAddNoteForm] = useState(false);
-  const [newNote, setNewNote] = useState('');
+  const [activeTab, setActiveTab] = useState<'info' | 'appointments'>('info');
+  const router = useRouter();
 
   useEffect(() => {
     fetchPatients();
   }, []);
+
+  // Debug log for appointments data
+  useEffect(() => {
+    if (selectedPatient && selectedPatient.appointments) {
+      console.log('Selected patient appointments:', selectedPatient.appointments);
+    }
+  }, [selectedPatient]);
 
   // 搜索过滤
   const filteredPatients = patients.filter(patient => {
@@ -38,20 +95,9 @@ export default function DoctorPatients() {
   });
 
   // 选择患者
-  const handlePatientClick = (patient: any) => {
+  const handlePatientClick = (patient: PatientWithFullInfo) => {
     selectPatient(patient.id);
     setActiveTab('info');
-    setShowAddNoteForm(false);
-    setNewNote('');
-  };
-
-  // 添加笔记
-  const handleAddNote = async () => {
-    if (selectedPatient && newNote.trim()) {
-      await addNote(selectedPatient.id, newNote);
-      setNewNote('');
-      setShowAddNoteForm(false);
-    }
   };
 
   return (
@@ -101,7 +147,6 @@ export default function DoctorPatients() {
                         <p className="text-xs text-gray-500">{patient.id}</p>
                       </div>
                       <div className="text-right">
-                        {/* 年龄和性别可根据 date_of_birth 计算 */}
                         <p className="text-xs text-gray-500">{patient.gender}</p>
                       </div>
                     </div>
@@ -121,16 +166,11 @@ export default function DoctorPatients() {
               {/* 头部 */}
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="w-full">
                     <h2 className="text-xl font-semibold">{selectedPatient.firstName} {selectedPatient.lastName}</h2>
                     <p className="text-sm text-gray-500">
                       {selectedPatient.id} {selectedPatient.gender ? `• ${selectedPatient.gender}` : ''}
                     </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                      Schedule Appointment
-                    </button>
                   </div>
                 </div>
               </div>
@@ -145,22 +185,10 @@ export default function DoctorPatients() {
                     Personal Info
                   </button>
                   <button
-                    className={`py-4 px-1 border-b-2 text-sm font-medium ${activeTab === 'medical' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                    onClick={() => setActiveTab('medical')}
-                  >
-                    Medical History
-                  </button>
-                  <button
                     className={`py-4 px-1 border-b-2 text-sm font-medium ${activeTab === 'appointments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     onClick={() => setActiveTab('appointments')}
                   >
                     Appointments
-                  </button>
-                  <button
-                    className={`py-4 px-1 border-b-2 text-sm font-medium ${activeTab === 'notes' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                    onClick={() => setActiveTab('notes')}
-                  >
-                    Notes
                   </button>
                 </nav>
               </div>
@@ -169,47 +197,70 @@ export default function DoctorPatients() {
               <div className="p-6">
                 {/* Personal Info Tab */}
                 {activeTab === 'info' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Contact Information</h3>
-                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-gray-500">Phone</p>
-                          <p className="text-sm">{selectedPatient.phone}</p>
+                  <div className="space-y-8 max-w-5xl mx-auto px-4">
+                    <div className="bg-gray-50 p-8 rounded-lg shadow-sm">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center border-b pb-4">Contact Information</h3>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-600 mb-2">Phone</p>
+                          <p className="text-lg font-semibold text-gray-900">{selectedPatient.phone}</p>
                         </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Email</p>
-                          <p className="text-sm">{selectedPatient.email}</p>
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-600 mb-2">Email</p>
+                          <p className="text-lg font-semibold text-gray-900">{selectedPatient.email}</p>
                         </div>
-                        <div className="md:col-span-2">
-                          <p className="text-xs text-gray-500">Address</p>
-                          <p className="text-sm">{selectedPatient.address}</p>
+                        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                          <p className="text-sm font-medium text-gray-600 mb-2">Address</p>
+                          <p className="text-lg font-semibold text-gray-900">{selectedPatient.address}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Medical History Tab */}
-                {activeTab === 'medical' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Allergies</h3>
-                      <div className="mt-2">
-                        {selectedPatient.allergies && selectedPatient.allergies.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {selectedPatient.allergies.map((allergy: any, index: number) => (
-                              <span key={index} className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-medium">
-                                {allergy.name}
-                              </span>
-                            ))}
+                    {/* Medical History Section */}
+                    <div className="bg-gray-50 p-8 rounded-lg shadow-sm">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center border-b pb-4">Medical History</h3>
+                      <div className="space-y-8">
+                        <div>
+                          <h4 className="text-lg font-medium text-gray-700 mb-4">Allergies</h4>
+                          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            {selectedPatient.allergies && selectedPatient.allergies.length > 0 ? (
+                              <div className="flex flex-wrap gap-3">
+                                {selectedPatient.allergies.map((allergy: any, index: number) => (
+                                  <span key={index} className="px-4 py-2 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium border border-yellow-200">
+                                    {allergy.name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-center py-4">No allergies recorded</p>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-sm text-gray-500">No allergies recorded</p>
-                        )}
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-medium text-gray-700 mb-4">Medical Records</h4>
+                          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            {selectedPatient.medicalRecords && selectedPatient.medicalRecords.length > 0 ? (
+                              <div className="space-y-6">
+                                {selectedPatient.medicalRecords.map((record: any) => (
+                                  <div key={record.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+                                    <div className="flex justify-between items-center mb-3">
+                                      <span className="text-sm font-semibold text-gray-900">
+                                        {new Date(record.created_at).toLocaleDateString()}
+                                      </span>
+                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{record.record_type}</span>
+                                    </div>
+                                    <p className="text-gray-700">{record.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-center py-4">No medical records available</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {/* 可扩展：病历、慢性病等 */}
                   </div>
                 )}
 
@@ -218,76 +269,61 @@ export default function DoctorPatients() {
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-sm font-medium text-gray-900">Appointment History</h3>
-                      <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                      <button 
+                        onClick={() => router.push('/doctor-appointments/new')}
+                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      >
                         Schedule New
                       </button>
                     </div>
-                    <div className="text-sm text-gray-500 text-center py-8">
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
                       {selectedPatient.appointments && selectedPatient.appointments.length > 0 ? (
-                        <ul className="space-y-2">
-                          {selectedPatient.appointments.map((appt: any) => (
-                            <li key={appt.id} className="flex justify-between">
-                              <span>{appt.appointment_date} {appt.appointment_time}</span>
-                              <span>{appt.status}</span>
-                              <span>{appt.type}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        'Appointment history will be displayed here.'
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Notes Tab */}
-                {activeTab === 'notes' && (
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-sm font-medium text-gray-900">Patient Notes</h3>
-                      <button
-                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        onClick={() => setShowAddNoteForm(true)}
-                      >
-                        Add Note
-                      </button>
-                    </div>
-                    {showAddNoteForm && (
-                      <div className="mb-4">
-                        <textarea
-                          className="w-full border rounded p-2 text-sm"
-                          rows={3}
-                          value={newNote}
-                          onChange={e => setNewNote(e.target.value)}
-                        />
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            className="bg-blue-500 text-white px-3 py-1 rounded text-xs"
-                            onClick={handleAddNote}
-                          >
-                            Save Note
-                          </button>
-                          <button
-                            className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs"
-                            onClick={() => setShowAddNoteForm(false)}
-                          >
-                            Cancel
-                          </button>
+                        <div className="divide-y divide-gray-200">
+                          {selectedPatient.appointments.map((appt: any) => {
+                            console.log('Processing appointment:', appt); // Debug log
+                            const formattedDate = formatDate(appt.appointmentDateTime);
+                            const formattedEndDate = formatDate(appt.endDateTime);
+                            console.log('Formatted date:', formattedDate); // Debug log
+                            return (
+                              <div 
+                                key={appt.id}
+                                onClick={() => router.push(`/doctor-appointments?appointmentId=${appt.id}`)}
+                                className="p-4 hover:bg-gray-50 cursor-pointer"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-gray-900">{formattedDate.fullDate}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <p className="text-sm text-gray-500">
+                                        {formattedDate.time} - {formattedEndDate.time}
+                                      </p>
+                                      <span className="text-sm text-gray-600 capitalize px-2 py-0.5 bg-gray-100 rounded">
+                                        {appt.type?.replace('_', ' ')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                                      ${appt.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                      appt.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                      appt.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-gray-100 text-gray-800'}`}
+                                    >
+                                      {appt.status}
+                                    </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      </div>
-                    )}
-                    <div>
-                      {selectedPatient.medicalRecords && selectedPatient.medicalRecords.length > 0 ? (
-                        <ul className="space-y-2">
-                          {selectedPatient.medicalRecords.map((record: any) => (
-                            <li key={record.id} className="border-b pb-2">
-                              <span className="block text-xs text-gray-500">{record.created_at}</span>
-                              <span className="block text-sm">{record.description}</span>
-                            </li>
-                          ))}
-                        </ul>
                       ) : (
-                        <p className="text-sm text-gray-500">No notes recorded</p>
+                        <div className="text-sm text-gray-500 text-center py-8">
+                          No appointment history available
+                        </div>
                       )}
                     </div>
                   </div>

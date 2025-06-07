@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import DoctorImage from '@/components/DoctorImage';
 
 // Define interface for the navigation items
 interface NavigationItem {
@@ -11,7 +12,7 @@ interface NavigationItem {
   icon: React.ElementType;
 }
 
-// Define props interface for the sidebar
+// Update props interface to include doctor profile data
 interface DoctorSidebarProps {
   navigationItems: NavigationItem[];
   isOpen: boolean;
@@ -22,6 +23,14 @@ interface DoctorSidebarProps {
     department?: string;
     avatar?: string;
   };
+  doctorProfile?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profilePicture?: string;
+    departmentName?: string;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -30,6 +39,7 @@ export const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
   isOpen,
   onClose,
   userProfile,
+  doctorProfile,
   onLogout,
 }) => {
   const pathname = usePathname();
@@ -68,11 +78,19 @@ export const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         </div>
         
         {/* User Profile for Desktop */}
-        {userProfile && (
+        {(userProfile || doctorProfile) && (
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center">
               <div>
-                {userProfile.avatar ? (
+                {doctorProfile ? (
+                  <DoctorImage
+                    userId={doctorProfile.id}
+                    profileImageBlob={doctorProfile.profilePicture}
+                    size="sm"
+                    rounded="full"
+                    className="mr-3"
+                  />
+                ) : userProfile?.avatar ? (
                   <img
                     className="h-10 w-10 rounded-full"
                     src={userProfile.avatar}
@@ -80,15 +98,24 @@ export const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                   />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                    {userProfile.name.charAt(0)}
+                    {((doctorProfile && doctorProfile.firstName) || userProfile?.name)?.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="ml-3 min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">{userProfile.name}</p>
-                <p className="text-xs text-gray-500 truncate">{userProfile.email}</p>
-                {userProfile.department && (
-                  <p className="text-xs text-blue-600 truncate">{userProfile.department}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {doctorProfile 
+                    ? `Dr. ${doctorProfile.firstName} ${doctorProfile.lastName}`
+                    : userProfile?.name
+                  }
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {doctorProfile?.email || userProfile?.email}
+                </p>
+                {(doctorProfile?.departmentName || userProfile?.department) && (
+                  <p className="text-xs text-blue-600 truncate">
+                    {doctorProfile?.departmentName || userProfile?.department}
+                  </p>
                 )}
               </div>
             </div>
@@ -161,11 +188,19 @@ export const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
         </div>
         
         {/* Mobile User Profile */}
-        {userProfile && (
+        {(userProfile || doctorProfile) && (
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center">
               <div>
-                {userProfile.avatar ? (
+                {doctorProfile ? (
+                  <DoctorImage
+                    userId={doctorProfile.id}
+                    profileImageBlob={doctorProfile.profilePicture}
+                    size="sm"
+                    rounded="full"
+                    className="mr-3"
+                  />
+                ) : userProfile?.avatar ? (
                   <img
                     className="h-10 w-10 rounded-full"
                     src={userProfile.avatar}
@@ -173,15 +208,24 @@ export const DoctorSidebar: React.FC<DoctorSidebarProps> = ({
                   />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                    {userProfile.name.charAt(0)}
+                    {((doctorProfile && doctorProfile.firstName) || userProfile?.name)?.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="ml-3 min-w-0 flex-1">
-                <p className="text-base font-medium text-gray-900 truncate">{userProfile.name}</p>
-                <p className="text-sm text-gray-500 truncate">{userProfile.email}</p>
-                {userProfile.department && (
-                  <p className="text-sm text-blue-600 truncate">{userProfile.department}</p>
+                <p className="text-base font-medium text-gray-900 truncate">
+                  {doctorProfile 
+                    ? `Dr. ${doctorProfile.firstName} ${doctorProfile.lastName}`
+                    : userProfile?.name
+                  }
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {doctorProfile?.email || userProfile?.email}
+                </p>
+                {(doctorProfile?.departmentName || userProfile?.department) && (
+                  <p className="text-sm text-blue-600 truncate">
+                    {doctorProfile?.departmentName || userProfile?.department}
+                  </p>
                 )}
               </div>
             </div>

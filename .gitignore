@@ -1,29 +1,94 @@
-# dependencies
+# Dependencies
 /node_modules
+/server/node_modules
 /.pnp
 .pnp.js
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production builds
 /build
+/server/dist
 
-# misc
-.DS_Store
-*.pem
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/logs
+/server/logs
+*.log
 
-# local env files
-.env*.local
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Package manager
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploads
+uploads/
+temp/
+
+# Misc
+*.pem
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# PM2
+ecosystem.config.js
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Local configuration
+config/local.js
 
 # vercel
 .vercel

@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 // 定义用户类型
 type User = {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'DOCTOR' | 'PATIENT';
+  role: 'admin' | 'doctor' | 'patient';
   isLoggedIn: boolean;
 };
 
@@ -28,7 +29,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
   const router = useRouter();
 
-  // 从localStorage加载用户数据
+  // 从localStorage和cookies加载用户数据
   const loadUserFromStorage = () => {
     try {
       setStatus('loading');
@@ -51,15 +52,27 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         });
         setStatus('authenticated');
         console.log('[SessionContext] User loaded from localStorage');
+        
+        // Ensure token and user data are also in cookies for middleware
+        Cookies.set('accessToken', token, { path: '/', sameSite: 'strict' });
+        Cookies.set('userData', userDataString, { path: '/', sameSite: 'strict' });
       } else {
         setUser(null);
         setStatus('unauthenticated');
         console.log('[SessionContext] No user data in localStorage');
+        
+        // Remove any existing cookies
+        Cookies.remove('accessToken', { path: '/' });
+        Cookies.remove('userData', { path: '/' });
       }
     } catch (error) {
       console.error('[SessionContext] Error loading user from localStorage:', error);
       setUser(null);
       setStatus('unauthenticated');
+      
+      // Remove any existing cookies
+      Cookies.remove('accessToken', { path: '/' });
+      Cookies.remove('userData', { path: '/' });
     }
   };
 
@@ -79,14 +92,22 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       if (response.ok && data.success) {
         // Check if we're in a browser environment
         if (typeof window !== 'undefined') {
-          // 保存token和用户数据到localStorage
-          localStorage.setItem('accessToken', data.user.token);
-          localStorage.setItem('userData', JSON.stringify({
+          const userData = {
             id: data.user.id,
             email: data.user.email,
             name: data.user.name,
             role: data.user.role
-          }));
+          };
+          
+          const userDataString = JSON.stringify(userData);
+          
+          // 保存token和用户数据到localStorage
+          localStorage.setItem('accessToken', data.user.token);
+          localStorage.setItem('userData', userDataString);
+          
+          // Also set the token and user data in cookies for middleware authentication
+          Cookies.set('accessToken', data.user.token, { path: '/', sameSite: 'strict' });
+          Cookies.set('userData', userDataString, { path: '/', sameSite: 'strict' });
         }
         
         // 更新状态
@@ -119,6 +140,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         // 清除localStorage中的数据
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userData');
+        
+        // Also remove the cookies
+        Cookies.remove('accessToken', { path: '/' });
+        Cookies.remove('userData', { path: '/' });
       }
       
       // 更新状态

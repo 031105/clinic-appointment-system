@@ -345,4 +345,176 @@ export const updateAppointmentNotes = async (req: AuthRequest, res: Response) =>
     logger.error('Error in updateAppointmentNotes:', error);
     return res.status(500).json({ message: 'Failed to update appointment notes' });
   }
+};
+
+/**
+ * 获取医生今日预约列表
+ */
+export const getTodayAppointments = async (req: AuthRequest, res: Response) => {
+  try {
+    const doctorId = req.user!.id;
+    logger.info(`[getTodayAppointments] Fetching appointments for doctor ID: ${doctorId}`);
+    logger.info(`[getTodayAppointments] User info:`, {
+      id: req.user?.id,
+      email: req.user?.email,
+      role: req.user?.role
+    });
+
+    const query = `
+      SELECT 
+        a.appointment_id as id,
+        a.appointment_datetime as "appointmentDateTime",
+        a.type,
+        a.status,
+        a.patient_id as "patientId",
+        u.first_name as "firstName",
+        u.last_name as "lastName",
+        u.email as "email"
+      FROM appointments a
+      JOIN users u ON a.patient_id = u.user_id
+      WHERE a.doctor_id = $1
+      AND DATE(a.appointment_datetime) = CURRENT_DATE
+      ORDER BY a.appointment_datetime ASC
+    `;
+
+    logger.info(`[getTodayAppointments] Executing query with doctorId: ${doctorId}`);
+    const result = await dbClient.query(query, [doctorId]);
+    logger.info(`[getTodayAppointments] Found ${result.rows.length} appointments`);
+    logger.debug(`[getTodayAppointments] Appointments data:`, result.rows);
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    logger.error('[getTodayAppointments] Error:', error);
+    logger.error('[getTodayAppointments] Request details:', {
+      headers: req.headers,
+      user: req.user,
+      params: req.params,
+      query: req.query
+    });
+    return res.status(500).json({ message: 'Failed to retrieve today\'s appointments' });
+  }
+};
+
+/**
+ * 标记预约为已完成
+ */
+export const markAppointmentAsCompleted = async (req: AuthRequest, res: Response) => {
+  try {
+    const doctorId = req.user!.id;
+    const appointmentId = Number(req.params.id);
+    const { notes } = req.body;
+    
+    if (isNaN(appointmentId)) {
+      return res.status(400).json({ message: 'Invalid appointment ID' });
+    }
+    
+    // 确认预约属于当前医生
+    const checkQuery = `
+      SELECT 1 FROM appointments 
+      WHERE appointment_id = $1 AND doctor_id = $2
+    `;
+    const checkResult = await dbClient.query(checkQuery, [appointmentId, doctorId]);
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+    
+    // 更新预约状态为已完成
+    const updateQuery = `
+      UPDATE appointments
+      SET 
+        status = 'completed',
+        notes = COALESCE($1, notes),
+        end_datetime = NOW(),
+        updated_at = NOW()
+      WHERE appointment_id = $2
+      RETURNING 
+        appointment_id as id,
+        patient_id as "patientId",
+        doctor_id as "doctorId",
+        appointment_datetime as "appointmentDateTime",
+        end_datetime as "endDateTime",
+        status,
+        type,
+        reason,
+        symptoms,
+        notes,
+        cancellation_reason as "cancellationReason",
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+    `;
+    
+    const updateResult = await dbClient.query(updateQuery, [notes, appointmentId]);
+    const updatedAppointment = updateResult.rows[0];
+    
+    // 格式化患者ID
+    updatedAppointment.patientId = `P${updatedAppointment.patientId}`;
+    
+    return res.status(200).json(updatedAppointment);
+  } catch (error) {
+    logger.error('Error in markAppointmentAsCompleted:', error);
+    return res.status(500).json({ message: 'Failed to mark appointment as completed' });
+  }
+};
+
+/**
+ * 标记预约为未出席
+ */
+export const markAppointmentAsNoShow = async (req: AuthRequest, res: Response) => {
+  try {
+    const doctorId = req.user!.id;
+    const appointmentId = Number(req.params.id);
+    const { notes } = req.body;
+    
+    if (isNaN(appointmentId)) {
+      return res.status(400).json({ message: 'Invalid appointment ID' });
+    }
+    
+    // 确认预约属于当前医生
+    const checkQuery = `
+      SELECT 1 FROM appointments 
+      WHERE appointment_id = $1 AND doctor_id = $2
+    `;
+    const checkResult = await dbClient.query(checkQuery, [appointmentId, doctorId]);
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+    
+    // 更新预约状态为未出席
+    const updateQuery = `
+      UPDATE appointments
+      SET 
+        status = 'no_show',
+        notes = COALESCE($1, notes),
+        end_datetime = NOW(),
+        updated_at = NOW()
+      WHERE appointment_id = $2
+      RETURNING 
+        appointment_id as id,
+        patient_id as "patientId",
+        doctor_id as "doctorId",
+        appointment_datetime as "appointmentDateTime",
+        end_datetime as "endDateTime",
+        status,
+        type,
+        reason,
+        symptoms,
+        notes,
+        cancellation_reason as "cancellationReason",
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+    `;
+    
+    const updateResult = await dbClient.query(updateQuery, [notes, appointmentId]);
+    const updatedAppointment = updateResult.rows[0];
+    
+    // 格式化患者ID
+    updatedAppointment.patientId = `P${updatedAppointment.patientId}`;
+    
+    return res.status(200).json(updatedAppointment);
+  } catch (error) {
+    logger.error('Error in markAppointmentAsNoShow:', error);
+    return res.status(500).json({ message: 'Failed to mark appointment as no-show' });
+  }
 }; 

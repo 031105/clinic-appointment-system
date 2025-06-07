@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getProfileImageUrl, handleImageError } from '@/utils/imageUtils';
+import { User } from 'lucide-react';
 
 interface DoctorImageProps {
   userId: number | string;
@@ -57,7 +58,7 @@ const DoctorImage = ({
   rounded = 'lg',
   profileImageBlob = ''
 }: DoctorImageProps) => {
-  const [imageUrl, setImageUrl] = useState<string>('/images/placeholder-doctor.jpg');
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -78,41 +79,61 @@ const DoctorImage = ({
       const timestamp = new Date().getTime();
       setImageUrl(`${getProfileImageUrl(userId)}?t=${timestamp}`);
     } else {
-      setImageUrl('/images/placeholder-doctor.jpg');
+      setImageUrl('');
       setIsLoading(false);
+      setHasError(true);
     }
   }, [userId, profileImageBlob]);
 
   const onLoad = () => {
     setIsLoading(false);
+    setHasError(false);
   };
 
   const onError = () => {
     setIsLoading(false);
     setHasError(true);
-    setImageUrl('/images/placeholder-doctor.jpg');
   };
 
   const sizeClass = sizeClasses[size];
   const roundedClass = roundedClasses[rounded];
 
+  // Determine icon size based on container size
+  const getIconSize = () => {
+    switch (size) {
+      case 'xs': return 'w-4 h-4';
+      case 'sm': return 'w-6 h-6';
+      case 'md': return 'w-8 h-8';
+      case 'lg': return 'w-12 h-12';
+      case 'xl': return 'w-16 h-16';
+      default: return 'w-8 h-8';
+    }
+  };
+
   return (
-    <div className={`relative overflow-hidden ${sizeClass} ${roundedClass} ${className}`}>
+    <div className={`relative overflow-hidden ${sizeClass} ${roundedClass} bg-blue-100 flex items-center justify-center ${className}`}>
       {/* Loading spinner */}
-      {isLoading && (
+      {isLoading && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
           <div className="w-1/3 h-1/3 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 
       {/* The actual image */}
-      <img
-        src={imageUrl}
-        alt={alt}
-        className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
-        onLoad={onLoad}
-        onError={onError}
-      />
+      {!hasError && imageUrl && (
+        <img
+          src={imageUrl}
+          alt={alt}
+          className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+          onLoad={onLoad}
+          onError={onError}
+        />
+      )}
+
+      {/* Fallback icon when no image or error */}
+      {hasError && (
+        <User className={`${getIconSize()} text-blue-600`} />
+      )}
     </div>
   );
 };

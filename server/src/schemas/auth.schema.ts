@@ -98,4 +98,76 @@ export const changePasswordSchema = z.object({
     message: "Passwords don't match",
     path: ['confirmNewPassword'],
   }),
+});
+
+// OTP verification schema
+export const verifyOTPSchema = z.object({
+  body: z.object({
+    email: emailSchema,
+    otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d{6}$/, 'OTP must contain only numbers'),
+    type: z.enum(['registration', 'password_reset'], {
+      errorMap: () => ({ message: 'Type must be either registration or password_reset' })
+    }),
+  }),
+});
+
+// Resend OTP schema
+export const resendOTPSchema = z.object({
+  body: z.object({
+    email: emailSchema,
+    type: z.enum(['registration', 'password_reset'], {
+      errorMap: () => ({ message: 'Type must be either registration or password_reset' })
+    }),
+  }),
+});
+
+// Initial registration schema (before OTP verification)
+export const initialRegisterSchema = z.object({
+  body: z.object({
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+    firstName: z.string().min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+    phone: z
+      .string()
+      .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
+      .optional(),
+    role: z.enum(['patient', 'doctor']),
+    // Additional fields for doctors
+    doctorInfo: z
+      .object({
+        specializations: z.array(z.string()).min(1, 'At least one specialization is required'),
+        qualifications: z.array(z.string()).min(1, 'At least one qualification is required'),
+        experienceYears: z.number().min(0),
+        departmentId: z.number(),
+        consultationFee: z.number().min(0),
+      })
+      .optional(),
+    // Additional fields for patients
+    patientInfo: z
+      .object({
+        dateOfBirth: z.string(),
+        bloodGroup: z.string().optional(),
+        height: z.number().optional(),
+        weight: z.number().optional(),
+      })
+      .optional(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  }),
+});
+
+// Reset password with temporary password schema
+export const resetPasswordWithTempSchema = z.object({
+  body: z.object({
+    email: emailSchema,
+    tempPassword: z.string(),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string(),
+  }).refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords don't match",
+    path: ['confirmNewPassword'],
+  }),
 }); 

@@ -14,8 +14,6 @@ import {
   Building2,
   UserCog,
   Settings,
-  Bell,
-  Search,
   Menu
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/Toaster';
@@ -39,16 +37,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const router = useRouter();
-
-  // Sample notifications
-  const notifications = [
-    { id: 1, title: 'New appointment request', time: '10 minutes ago' },
-    { id: 2, title: 'Dr. Smith is unavailable today', time: '1 hour ago' },
-    { id: 3, title: 'System backup completed', time: '2 hours ago' }
-  ];
 
   // Sample user profile
   const userProfile = {
@@ -80,7 +69,6 @@ export default function AdminLayout({
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         userProfile={userProfile}
-        notifications={notifications}
         onLogout={handleLogout}
       />
 

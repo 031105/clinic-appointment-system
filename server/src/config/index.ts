@@ -32,6 +32,12 @@ interface Config {
     pass: string;
     from: string;
   };
+  emailjs: {
+    serviceId: string;
+    verificationTemplateId: string;
+    resetPasswordTemplateId: string;
+    publicKey: string;
+  };
   upload: {
     directory: string;
     maxSize: number;
@@ -74,6 +80,12 @@ export const config: Config = {
     user: process.env.SMTP_USER || 'user@example.com',
     pass: process.env.SMTP_PASS || 'password',
     from: process.env.EMAIL_FROM || 'noreply@example.com',
+  },
+  emailjs: {
+    serviceId: process.env.EMAILJS_SERVICE_ID || '',
+    verificationTemplateId: process.env.EMAILJS_TEMPLATE_ID_VERIFICATION || '',
+    resetPasswordTemplateId: process.env.EMAILJS_TEMPLATE_ID_RESET_PASSWORD || '',
+    publicKey: process.env.EMAILJS_PUBLIC_KEY || '',
   },
   upload: {
     directory: process.env.UPLOAD_DIR || 'uploads',

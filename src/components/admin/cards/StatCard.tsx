@@ -38,7 +38,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <p className="text-2xl font-bold mt-1">{value}</p>
           {change && (
             <p className={`text-sm mt-1 ${getChangeColor(change)}`}>
-              {change} from last month
+              {change} from last week
             </p>
           )}
         </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Filter } from 'lucide-react';
-import { useDoctorAppointments, AppointmentStatus } from '@/hooks/appointment/useDoctorAppointments';
+import { useSearchParams } from 'next/navigation';
+import { useDoctorAppointments, AppointmentStatus, DoctorAppointmentFilter } from '@/hooks/appointment/useDoctorAppointments';
 
 // Status badge component
 const StatusBadge = ({ status }: { status: string }) => {
@@ -20,6 +21,10 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function MyAppointments() {
+  const searchParams = useSearchParams();
+  const appointmentIdParam = searchParams.get('appointmentId');
+  const appointmentId = appointmentIdParam ? parseInt(appointmentIdParam, 10) : null;
+
   const {
     appointments,
     loading,
@@ -41,6 +46,17 @@ export default function MyAppointments() {
     const matchesStatus = !filter.status || filter.status === 'all' || appointment.status === filter.status;
     return matchesDate && matchesStatus;
   });
+
+  // Auto-select appointment from URL parameter
+  useEffect(() => {
+    if (!loading && appointmentId && appointments.length > 0) {
+      const appointment = appointments.find(apt => apt.id === appointmentId);
+      if (appointment) {
+        setSelectedAppointment(appointment);
+        setNotesInput(appointment.notes || '');
+      }
+    }
+  }, [loading, appointments, appointmentId]);
 
   // Handle appointment selection for details view
   const handleAppointmentClick = (appointment: any) => {
@@ -85,7 +101,7 @@ export default function MyAppointments() {
               placeholder="dd/mm/yyyy"
               className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               value={filter.startDate || ''}
-              onChange={e => setFilter(prev => ({ ...prev, startDate: e.target.value }))}
+              onChange={e => setFilter({ ...filter, startDate: e.target.value })}
             />
           </div>
 
@@ -97,7 +113,7 @@ export default function MyAppointments() {
             <select
               className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               value={filter.status || 'all'}
-              onChange={e => setFilter(prev => ({ ...prev, status: e.target.value as AppointmentStatus }))}
+              onChange={e => setFilter({ ...filter, status: e.target.value as AppointmentStatus })}
             >
               <option value="all">All Statuses</option>
               <option value="scheduled">Scheduled</option>

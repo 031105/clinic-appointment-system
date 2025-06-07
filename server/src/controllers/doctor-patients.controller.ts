@@ -10,33 +10,6 @@ interface Appointment {
   type: string;
 }
 
-// Mock DB functions (replace with real DB logic)
-const mockPatients = [
-  {
-    id: 'P1001',
-    firstName: 'John',
-    lastName: 'Wong',
-    age: 45,
-    gender: 'Male',
-    nextAppointment: '2023-08-10',
-    phone: '+60 12-345-6789',
-    address: '123 Jalan Bukit Bintang, Kuala Lumpur',
-    email: 'john.wong@example.com',
-    lastVisit: '2023-07-25',
-    medicalHistory: {
-      conditions: ['Hypertension', 'Type 2 Diabetes'],
-      allergies: ['Penicillin'],
-      medications: ['Metformin 500mg', 'Lisinopril 10mg'],
-      bloodType: 'A+',
-    },
-    notes: [
-      { id: 1, text: 'Patient is maintaining a healthy diet and exercise routine. Blood sugar levels are stabilizing.' }
-    ],
-    appointments: [] as Appointment[],
-  },
-  // ... more mock patients
-];
-
 // 扩展Request类型，包含用户信息
 type AuthRequest = Request & {
   user?: {
@@ -86,73 +59,109 @@ export const getPatientDetails = async (req: AuthRequest, res: Response) => {
   try {
     const { patientId } = req.params;
     logger.info(`Fetching details for patient ID: ${patientId}`);
+    
+    if (!patientId || isNaN(Number(patientId))) {
+      logger.error(`Invalid patient ID: ${patientId}`);
+      return res.status(400).json({ message: 'Invalid patient ID' });
+    }
 
     // 基本信息
-    const patientResult = await dbClient.query(`
-      SELECT 
-        p.patient_id as id,
-        u.first_name,
-        u.last_name,
-        u.email,
-        p.gender,
-        p.date_of_birth,
-        u.phone,
-        u.address
-      FROM patients p
-      JOIN users u ON p.patient_id = u.user_id
-      WHERE p.patient_id = $1
-    `, [patientId]);
-    if (patientResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Patient not found' });
+    try {
+      const patientResult = await dbClient.query(`
+        SELECT 
+          p.patient_id as id,
+          u.first_name,
+          u.last_name,
+          u.email,
+          p.gender,
+          p.date_of_birth,
+          u.phone,
+          u.address
+        FROM patients p
+        JOIN users u ON p.patient_id = u.user_id
+        WHERE p.patient_id = $1
+      `, [patientId]);
+      
+      logger.info(`Patient query results: ${JSON.stringify(patientResult.rows)}`);
+      
+      if (patientResult.rows.length === 0) {
+        return res.status(404).json({ message: 'Patient not found' });
+      }
+      
+      const patient = patientResult.rows[0];
+      
+      // 组装返回，即使其他查询出错也至少返回基本信息
+      const details = {
+        ...patient,
+        allergies: [],
+        appointments: [],
+        medicalRecords: []
+      };
+
+      try {
+        // 过敏史
+        const allergiesResult = await dbClient.query(`
+          SELECT 
+            allergy_id as id,
+            name,
+            severity
+          FROM patient_allergies
+          WHERE patient_id = $1
+        `, [patientId]);
+        
+        details.allergies = allergiesResult.rows;
+      } catch (allergyError) {
+        logger.error(`Error fetching allergies: ${allergyError}`);
+        // 继续执行，不中断整个请求
+      }
+
+      try {
+        // 预约历史
+        const appointmentsResult = await dbClient.query(`
+          SELECT 
+            appointment_id as id,
+            appointment_datetime,
+            end_datetime,
+            status,
+            type
+          FROM appointments
+          WHERE patient_id = $1 AND doctor_id = $2
+          ORDER BY appointment_datetime DESC, end_datetime DESC
+        `, [patientId, req.user!.id]);
+        
+        logger.info(`Appointments query results: ${JSON.stringify(appointmentsResult.rows)}`);
+        details.appointments = appointmentsResult.rows;
+      } catch (appointmentError) {
+        logger.error(`Error fetching appointments: ${appointmentError}`);
+        // 继续执行，不中断整个请求
+      }
+
+      try {
+        // 病历
+        const medicalRecordsResult = await dbClient.query(`
+          SELECT 
+            record_id as id,
+            record_type,
+            description,
+            created_at
+          FROM medical_records
+          WHERE patient_id = $1
+          ORDER BY created_at DESC
+        `, [patientId]);
+        
+        details.medicalRecords = medicalRecordsResult.rows;
+      } catch (recordError) {
+        logger.error(`Error fetching medical records: ${recordError}`);
+        // 继续执行，不中断整个请求
+      }
+
+      return res.status(200).json(details);
+    } catch (patientError) {
+      logger.error(`Error fetching patient basic info: ${patientError}`);
+      return res.status(500).json({ message: 'Error retrieving patient basic information' });
     }
-    const patient = patientResult.rows[0];
-
-    // 过敏史
-    const allergiesResult = await dbClient.query(`
-      SELECT 
-        allergy_id as id,
-        name,
-        severity
-      FROM patient_allergies
-      WHERE patient_id = $1
-    `, [patientId]);
-
-    // 预约历史
-    const appointmentsResult = await dbClient.query(`
-      SELECT 
-        appointment_id as id,
-        appointment_date,
-        appointment_time,
-        status,
-        type
-      FROM appointments
-      WHERE patient_id = $1
-      ORDER BY appointment_date DESC, appointment_time DESC
-    `, [patientId]);
-
-    // 病历
-    const medicalRecordsResult = await dbClient.query(`
-      SELECT 
-        record_id as id,
-        record_type,
-        description,
-        created_at
-      FROM medical_records
-      WHERE patient_id = $1
-      ORDER BY created_at DESC
-    `, [patientId]);
-
-    // 组装返回
-    const details = {
-      ...patient,
-      allergies: allergiesResult.rows,
-      appointments: appointmentsResult.rows,
-      medicalRecords: medicalRecordsResult.rows
-    };
-
-    return res.status(200).json(details);
   } catch (error) {
-    logger.error('Error in getPatientDetails:', error);
+    logger.error(`Error in getPatientDetails: ${error}`);
     return res.status(500).json({ message: 'Failed to retrieve patient details' });
   }
 };
@@ -187,14 +196,14 @@ export const schedulePatientAppointment = async (req: AuthRequest, res: Response
   try {
     const { patientId } = req.params;
     const doctorId = req.user!.id;
-    const { date, time, type } = req.body;
+    const { appointmentDateTime, endDateTime, type } = req.body;
     logger.info(`Scheduling appointment for patient ID: ${patientId} by doctor ID: ${doctorId}`);
 
     const result = await dbClient.query(`
-      INSERT INTO appointments (patient_id, doctor_id, appointment_date, appointment_time, type, status)
+      INSERT INTO appointments (patient_id, doctor_id, appointment_datetime, end_datetime, type, status)
       VALUES ($1, $2, $3, $4, $5, 'scheduled')
-      RETURNING appointment_id as id, appointment_date, appointment_time, type, status
-    `, [patientId, doctorId, date, time, type]);
+      RETURNING appointment_id as id, appointment_datetime, end_datetime, type, status
+    `, [patientId, doctorId, appointmentDateTime, endDateTime, type]);
 
     return res.status(201).json(result.rows[0]);
   } catch (error) {

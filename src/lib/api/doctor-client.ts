@@ -95,33 +95,13 @@ export interface Appointment {
 // 患者类型
 export interface Patient {
   id: number;
-  userId: number;
-  dateOfBirth: string;
-  bloodGroup?: string;
-  height?: number;
-  weight?: number;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  };
-  allergies?: {
-    id: number;
-    allergyName: string;
-    severity: string;
-    diagnosedDate?: string;
-    notes?: string;
-  }[];
-  emergencyContacts?: {
-    id: number;
-    name: string;
-    relationship: string;
-    phone: string;
-    isPrimary: boolean;
-  }[];
+  first_name: string;
+  last_name: string;
+  email: string;
+  gender: string;
+  date_of_birth: string;
+  phone: string;
+  address: string;
 }
 
 // 医疗记录请求类型
@@ -231,6 +211,36 @@ export interface DoctorDashboardStats {
   };
   recentReviews: Review[];
   averageRating: number;
+}
+
+// 医生患者详情类型
+export interface DoctorPatientDetails {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  gender: string;
+  date_of_birth: string;
+  phone: string;
+  address: string;
+  allergies?: Array<{
+    id: number;
+    name: string;
+    severity: string;
+  }>;
+  appointments?: Array<{
+    id: number;
+    appointment_datetime: string;
+    end_datetime: string;
+    status: string;
+    type: string;
+  }>;
+  medicalRecords?: Array<{
+    id: number;
+    record_type: string;
+    description: string;
+    created_at: string;
+  }>;
 }
 
 // 医生API客户端
@@ -505,40 +515,52 @@ const doctorClient = {
   // 患者管理
   //=====================================================
   
-  // 获取我的所有患者
-  getMyPatients: async (params?: {
-    search?: string;
-    page?: number;
-    limit?: number;
-    sortBy?: string;
-  }): Promise<Patient[]> => {
+  // 获取医生的所有患者
+  getDoctorPatients: async (): Promise<Patient[]> => {
     try {
-      const response = await httpClient.get('/doctors/patients', { params });
+      const response = await httpClient.get('/doctor-patients');
       return handleApiResponse<Patient[]>(response);
     } catch (error) {
-      console.error('Get my patients error:', error);
+      console.error('Get doctor patients error:', error);
       throw error;
     }
   },
 
   // 获取单个患者详情
-  getPatientById: async (id: number): Promise<Patient> => {
+  getDoctorPatientDetails: async (patientId: string): Promise<DoctorPatientDetails> => {
     try {
-      const response = await httpClient.get(`/doctors/patients/${id}`);
-      return handleApiResponse<Patient>(response);
+      const response = await httpClient.get(`/doctor-patients/${patientId}`);
+      return handleApiResponse<DoctorPatientDetails>(response);
     } catch (error) {
-      console.error('Get patient error:', error);
+      console.error('Get doctor patient details error:', error);
       throw error;
     }
   },
 
-  // 获取患者的预约历史
-  getPatientAppointments: async (patientId: number): Promise<Appointment[]> => {
+  // 添加患者笔记
+  addPatientNote: async (patientId: string, text: string): Promise<any> => {
     try {
-      const response = await httpClient.get(`/doctors/patients/${patientId}/appointments`);
-      return handleApiResponse<Appointment[]>(response);
+      const response = await httpClient.post(`/doctor-patients/${patientId}/notes`, { text });
+      return handleApiResponse(response);
     } catch (error) {
-      console.error('Get patient appointments error:', error);
+      console.error('Add patient note error:', error);
+      throw error;
+    }
+  },
+
+  // 为患者安排预约
+  schedulePatientAppointment: async (
+    patientId: string, 
+    appointmentData: { date: string; time: string; type: string }
+  ): Promise<any> => {
+    try {
+      const response = await httpClient.post(
+        `/doctor-patients/${patientId}/appointments`, 
+        appointmentData
+      );
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error('Schedule patient appointment error:', error);
       throw error;
     }
   },

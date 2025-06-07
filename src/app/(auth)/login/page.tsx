@@ -36,6 +36,7 @@ export default function LoginPage() {
       });
       
       const data = await response.json();
+      console.log('[Login Frontend] 登录响应:', data); // Debug log
   
       if (!response.ok || !data.success) {
         console.error('Login error:', data.message);
@@ -46,28 +47,40 @@ export default function LoginPage() {
           variant: "destructive",
         });
       } else {
+        console.log('[Login Frontend] 用户数据:', data.user); // Debug log
+        console.log('[Login Frontend] 用户角色:', data.user.role); // Debug log
+        
         // 登录成功，将token和用户信息保存到localStorage
-        localStorage.setItem('accessToken', data.user.token);
+        // 构造简化的token格式：user_id:email:role
+        const token = `${data.user.id}:${data.user.email}:${data.user.role}`;
+        localStorage.setItem('accessToken', token);
         localStorage.setItem('userData', JSON.stringify({
           id: data.user.id,
           email: data.user.email,
           name: data.user.name,
-          firstName: data.user.name.split(' ')[0],
-          lastName: data.user.name.split(' ')[1] || '',
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
           role: data.user.role
         }));
         
         // 根据用户角色重定向到对应页面
         let redirectPath = '/user-dashboard';
         
-        if (data.user.role === 'ADMIN') {
+        console.log('[Login Frontend] 检查角色重定向:', data.user.role); // Debug log
+        
+        if (data.user.role === 'admin') {
           redirectPath = '/admin-dashboard';
-        } else if (data.user.role === 'DOCTOR') {
+          console.log('[Login Frontend] 重定向到admin页面'); // Debug log
+        } else if (data.user.role === 'doctor') {
           redirectPath = '/doctor-dashboard';
+          console.log('[Login Frontend] 重定向到doctor页面'); // Debug log
         } else {
           // For patients
           redirectPath = '/user-dashboard';
+          console.log('[Login Frontend] 重定向到patient页面'); // Debug log
         }
+        
+        console.log('[Login Frontend] 最终重定向路径:', redirectPath); // Debug log
         
         // 使用replace而不是push来避免浏览器历史问题
         router.replace(redirectPath);

@@ -4,55 +4,288 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import Toast from '@/components/ui/Toast';
+import { OTPInput } from '@/components/ui/OTPInput';
+import { toast } from '@/components/ui/use-toast';
+import { sendVerificationEmail, generateOTP, isEmailJSConfigured } from '@/utils/emailjs';
+
+type RegistrationStep = 'form' | 'verification' | 'complete';
+
+interface FormData {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Form state
+  const [formData, setFormData] = useState<FormData>({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  
+  // UI state
+  const [currentStep, setCurrentStep] = useState<RegistrationStep>('form');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showToast, setShowToast] = useState(false);
+  
+  // OTP state
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [generatedOTP, setGeneratedOTP] = useState(''); // For development
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Step 1: Initial form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
-    // Simple validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setShowToast(true);
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive",
+      });
       setIsLoading(false);
       return;
     }
 
     try {
-      // In a real implementation, you would call an API here
-      // This is just a simulation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Split full name into first and last name
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      const finalLastName = lastName || firstName;
+
+      if (!firstName || firstName.length < 2) {
+        toast({
+          title: "Error",
+          description: "Please enter at least your first name (minimum 2 characters)",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Call backend to initiate registration (generates OTP)
+      const response = await fetch('/api/auth/register/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName,
+          lastName: finalLastName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to initiate registration');
+      }
+
+      // Send OTP via EmailJS if configured
+      if (isEmailJSConfigured()) {
+        try {
+          await sendVerificationEmail({
+            to_email: formData.email,
+            to_name: formData.fullName,
+            otp_code: data.otp || generateOTP(), // Use backend OTP or generate new one
+            app_name: 'Clinic Appointment System'
+          });
+        } catch (emailError) {
+          console.error('EmailJS failed:', emailError);
+          toast({
+            title: "Error",
+            description: "Failed to send verification email. Please try again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Store OTP for development/fallback
+      if (data.otp) {
+        setGeneratedOTP(data.otp);
+      }
+
+      // Move to verification step
+      setCurrentStep('verification');
       
-      // Simulate successful registration
-      router.push('/login?registered=true');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register account');
-      setShowToast(true);
+      console.error('Registration initiation error:', err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : 'Failed to send verification code',
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Step 2: OTP verification and complete registration
+  const handleOTPSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (otp.length !== 6) {
+      setOtpError(true);
+      toast({
+        title: "Error",
+        description: "Please enter a valid 6-digit verification code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setOtpError(false);
+
+    try {
+      // Split full name for backend
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      const finalLastName = lastName || firstName;
+
+      // Complete registration with OTP verification
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otp,
+          password: formData.password,
+          firstName,
+          lastName: finalLastName,
+          role: 'patient', // Default role for self-registration
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to verify code and complete registration');
+      }
+
+      // Registration successful
+      setCurrentStep('complete');
+      
+      // Auto redirect to login after 3 seconds
+      setTimeout(() => {
+      router.push('/login?registered=true');
+      }, 3000);
+
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : 'Failed to verify code',
+        variant: "destructive",
+      });
+      setOtpError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOTP = async () => {
+    if (resendCooldown > 0) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/resend-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          type: 'registration',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to resend verification code');
+      }
+
+      // Send new OTP via EmailJS if configured
+      if (isEmailJSConfigured() && data.otp) {
+        await sendVerificationEmail({
+          to_email: formData.email,
+          to_name: formData.fullName,
+          otp_code: data.otp,
+          app_name: 'Clinic Appointment System'
+        });
+      }
+
+      // Update OTP for development
+      if (data.otp) {
+        setGeneratedOTP(data.otp);
+      }
+
+      // Start cooldown
+      setResendCooldown(60);
+      const countdown = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdown);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      toast({
+        title: "Success",
+        description: "New verification code sent to your email",
+      });
+
+    } catch (err) {
+      console.error('Resend OTP error:', err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : 'Failed to resend verification code',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Step 1: Registration Form
+  if (currentStep === 'form') {
   return (
-    <>
       <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
         <div className="px-8 pt-8 pb-6 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
           <p className="text-sm text-gray-600">Join us and start your journey to better health</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-5">
+        <form onSubmit={handleFormSubmit} className="px-8 pb-8 space-y-5">
           <div className="space-y-1">
             <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">
               Full Name
@@ -60,8 +293,8 @@ export default function RegisterPage() {
             <input
               id="fullname"
               type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={formData.fullName}
+              onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
               className="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your full name"
               required
@@ -75,8 +308,8 @@ export default function RegisterPage() {
             <input
               id="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               className="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your email"
               required
@@ -90,12 +323,14 @@ export default function RegisterPage() {
             <input
               id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
               className="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Create a password"
               required
+              minLength={8}
             />
+            <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
           </div>
 
           <div className="space-y-1">
@@ -105,8 +340,8 @@ export default function RegisterPage() {
             <input
               id="confirm-password"
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
               className="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Confirm your password"
               required
@@ -117,51 +352,10 @@ export default function RegisterPage() {
             type="submit"
             isLoading={isLoading}
             className="w-full py-3 rounded-xl"
+            disabled={isLoading}
           >
-            Create Account
+            {isLoading ? 'Sending verification code...' : 'Send Verification Code'}
           </Button>
-
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or sign up with</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <button
-              type="button"
-              className="flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50"
-            >
-              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-                <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
-                <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-                <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50"
-            >
-              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                <path fill="#039BE5" d="M24 5a19 19 0 1 0 0 38 19 19 0 1 0 0-38z"/>
-                <path fill="#FFF" d="M26.572 29.036h4.917l.772-4.995h-5.69v-2.73c0-2.075.678-3.915 2.619-3.915h3.119v-4.359c-.548-.074-1.707-.236-3.897-.236-4.573 0-7.254 2.415-7.254 7.917v3.323h-4.701v4.995h4.701v13.729c.931.14 1.874.235 2.842.235.875 0 1.729-.08 2.572-.194v-13.77z"/>
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50"
-            >
-              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z" fill="#000"/>
-                <path d="M17.291 16.295H6.709c-.387 0-.709-.374-.709-.833v-6.75c0-.459.322-.833.709-.833h10.582c.387 0 .709.374.709.833v6.75c0 .459-.322.833-.709.833z" fill="#000"/>
-                <path d="M12 7.25c-2.891 0-5.25 2.359-5.25 5.25S9.109 17.75 12 17.75s5.25-2.359 5.25-5.25S14.891 7.25 12 7.25zm1.5 5.25a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13.5 12.5z" fill="#000"/>
-              </svg>
-            </button>
-          </div>
 
           <div className="text-center text-sm">
             Already have an account?{' '}
@@ -171,14 +365,111 @@ export default function RegisterPage() {
           </div>
         </form>
       </div>
+    );
+  }
 
-      {showToast && (
-        <Toast
-          message={error}
-          type="error"
-          onClose={() => setShowToast(false)}
-        />
-      )}
-    </>
+  // Step 2: OTP Verification
+  if (currentStep === 'verification') {
+    return (
+      <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div className="px-8 pt-8 pb-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h1>
+          <p className="text-sm text-gray-600">
+            We've sent a 6-digit verification code to
+          </p>
+          <p className="text-sm font-medium text-gray-900">{formData.email}</p>
+        </div>
+
+        <form onSubmit={handleOTPSubmit} className="px-8 pb-8 space-y-6">
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700 text-center">
+              Enter Verification Code
+            </label>
+            
+            <OTPInput
+              value={otp}
+              onChange={setOtp}
+              error={otpError}
+              disabled={isLoading}
+              className="justify-center"
+            />
+
+            {/* Development mode: show generated OTP */}
+            {process.env.NODE_ENV === 'development' && generatedOTP && (
+              <div className="text-center">
+                <p className="text-xs text-gray-500">Development mode - OTP: {generatedOTP}</p>
+              </div>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full py-3 rounded-xl"
+            disabled={isLoading || otp.length !== 6}
+          >
+            {isLoading ? 'Verifying...' : 'Verify & Create Account'}
+          </Button>
+
+          <div className="text-center space-y-2">
+            <p className="text-sm text-gray-600">
+              Didn't receive the code?
+            </p>
+            <button
+              type="button"
+              onClick={handleResendOTP}
+              disabled={resendCooldown > 0 || isLoading}
+              className="text-sm font-medium text-blue-600 hover:text-blue-500 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              {resendCooldown > 0 
+                ? `Resend in ${resendCooldown}s` 
+                : 'Resend verification code'
+              }
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setCurrentStep('form')}
+              className="text-sm text-gray-600 hover:text-gray-500"
+            >
+              ← Back to registration form
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // Step 3: Registration Complete
+  return (
+    <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+      <div className="px-8 pt-8 pb-8 text-center space-y-6">
+        <div className="flex justify-center">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        </div>
+        
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Registration Complete!</h1>
+          <p className="text-gray-600">
+            Your account has been created successfully.
+          </p>
+          <p className="text-gray-600">
+            Redirecting you to login page...
+          </p>
+        </div>
+        
+        <Link href="/login" className="block">
+          <Button className="w-full py-3 rounded-xl">
+            Go to Login
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }

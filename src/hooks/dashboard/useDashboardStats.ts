@@ -59,9 +59,14 @@ export function useDashboardStats() {
       const departmentsData = await patientClient.getDepartments();
       console.log('Departments loaded:', departmentsData.length);
       
-      setDepartments(departmentsData);
-      if (departmentsData.length > 0) {
-        setSelectedDepartment(departmentsData[0]);
+      // 过滤掉"Unassigned"部门，患者不应该看到未分配的部门
+      const filteredDepartments = departmentsData.filter(dept => 
+        dept.name.toLowerCase() !== 'unassigned'
+      );
+      
+      setDepartments(filteredDepartments);
+      if (filteredDepartments.length > 0) {
+        setSelectedDepartment(filteredDepartments[0]);
       }
     } catch (deptError) {
       console.error('Department error:', deptError);
@@ -74,12 +79,14 @@ export function useDashboardStats() {
       const doctorsData = await patientClient.getDoctors();
       console.log('Doctors loaded:', doctorsData.length);
       
-      // 处理医生数据以确保格式一致
-      const processedDoctors = doctorsData.map(doctor => ({
-        ...doctor,
-        name: `${doctor.user.firstName} ${doctor.user.lastName}`,
-        profileImage: (doctor.user as any).profile_image_blob
-      }));
+      // 处理医生数据以确保格式一致，同时过滤掉"Unassigned"部门的医生
+      const processedDoctors = doctorsData
+        .filter(doctor => doctor.department?.name?.toLowerCase() !== 'unassigned')
+        .map(doctor => ({
+          ...doctor,
+          name: `${doctor.user.firstName} ${doctor.user.lastName}`,
+          profileImage: (doctor.user as any).profile_image_blob
+        }));
       
       setDoctors(processedDoctors);
     } catch (doctorError) {

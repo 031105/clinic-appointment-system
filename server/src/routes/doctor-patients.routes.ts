@@ -9,9 +9,9 @@ import {
 
 const router = Router();
 
-router.get('/doctor-patients', getDoctorPatients);
-router.get('/doctor-patients/:patientId', getPatientDetails);
-router.post('/doctor-patients/:patientId/notes', addPatientNote);
-router.post('/doctor-patients/:patientId/appointments', schedulePatientAppointment);
+router.get('/', getDoctorPatients);
+router.get('/:patientId', getPatientDetails);
+router.post('/:patientId/notes', addPatientNote);
+router.post('/:patientId/appointments', schedulePatientAppointment);
 
 export default router; 

@@ -1,101 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   SearchFilterBar, 
   DataTable, 
   StatusBadge, 
   ModalDialog 
 } from '@/components/admin';
-
-// Temporary patient data
-const tempPatients = [
-  {
-    id: '21',
-    name: 'Michael Chan',
-    email: 'patient1@email.com',
-    phone: '+6012345698',
-    dateOfBirth: '1990-04-10',
-    gender: 'male',
-    address: '202 Patient Lane, Patient City',
-    registrationDate: '2023-01-15',
-    lastVisit: '2025-06-16',
-    status: 'active',
-    medicalRecords: [
-      { id: 1, date: '2025-06-16', diagnosis: 'Mild hypertension', doctor: 'Dr. John Smith' },
-      { id: 2, date: '2024-12-10', diagnosis: 'Common cold', doctor: 'Dr. Sarah Johnson' }
-    ],
-    allergies: ['Penicillin']
-  },
-  {
-    id: '22',
-    name: 'Jessica Tan',
-    email: 'patient2@email.com',
-    phone: '+6012345699',
-    dateOfBirth: '1988-09-22',
-    gender: 'female',
-    address: '303 Health Avenue, Patient City',
-    registrationDate: '2023-02-20',
-    lastVisit: '2025-06-18',
-    status: 'active',
-    medicalRecords: [
-      { id: 3, date: '2025-06-18', diagnosis: 'Stable coronary artery disease', doctor: 'Dr. John Smith' },
-      { id: 4, date: '2024-11-05', diagnosis: 'Seasonal allergies', doctor: 'Dr. Emily Wong' }
-    ],
-    allergies: ['Sulfa drugs', 'Peanuts']
-  },
-  {
-    id: '23',
-    name: 'David Wong',
-    email: 'patient3@email.com',
-    phone: '+6012345700',
-    dateOfBirth: '1979-12-30',
-    gender: 'male',
-    address: '404 Wellness Street, Patient City',
-    registrationDate: '2023-03-10',
-    lastVisit: '2025-06-18',
-    status: 'active',
-    medicalRecords: [
-      { id: 5, date: '2025-06-18', diagnosis: 'Acute otitis media', doctor: 'Dr. Natalie Clarke' },
-      { id: 6, date: '2024-09-22', diagnosis: 'Lower back pain', doctor: 'Dr. William Tan' }
-    ],
-    allergies: []
-  },
-  {
-    id: '24',
-    name: 'Emily Lim',
-    email: 'patient4@email.com',
-    phone: '+6012345701',
-    dateOfBirth: '1995-01-18',
-    gender: 'female',
-    address: '505 Care Road, Patient City',
-    registrationDate: '2023-04-05',
-    lastVisit: '2025-06-19',
-    status: 'active',
-    medicalRecords: [
-      { id: 7, date: '2025-06-19', diagnosis: 'Atrial fibrillation', doctor: 'Dr. James Wilson' },
-      { id: 8, date: '2025-06-17', diagnosis: 'Moderate acne vulgaris', doctor: 'Dr. Emily Wong' }
-    ],
-    allergies: ['Latex']
-  },
-  {
-    id: '25',
-    name: 'Jason Ng',
-    email: 'patient5@email.com',
-    phone: '+6012345702',
-    dateOfBirth: '1992-05-28',
-    gender: 'male',
-    address: '606 Therapy Lane, Patient City',
-    registrationDate: '2023-05-12',
-    lastVisit: '2025-06-20',
-    status: 'active',
-    medicalRecords: [
-      { id: 9, date: '2025-06-20', diagnosis: 'Congestive heart failure', doctor: 'Dr. Kimberly Novak' },
-      { id: 10, date: '2025-06-18', diagnosis: 'Seborrheic dermatitis', doctor: 'Dr. Lisa Mueller' }
-    ],
-    allergies: ['Ibuprofen']
-  }
-];
+import { PatientRegistrationModal } from '@/components/admin/PatientRegistrationModal';
+import { useAdminPatients, usePatientDetails } from '@/hooks/admin/useAdminPatients';
+import { Patient, MedicalRecord } from '@/lib/api/admin-patients-client';
 
 // Define table columns
 const patientColumns = [
@@ -107,8 +21,8 @@ const patientColumns = [
     header: 'Name', 
     accessor: (patient: Patient) => (
       <div>
-        <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-        <div className="text-sm text-gray-500">{new Date(patient.dateOfBirth).toLocaleDateString()}</div>
+        <div className="text-sm font-medium text-gray-900">{patient.first_name} {patient.last_name}</div>
+        <div className="text-sm text-gray-500">{new Date(patient.date_of_birth).toLocaleDateString()}</div>
       </div>
     )
   },
@@ -125,11 +39,14 @@ const patientColumns = [
     header: 'Last Visit', 
     accessor: (patient: Patient) => (
       <div className="text-sm text-gray-900">
-        {new Date(patient.lastVisit).toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
-        })}
+        {patient.last_visit ? 
+          new Date(patient.last_visit).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          }) : 
+          'No visits'
+        }
       </div>
     )
   },
@@ -146,82 +63,82 @@ const statusFilterOptions = [
   { id: 'inactive', label: 'Inactive' },
 ];
 
-interface Patient {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  gender: string;
-  address: string;
-  registrationDate: string;
-  lastVisit: string;
-  status: string;
-  medicalRecords: Array<{
-    id: number;
-    date: string;
-    diagnosis: string;
-    doctor: string;
-  }>;
-  allergies: string[];
-}
-
 export default function PatientManagement() {
-  const [patients, setPatients] = useState<Patient[]>(tempPatients);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const {
+    patients,
+    loading,
+    error,
+    pagination,
+    fetchPatients,
+    searchPatients,
+    filterPatients,
+    createPatient,
+    changePage,
+    changeLimit
+  } = useAdminPatients();
+
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // Filter patients based on search query and status
-  const filteredPatients = patients.filter(patient => {
-    // Status filter
-    if (filterStatus !== 'all' && patient.status !== filterStatus) {
-      return false;
-    }
-    
-    // Search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        patient.name.toLowerCase().includes(query) ||
-        patient.email.toLowerCase().includes(query) ||
-        patient.phone.includes(query) ||
-        patient.id.includes(query)
-      );
-    }
-    
-    return true;
-  });
+  const {
+    patient: selectedPatient,
+    medicalRecords,
+    loading: detailsLoading,
+    medicalRecordsLoading
+  } = usePatientDetails(selectedPatientId || undefined);
+
+  // Load patients on component mount
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
+
+  // Handle search
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    searchPatients(query);
+  };
+
+  // Handle filter change
+  const handleFilterChange = (status: string) => {
+    setFilterStatus(status);
+    filterPatients(status as 'all' | 'active' | 'inactive');
+  };
 
   // Handle patient view
   const handleViewPatient = (patient: Patient) => {
-    setSelectedPatient(patient);
+    setSelectedPatientId(patient.id);
     setShowDetailModal(true);
     setActiveTab('details');
   };
 
-  // Table actions
+  // Handle patient registration
+  const handlePatientRegistration = async (data: any) => {
+    await createPatient(data);
+    setShowRegistrationModal(false);
+  };
+
+  // Table actions (removed Edit button as requested)
   const tableActions = [
     {
       label: 'View',
       onClick: handleViewPatient,
       className: 'text-blue-600 hover:text-blue-900'
-    },
-    {
-      label: 'Edit',
-      onClick: (patient: Patient) => {
-        // Implement edit functionality
-        console.log('Edit patient:', patient);
-      },
-      className: 'text-gray-500 hover:text-gray-700'
     }
   ];
 
   // Function to render the patient detail modal content
   const renderPatientDetail = () => {
-    if (!selectedPatient) return null;
+    if (!selectedPatient) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-6">
@@ -233,7 +150,7 @@ export default function PatientManagement() {
                 <h3 className="text-sm font-medium text-gray-500">Basic Information</h3>
                 <div className="mt-2 border rounded-md p-3">
                   <p className="text-sm text-gray-500">Full Name</p>
-                  <p className="text-sm font-medium">{selectedPatient.name}</p>
+                  <p className="text-sm font-medium">{selectedPatient.first_name} {selectedPatient.last_name}</p>
                   
                   <div className="grid grid-cols-2 mt-3">
                     <div>
@@ -242,9 +159,33 @@ export default function PatientManagement() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Date of Birth</p>
-                      <p className="text-sm font-medium">{new Date(selectedPatient.dateOfBirth).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium">{new Date(selectedPatient.date_of_birth).toLocaleDateString()}</p>
                     </div>
                   </div>
+
+                  {selectedPatient.blood_type && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-500">Blood Type</p>
+                      <p className="text-sm font-medium">{selectedPatient.blood_type}</p>
+                    </div>
+                  )}
+
+                  {(selectedPatient.height || selectedPatient.weight) && (
+                    <div className="grid grid-cols-2 mt-3">
+                      {selectedPatient.height && (
+                        <div>
+                          <p className="text-sm text-gray-500">Height</p>
+                          <p className="text-sm font-medium">{selectedPatient.height} cm</p>
+                        </div>
+                      )}
+                      {selectedPatient.weight && (
+                        <div>
+                          <p className="text-sm text-gray-500">Weight</p>
+                          <p className="text-sm font-medium">{selectedPatient.weight} kg</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -257,8 +198,12 @@ export default function PatientManagement() {
                   <p className="text-sm text-gray-500 mt-3">Phone</p>
                   <p className="text-sm font-medium">{selectedPatient.phone}</p>
                   
-                  <p className="text-sm text-gray-500 mt-3">Address</p>
-                  <p className="text-sm font-medium">{selectedPatient.address}</p>
+                  {selectedPatient.address && (
+                    <>
+                      <p className="text-sm text-gray-500 mt-3">Address</p>
+                      <p className="text-sm font-medium">{selectedPatient.address}</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -269,21 +214,26 @@ export default function PatientManagement() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Registration Date</p>
-                    <p className="text-sm font-medium">{new Date(selectedPatient.registrationDate).toLocaleDateString()}</p>
+                    <p className="text-sm font-medium">{new Date(selectedPatient.created_at).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Last Visit</p>
-                    <p className="text-sm font-medium">{new Date(selectedPatient.lastVisit).toLocaleDateString()}</p>
+                    <p className="text-sm font-medium">
+                      {selectedPatient.last_visit ? 
+                        new Date(selectedPatient.last_visit).toLocaleDateString() : 
+                        'No visits yet'
+                      }
+                    </p>
                   </div>
                 </div>
                 
                 <div className="mt-3">
                   <p className="text-sm text-gray-500">Allergies</p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {selectedPatient.allergies.length > 0 ? (
+                    {selectedPatient.allergies && selectedPatient.allergies.length > 0 ? (
                       selectedPatient.allergies.map((allergy, index) => (
                         <span key={index} className="px-2 py-1 bg-red-50 text-red-700 text-xs rounded">
-                          {allergy}
+                          {allergy.name} ({allergy.severity})
                         </span>
                       ))
                     ) : (
@@ -291,6 +241,26 @@ export default function PatientManagement() {
                     )}
                   </div>
                 </div>
+
+                {selectedPatient.stats && (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-500">Statistics</p>
+                    <div className="grid grid-cols-3 gap-2 mt-1">
+                      <div className="text-center p-2 bg-blue-50 rounded">
+                        <p className="text-lg font-semibold text-blue-600">{selectedPatient.stats.total_appointments}</p>
+                        <p className="text-xs text-blue-800">Total Appointments</p>
+                      </div>
+                      <div className="text-center p-2 bg-green-50 rounded">
+                        <p className="text-lg font-semibold text-green-600">{selectedPatient.stats.completed_appointments}</p>
+                        <p className="text-xs text-green-800">Completed</p>
+                      </div>
+                      <div className="text-center p-2 bg-purple-50 rounded">
+                        <p className="text-lg font-semibold text-purple-600">{selectedPatient.stats.medical_records_count}</p>
+                        <p className="text-xs text-purple-800">Medical Records</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -301,25 +271,46 @@ export default function PatientManagement() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-medium text-gray-700">Medical Records</h3>
-              <button className="text-xs bg-blue-50 text-blue-600 py-1 px-2 rounded">
-                Add New Record
-              </button>
             </div>
             
-            {selectedPatient.medicalRecords.length > 0 ? (
+            {medicalRecordsLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+            ) : medicalRecords.length > 0 ? (
               <div className="space-y-3">
-                {selectedPatient.medicalRecords.map((record) => (
+                {medicalRecords.map((record) => (
                   <div key={record.id} className="border rounded-md p-3">
-                    <div className="flex justify-between">
-                      <p className="text-sm font-medium">{new Date(record.date).toLocaleDateString()}</p>
-                      <p className="text-sm text-gray-500">{record.doctor}</p>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <p className="text-sm font-medium">{new Date(record.date).toLocaleDateString()}</p>
+                          <p className="text-sm text-gray-500">{record.doctor_name}</p>
+                        </div>
+                        <p className="text-sm mt-2 font-medium text-gray-900">{record.diagnosis}</p>
+                        {record.prescription && record.prescription.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500">Prescription:</p>
+                            <ul className="text-sm text-gray-700 list-disc list-inside">
+                              {record.prescription.map((med, index) => (
+                                <li key={index}>{med}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {record.notes && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500">Notes:</p>
+                            <p className="text-sm text-gray-700">{record.notes}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm mt-2">{record.diagnosis}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No medical records available</p>
+              <p className="text-sm text-gray-500 text-center py-8">No medical records available</p>
             )}
           </div>
         )}
@@ -361,45 +352,104 @@ export default function PatientManagement() {
     </div>
   );
 
+  if (loading && patients.length === 0) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+        <button 
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          onClick={() => setShowRegistrationModal(true)}
+        >
           Register New Patient
         </button>
       </div>
 
-      {/* Using SearchFilterBar component */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Search and Filter Bar */}
       <SearchFilterBar
-        searchPlaceholder="Search by name, email, phone..."
+        searchPlaceholder="Search by name, email, phone, patient ID..."
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         filterOptions={statusFilterOptions}
         filterValue={filterStatus}
-        onFilterChange={setFilterStatus}
+        onFilterChange={handleFilterChange}
         className="mb-6"
       />
 
-      {/* Using DataTable component */}
+      {/* Data Table */}
       <DataTable
-        data={filteredPatients}
+        data={patients}
         columns={patientColumns}
         keyField="id"
         actions={tableActions}
         emptyMessage="No patients found matching your search criteria."
+        isLoading={loading}
       />
 
-      {/* Using ModalDialog component for patient details */}
+      {/* Pagination */}
+      {pagination.pages > 1 && (
+        <div className="mt-6 flex justify-between items-center">
+          <div className="text-sm text-gray-500">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} patients
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => changePage(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <button
+              onClick={() => changePage(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages}
+              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Detail Modal */}
       <ModalDialog
         isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        title={selectedPatient ? `Patient: ${selectedPatient.name}` : 'Patient Details'}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedPatientId(null);
+        }}
+        title={selectedPatient ? `Patient: ${selectedPatient.first_name} ${selectedPatient.last_name}` : 'Patient Details'}
         footer={modalFooter}
         size="lg"
       >
         {renderPatientDetail()}
       </ModalDialog>
+
+      {/* Patient Registration Modal */}
+      <PatientRegistrationModal
+        isOpen={showRegistrationModal}
+        onClose={() => setShowRegistrationModal(false)}
+        onSubmit={handlePatientRegistration}
+        loading={loading}
+      />
     </div>
   );
 }

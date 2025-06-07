@@ -52,40 +52,45 @@ export interface Role {
 
 // 部门类型
 export interface Department {
-  id: number;
+  department_id: number;
   name: string;
-  description: string;
-  imageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  doctorCount?: number;
+  description?: string;
+  head_doctor_id?: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  emoji_icon: string;
+  doctor_count?: number;
+  service_count?: number;
 }
 
 // 部门创建/更新请求类型
 export interface DepartmentRequest {
   name: string;
-  description: string;
-  imageUrl?: string;
+  description?: string;
+  emoji_icon?: string;
+  head_doctor_id?: number;
 }
 
 // 服务类型
 export interface Service {
-  id: number;
-  departmentId: number;
+  service_id: number;
+  department_id: number;
   name: string;
+  description?: string;
   price: number;
   duration: number;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 // 服务创建/更新请求类型
 export interface ServiceRequest {
   name: string;
+  description?: string;
   price: number;
   duration: number;
-  description?: string;
 }
 
 // 预约类型
@@ -139,6 +144,31 @@ export interface DashboardStats {
     month: string;
     revenue: number;
   }>;
+}
+
+// 医生类型
+export interface DepartmentDoctor {
+  doctor_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  specialty?: string;
+  license_number?: string;
+  qualification?: string;
+  experience?: number;
+  consultation_fee?: number;
+  bio?: string;
+  status: string;
+  created_at: string;
+}
+
+// 部门统计类型
+export interface DepartmentStats {
+  doctor_count: number;
+  service_count: number;
+  total_appointments: number;
+  completed_appointments: number;
 }
 
 // 管理员API客户端
@@ -384,6 +414,17 @@ const adminClient = {
     }
   },
 
+  // 获取部门统计信息
+  getDepartmentStats: async (id: number): Promise<DepartmentStats> => {
+    try {
+      const response = await httpClient.get(`/admin/departments/${id}/stats`);
+      return handleApiResponse<DepartmentStats>(response);
+    } catch (error) {
+      console.error('Get department stats error:', error);
+      throw error;
+    }
+  },
+
   //=====================================================
   // 服务管理
   //=====================================================
@@ -417,13 +458,21 @@ const adminClient = {
     data: Partial<ServiceRequest>
   ): Promise<Service> => {
     try {
+      console.log(`API call: PUT /admin/departments/${departmentId}/services/${serviceId}`);
+      console.log('Update data being sent:', data);
       const response = await httpClient.put(
         `/admin/departments/${departmentId}/services/${serviceId}`, 
         data
       );
+      console.log('API call successful, response:', response.data);
       return handleApiResponse<Service>(response);
     } catch (error) {
       console.error('Update service error:', error);
+      console.error('Request URL:', `/admin/departments/${departmentId}/services/${serviceId}`);
+      console.error('Request data:', data);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+      }
       throw error;
     }
   },
@@ -434,6 +483,58 @@ const adminClient = {
       await httpClient.delete(`/admin/departments/${departmentId}/services/${serviceId}`);
     } catch (error) {
       console.error('Delete service error:', error);
+      throw error;
+    }
+  },
+
+  //=====================================================
+  // 部门医生管理
+  //=====================================================
+  
+  // 获取部门下的所有医生
+  getDepartmentDoctors: async (departmentId: number): Promise<DepartmentDoctor[]> => {
+    try {
+      const response = await httpClient.get(`/admin/departments/${departmentId}/doctors`);
+      return handleApiResponse<DepartmentDoctor[]>(response);
+    } catch (error) {
+      console.error('Get department doctors error:', error);
+      throw error;
+    }
+  },
+
+  // 获取未分配的医生列表
+  getUnassignedDoctors: async (): Promise<DepartmentDoctor[]> => {
+    try {
+      const response = await httpClient.get('/admin/departments/unassigned/doctors');
+      return handleApiResponse<DepartmentDoctor[]>(response);
+    } catch (error) {
+      console.error('Get unassigned doctors error:', error);
+      throw error;
+    }
+  },
+
+  // 分配医生到部门
+  assignDoctorToDepartment: async (departmentId: number, doctorId: number): Promise<void> => {
+    try {
+      await httpClient.post(`/admin/departments/${departmentId}/doctors`, { doctorId });
+    } catch (error) {
+      console.error('Assign doctor to department error:', error);
+      throw error;
+    }
+  },
+
+  // 将医生从部门移除
+  removeDoctorFromDepartment: async (departmentId: number, doctorId: number): Promise<void> => {
+    try {
+      console.log(`API call: DELETE /admin/departments/${departmentId}/doctors/${doctorId}`);
+      await httpClient.delete(`/admin/departments/${departmentId}/doctors/${doctorId}`);
+      console.log('API call successful');
+    } catch (error) {
+      console.error('Remove doctor from department error:', error);
+      console.error('Request URL:', `/admin/departments/${departmentId}/doctors/${doctorId}`);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+      }
       throw error;
     }
   },

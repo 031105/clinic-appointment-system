@@ -1,888 +1,553 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useAdminSettings } from '@/hooks/admin/useAdminSettings';
+import { Save, X, Edit, Settings as SettingsIcon } from 'lucide-react';
+import { 
+  validateNumber,
+  validateJSON,
+  validateTime,
+  sanitizeText,
+  ValidationResult
+} from '@/utils/validation';
 
-// Temporary settings data
-const tempSettings = {
-  general: {
-    clinicName: 'HealthCare Clinic',
-    address: '123 Medical Ave, Health City, HC 12345',
-    phone: '(123) 456-7890',
-    email: 'contact@healthcareclinic.com',
-    website: 'www.healthcareclinic.com',
-    timezone: 'UTC-5'
-  },
-  workingHours: {
-    monday: { isOpen: true, start: '09:00', end: '17:00' },
-    tuesday: { isOpen: true, start: '09:00', end: '17:00' },
-    wednesday: { isOpen: true, start: '09:00', end: '17:00' },
-    thursday: { isOpen: true, start: '09:00', end: '17:00' },
-    friday: { isOpen: true, start: '09:00', end: '17:00' },
-    saturday: { isOpen: false, start: '09:00', end: '13:00' },
-    sunday: { isOpen: false, start: '09:00', end: '13:00' }
-  },
-  appointments: {
-    allowOnlineBooking: true,
-    slotDuration: 30,
-    bufferTime: 15,
-    maxDaysInAdvance: 60,
-    cancelationPolicy: 24
-  },
-  notifications: {
-    sendReminders: {
-      email: true,
-      sms: true,
-      hours: 24
-    },
-    templates: {
-      appointmentConfirmation: {
-        subject: 'Your appointment has been confirmed',
-        body: 'Dear {patientName},\n\nYour appointment with {doctorName} has been confirmed for {appointmentDate} at {appointmentTime}.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
-      },
-      appointmentReminder: {
-        subject: 'Reminder: Your upcoming appointment',
-        body: 'Dear {patientName},\n\nThis is a reminder of your appointment with {doctorName} scheduled for {appointmentDate} at {appointmentTime}.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
-      },
-      appointmentCancellation: {
-        subject: 'Your appointment has been cancelled',
-        body: 'Dear {patientName},\n\nYour appointment with {doctorName} scheduled for {appointmentDate} at {appointmentTime} has been cancelled.\n\nPlease contact us if you need to reschedule.\n\nThank you for choosing HealthCare Clinic.\n\nBest regards,\nThe HealthCare Clinic Team'
+// Component for different setting input types with enhanced validation
+const SettingInput = ({ 
+  settingKey, 
+  value, 
+  dataType, 
+  description, 
+  onChange, 
+  disabled = false 
+}: {
+  settingKey: string;
+  value: any;
+  dataType: string;
+  description?: string;
+  onChange: (key: string, value: any) => void;
+  disabled?: boolean;
+}) => {
+  const [validationError, setValidationError] = useState<string>('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { type, value: inputValue } = e.target;
+    let newValue: any = inputValue;
+    let validationResult: ValidationResult = { isValid: true };
+
+    if (type === 'checkbox') {
+      newValue = (e.target as HTMLInputElement).checked;
+    } else if (dataType === 'number') {
+      const numValue = Number(inputValue) || 0;
+      // Basic number validation based on setting type
+      if (settingKey.includes('max_') || settingKey.includes('limit_')) {
+        validationResult = validateNumber(numValue, 1, 10000, generateLabel(settingKey), false, false);
+      } else if (settingKey.includes('fee') || settingKey.includes('cost')) {
+        validationResult = validateNumber(numValue, 0, 100000, generateLabel(settingKey), false, true);
+      } else {
+        validationResult = validateNumber(numValue, 0, Number.MAX_SAFE_INTEGER, generateLabel(settingKey), false, true);
       }
+      
+      if (validationResult.isValid) {
+        newValue = numValue;
+      }
+    } else if (dataType === 'json') {
+      if (inputValue.trim()) {
+        validationResult = validateJSON(inputValue, generateLabel(settingKey), false);
+      }
+      if (validationResult.isValid && inputValue.trim()) {
+        try {
+          newValue = JSON.parse(inputValue);
+        } catch {
+          newValue = inputValue; // Keep as string if JSON parsing fails
+        }
+      } else {
+        newValue = inputValue;
+      }
+    } else {
+      newValue = sanitizeText(inputValue);
     }
-  },
-  backup: {
-    autoBackup: true,
-    frequency: 'daily',
-    backupTime: '02:00',
-    retentionDays: 30,
-    storageLocation: 'cloud'
-  },
-  security: {
-    sessionTimeout: 30,
-    passwordPolicy: {
-      minLength: 8,
-      requireUppercase: true,
-      requireLowercase: true,
-      requireNumbers: true,
-      requireSpecialChars: true,
-      expiryDays: 90
-    },
-    loginAttempts: 5
+
+    setValidationError(validationResult.error || '');
+    
+    if (validationResult.isValid) {
+      onChange(settingKey, newValue);
+    }
+  };
+
+  const handleTimeChange = (timeType: 'start' | 'end', timeValue: string) => {
+    const timeValidation = validateTime(timeValue);
+    
+    if (timeValidation.isValid) {
+      const currentValue = typeof value === 'object' ? value : {};
+      const newValue = { ...currentValue, [timeType]: timeValue };
+      
+      // Validate that start time is before end time
+      if (newValue.start && newValue.end && newValue.start >= newValue.end) {
+        setValidationError('Start time must be before end time');
+        return;
+      }
+      
+      setValidationError('');
+      onChange(settingKey, newValue);
+    } else {
+      setValidationError(timeValidation.error || '');
+    }
+  };
+
+  // Generate readable label from setting key
+  const generateLabel = (key: string) => {
+    return key
+      .replace(/_/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  };
+
+  const inputId = `setting-${settingKey}`;
+
+  // Render different input types based on dataType
+  switch (dataType) {
+    case 'boolean':
+      return (
+        <div className="mb-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id={inputId}
+              checked={value || false}
+              onChange={handleChange}
+              disabled={disabled}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
+            />
+            <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+              {generateLabel(settingKey)}
+            </label>
+          </div>
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
+        </div>
+      );
+
+    case 'number':
+      return (
+        <div className="mb-4">
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+            {generateLabel(settingKey)}
+          </label>
+          <input
+            type="number"
+            id={inputId}
+            value={value || 0}
+            onChange={handleChange}
+            disabled={disabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50"
+          />
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
+        </div>
+      );
+
+    case 'json':
+      // Special handling for working hours
+      if (settingKey.startsWith('working_hours_') && settingKey !== 'working_hours_holiday_mode') {
+        const timeData = typeof value === 'object' ? value : {};
+        const dayName = settingKey.replace('working_hours_', '');
+        
+        return (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {generateLabel(settingKey)}
+            </label>
+            <div className="space-y-2 p-3 border border-gray-300 rounded-md bg-gray-50">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={timeData.enabled || false}
+                  onChange={(e) => {
+                    const newValue = { ...timeData, enabled: e.target.checked };
+                    onChange(settingKey, newValue);
+                  }}
+                  disabled={disabled}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">Enabled</span>
+              </div>
+              {timeData.enabled && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={timeData.start || '09:00'}
+                      onChange={(e) => {
+                        const newValue = { ...timeData, start: e.target.value };
+                        onChange(settingKey, newValue);
+                      }}
+                      disabled={disabled}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={timeData.end || '17:00'}
+                      onChange={(e) => {
+                        const newValue = { ...timeData, end: e.target.value };
+                        onChange(settingKey, newValue);
+                      }}
+                      disabled={disabled}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            {description && (
+              <p className="mt-1 text-xs text-gray-500">{description}</p>
+            )}
+          </div>
+        );
+      }
+
+      // Default JSON handling
+      return (
+        <div className="mb-4">
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+            {generateLabel(settingKey)}
+          </label>
+          <textarea
+            id={inputId}
+            value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value || ''}
+            onChange={(e) => {
+              try {
+                const parsedValue = JSON.parse(e.target.value);
+                onChange(settingKey, parsedValue);
+              } catch (err) {
+                // If invalid JSON, store as string for now
+                onChange(settingKey, e.target.value);
+              }
+            }}
+            disabled={disabled}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50 font-mono text-sm"
+          />
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
+        </div>
+      );
+
+    case 'file':
+      return (
+        <div className="mb-4">
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+            {generateLabel(settingKey)}
+          </label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              id={inputId}
+              value={value || ''}
+              onChange={handleChange}
+              disabled={disabled}
+              placeholder="File path or URL"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              disabled={disabled}
+              className="px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            >
+              Browse
+            </button>
+          </div>
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
+        </div>
+      );
+
+    default: // string
+      // Special handling for time inputs
+      if (settingKey.includes('time') && (settingKey.includes('break') || settingKey.includes('start') || settingKey.includes('end'))) {
+        return (
+          <div className="mb-4">
+            <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+              {generateLabel(settingKey)}
+            </label>
+            <input
+              type="time"
+              id={inputId}
+              value={value || ''}
+              onChange={handleChange}
+              disabled={disabled}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50"
+            />
+            {description && (
+              <p className="mt-1 text-xs text-gray-500">{description}</p>
+            )}
+          </div>
+        );
+      }
+
+      if (settingKey.includes('address')) {
+        return (
+          <div className="mb-4">
+            <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+              {generateLabel(settingKey)}
+            </label>
+            <textarea
+              id={inputId}
+              value={value || ''}
+              onChange={handleChange}
+              disabled={disabled}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50"
+            />
+            {description && (
+              <p className="mt-1 text-xs text-gray-500">{description}</p>
+            )}
+          </div>
+        );
+      }
+
+      return (
+        <div className="mb-4">
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+            {generateLabel(settingKey)}
+          </label>
+          <input
+            type="text"
+            id={inputId}
+            value={value || ''}
+            onChange={handleChange}
+            disabled={disabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:opacity-50"
+          />
+          {description && (
+            <p className="mt-1 text-xs text-gray-500">{description}</p>
+          )}
+        </div>
+      );
   }
 };
 
+// Main SettingsConfiguration component
 export default function SettingsConfiguration() {
-  const [settings, setSettings] = useState(tempSettings);
-  const [activeSection, setActiveSection] = useState('general');
-  const [selectedTemplate, setSelectedTemplate] = useState('appointmentConfirmation');
+  const {
+    settings,
+    metadata,
+    categories,
+    loading,
+    updating,
+    error,
+    updateSettings,
+    getSettingsByCategory,
+    getSettingMetadata,
+    getCategoryMetadata
+  } = useAdminSettings();
+
+  const [activeCategory, setActiveCategory] = useState('general');
   const [isEditing, setIsEditing] = useState(false);
-  const [tempEditSettings, setTempEditSettings] = useState({});
+  const [editedSettings, setEditedSettings] = useState<{ [key: string]: any }>({});
 
-  // Handle input change for general settings
-  const handleGeneralChange = (e) => {
-    const { name, value } = e.target;
-    setTempEditSettings(prev => ({
-      ...prev,
-      general: {
-        ...prev.general,
-        [name]: value
-      }
-    }));
-  };
-
-  // Handle working hours change
-  const handleWorkingHoursChange = (day, field, value) => {
-    setTempEditSettings(prev => ({
-      ...prev,
-      workingHours: {
-        ...prev.workingHours,
-        [day]: {
-          ...prev.workingHours[day],
-          [field]: field === 'isOpen' ? value : value
-        }
-      }
-    }));
-  };
-
-  // Handle appointments settings change
-  const handleAppointmentsChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setTempEditSettings(prev => ({
-      ...prev,
-      appointments: {
-        ...prev.appointments,
-        [name]: type === 'checkbox' ? checked : value
-      }
-    }));
-  };
-
-  // Handle template change
-  const handleTemplateChange = (e) => {
-    const { name, value } = e.target;
-    setTempEditSettings(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        templates: {
-          ...prev.notifications.templates,
-          [selectedTemplate]: {
-            ...prev.notifications.templates[selectedTemplate],
-            [name]: value
-          }
-        }
-      }
-    }));
-  };
-
-  // Handle reminder settings change
-  const handleReminderChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setTempEditSettings(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        sendReminders: {
-          ...prev.notifications.sendReminders,
-          [name]: type === 'checkbox' ? checked : parseInt(value)
-        }
-      }
-    }));
-  };
-
-  // Handle backup settings change
-  const handleBackupChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setTempEditSettings(prev => ({
-      ...prev,
-      backup: {
-        ...prev.backup,
-        [name]: type === 'checkbox' ? checked : value
-      }
-    }));
-  };
-
-  // Handle security settings change
-  const handleSecurityChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setTempEditSettings(prev => ({
-        ...prev,
-        security: {
-          ...prev.security,
-          [parent]: {
-            ...prev.security[parent],
-            [child]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value) : value)
-          }
-        }
-      }));
-    } else {
-      setTempEditSettings(prev => ({
-        ...prev,
-        security: {
-          ...prev.security,
-          [name]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value) : value)
-        }
-      }));
+  // Initialize editing state when category changes
+  useEffect(() => {
+    if (settings[activeCategory]) {
+      setEditedSettings(settings[activeCategory]);
     }
+  }, [activeCategory, settings]);
+
+  // Generate fallback categories from settings if categories API fails
+  const availableCategories = useMemo(() => {
+    if (categories && categories.length > 0) {
+      return categories;
+    }
+    
+    // Fallback: generate categories from settings keys
+    return Object.keys(settings).map(categoryName => ({
+      name: categoryName,
+      count: Object.keys(settings[categoryName] || {}).length,
+      display_name: categoryName.charAt(0).toUpperCase() + categoryName.slice(1).replace(/_/g, ' ')
+    }));
+  }, [categories, settings]);
+
+  // Handle setting change during editing
+  const handleSettingChange = (key: string, value: any) => {
+    setEditedSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
-  // Start editing
+  // Start editing mode
   const startEditing = () => {
-    setTempEditSettings(settings);
+    setEditedSettings(settings[activeCategory] || {});
     setIsEditing(true);
   };
 
   // Cancel editing
   const cancelEditing = () => {
-    setTempEditSettings({});
+    setEditedSettings(settings[activeCategory] || {});
     setIsEditing(false);
   };
 
   // Save settings
-  const saveSettings = () => {
-    setSettings(tempEditSettings);
-    setIsEditing(false);
-    setTempEditSettings({});
-    // In a real app, you would save to database here
-    alert('Settings saved successfully!');
+  const saveSettings = async () => {
+    try {
+      await updateSettings(editedSettings);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
   };
 
-  return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Settings & Configuration</h1>
-        {!isEditing ? (
-          <button 
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            onClick={startEditing}
-          >
-            Edit Settings
-          </button>
-        ) : (
-          <div className="flex gap-2">
-            <button 
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
-              onClick={cancelEditing}
-            >
-              Cancel
-            </button>
-            <button 
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              onClick={saveSettings}
-            >
-              Save Changes
-            </button>
-          </div>
-        )}
-      </div>
+  // Get current category display name
+  const getCurrentCategoryDisplayName = () => {
+    const category = availableCategories.find(cat => cat.name === activeCategory);
+    return category?.display_name || activeCategory;
+  };
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Settings Navigation */}
-        <div className="md:w-64 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">Settings</h2>
-            <nav className="space-y-1">
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'general' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('general')}
-              >
-                General
-              </button>
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'workingHours' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('workingHours')}
-              >
-                Working Hours
-              </button>
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'appointments' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('appointments')}
-              >
-                Appointments
-              </button>
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'notifications' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('notifications')}
-              >
-                Notifications
-              </button>
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'backup' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('backup')}
-              >
-                Backup
-              </button>
-              <button
-                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-                  activeSection === 'security' 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setActiveSection('security')}
-              >
-                Security
-              </button>
-            </nav>
+  if (loading && Object.keys(settings).length === 0) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentCategorySettings = settings[activeCategory] || {};
+
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Settings & Configuration</h1>
+              <p className="text-gray-600 mt-1">Manage system settings and configuration</p>
+            </div>
+            <div className="flex space-x-3">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={cancelEditing}
+                    disabled={updating}
+                    className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" />
+                    <span>Cancel</span>
+                  </button>
+                  <button
+                    onClick={saveSettings}
+                    disabled={updating}
+                    className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{updating ? 'Saving...' : 'Save Settings'}</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={startEditing}
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit Settings</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
-        
-        {/* Settings Content */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
-          {/* General Settings */}
-          {activeSection === 'general' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">General Settings</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="clinicName" className="block text-sm font-medium text-gray-700">Clinic Name</label>
-                  <input
-                    type="text"
-                    id="clinicName"
-                    name="clinicName"
-                    value={isEditing ? tempEditSettings.general.clinicName : settings.general.clinicName}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicLogo" className="block text-sm font-medium text-gray-700">Clinic Logo</label>
-                  <input
-                    type="text"
-                    id="clinicLogo"
-                    name="clinicLogo"
-                    value={isEditing ? tempEditSettings.general.clinicLogo : settings.general.clinicLogo}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicPhone" className="block text-sm font-medium text-gray-700">Clinic Phone</label>
-                  <input
-                    type="text"
-                    id="clinicPhone"
-                    name="clinicPhone"
-                    value={isEditing ? tempEditSettings.general.clinicPhone : settings.general.clinicPhone}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="clinicEmail" className="block text-sm font-medium text-gray-700">Clinic Email</label>
-                  <input
-                    type="email"
-                    id="clinicEmail"
-                    name="clinicEmail"
-                    value={isEditing ? tempEditSettings.general.clinicEmail : settings.general.clinicEmail}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label htmlFor="clinicAddress" className="block text-sm font-medium text-gray-700">Clinic Address</label>
-                  <textarea
-                    id="clinicAddress"
-                    name="clinicAddress"
-                    value={isEditing ? tempEditSettings.general.clinicAddress : settings.general.clinicAddress}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    rows="3"
-                    disabled={!isEditing}
-                  ></textarea>
-                </div>
-                <div>
-                  <label htmlFor="clinicWebsite" className="block text-sm font-medium text-gray-700">Clinic Website</label>
-                  <input
-                    type="text"
-                    id="clinicWebsite"
-                    name="clinicWebsite"
-                    value={isEditing ? tempEditSettings.general.clinicWebsite : settings.general.clinicWebsite}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700">Time Zone</label>
-                  <select
-                    id="timeZone"
-                    name="timeZone"
-                    value={isEditing ? tempEditSettings.general.timeZone : settings.general.timeZone}
-                    onChange={handleGeneralChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                  >
-                    <option value="Asia/Kuala_Lumpur">Malaysia (UTC+8)</option>
-                    <option value="Asia/Singapore">Singapore (UTC+8)</option>
-                    <option value="Asia/Jakarta">Indonesia (UTC+7)</option>
-                    <option value="Asia/Bangkok">Thailand (UTC+7)</option>
-                  </select>
-                </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <div className="w-64">
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <SettingsIcon className="h-5 w-5 mr-2" />
+                  Settings
+                </h3>
               </div>
+              <nav className="p-2">
+                {availableCategories.map((category) => (
+                  <button
+                    key={category.name}
+                    onClick={() => setActiveCategory(category.name)}
+                    className={`w-full text-left px-3 py-2 rounded-lg mb-1 transition-colors ${
+                      activeCategory === category.name
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{category.display_name}</span>
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+                        {category.count}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </nav>
             </div>
-          )}
-          
-          {/* Working Hours Settings */}
-          {activeSection === 'workingHours' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h2>
-              <div className="space-y-4">
-                {Object.entries(isEditing ? tempEditSettings.workingHours : settings.workingHours).map(([day, hours]) => (
-                  <div key={day} className="grid grid-cols-4 gap-4 items-center">
-                    <div className="col-span-1 font-medium capitalize">{day}</div>
-                    <div className="col-span-3 flex items-center gap-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`${day}-isOpen`}
-                          checked={hours.isOpen}
-                          onChange={(e) => handleWorkingHoursChange(day, 'isOpen', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {getCurrentCategoryDisplayName()}
+                </h2>
+              </div>
+              
+              <div className="p-6">
+                {Object.keys(currentCategorySettings).length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No settings found for this category
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Object.entries(currentCategorySettings).map(([key, value]) => {
+                      // Skip certain system fields from display
+                      if (key.includes('_id') || key.includes('created_at') || key.includes('updated_at')) {
+                        return null;
+                      }
+
+                      // Get metadata for this setting
+                      const settingMetadata = getSettingMetadata(activeCategory, key);
+
+                      return (
+                        <SettingInput
+                          key={key}
+                          settingKey={key}
+                          value={isEditing ? editedSettings[key] : value}
+                          dataType={settingMetadata.dataType}
+                          description={settingMetadata.description}
+                          onChange={handleSettingChange}
                           disabled={!isEditing}
                         />
-                        <label htmlFor={`${day}-isOpen`} className="ml-2 text-sm text-gray-700">
-                          Open
-                        </label>
-                      </div>
-                      
-                      {hours.isOpen && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="time"
-                            value={hours.startTime}
-                            onChange={(e) => handleWorkingHoursChange(day, 'startTime', e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded"
-                            disabled={!isEditing}
-                          />
-                          <span>to</span>
-                          <input
-                            type="time"
-                            value={hours.endTime}
-                            onChange={(e) => handleWorkingHoursChange(day, 'endTime', e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Appointments Settings */}
-          {activeSection === 'appointments' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Appointment Settings</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="defaultDuration" className="block text-sm font-medium text-gray-700">Default Duration (minutes)</label>
-                  <input
-                    type="number"
-                    id="defaultDuration"
-                    name="defaultDuration"
-                    value={isEditing ? tempEditSettings.appointments.defaultDuration : settings.appointments.defaultDuration}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="5"
-                    step="5"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="timeSlotInterval" className="block text-sm font-medium text-gray-700">Time Slot Interval (minutes)</label>
-                  <input
-                    type="number"
-                    id="timeSlotInterval"
-                    name="timeSlotInterval"
-                    value={isEditing ? tempEditSettings.appointments.timeSlotInterval : settings.appointments.timeSlotInterval}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="5"
-                    step="5"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="maxDaysInAdvance" className="block text-sm font-medium text-gray-700">Maximum Days in Advance</label>
-                  <input
-                    type="number"
-                    id="maxDaysInAdvance"
-                    name="maxDaysInAdvance"
-                    value={isEditing ? tempEditSettings.appointments.maxDaysInAdvance : settings.appointments.maxDaysInAdvance}
-                    onChange={handleAppointmentsChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isEditing}
-                    min="1"
-                  />
-                </div>
-                <div className="flex items-center h-full pt-6">
-                  <input
-                    type="checkbox"
-                    id="allowSameDayBooking"
-                    name="allowSameDayBooking"
-                    checked={isEditing ? tempEditSettings.appointments.allowSameDayBooking : settings.appointments.allowSameDayBooking}
-                    onChange={handleAppointmentsChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}
-                  />
-                  <label htmlFor="allowSameDayBooking" className="ml-2 text-sm text-gray-700">
-                    Allow same day booking
-                  </label>
-                </div>
-                <div className="flex items-center h-full pt-6">
-                  <input
-                    type="checkbox"
-                    id="requireApproval"
-                    name="requireApproval"
-                    checked={isEditing ? tempEditSettings.appointments.requireApproval : settings.appointments.requireApproval}
-                    onChange={handleAppointmentsChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}
-                  />
-                  <label htmlFor="requireApproval" className="ml-2 text-sm text-gray-700">
-                    Require approval for appointments
-                  </label>
-                </div>
-                <div className="flex items-center h-full">
-                  <input
-                    type="checkbox"
-                    id="emailNotifications"
-                    name="emailNotifications"
-                    checked={isEditing ? tempEditSettings.appointments.emailNotifications : settings.appointments.emailNotifications}
-                    onChange={handleAppointmentsChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}
-                  />
-                  <label htmlFor="emailNotifications" className="ml-2 text-sm text-gray-700">
-                    Send email notifications
-                  </label>
-                </div>
-                <div className="flex items-center h-full">
-                  <input
-                    type="checkbox"
-                    id="smsNotifications"
-                    name="smsNotifications"
-                    checked={isEditing ? tempEditSettings.appointments.smsNotifications : settings.appointments.smsNotifications}
-                    onChange={handleAppointmentsChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}
-                  />
-                  <label htmlFor="smsNotifications" className="ml-2 text-sm text-gray-700">
-                    Send SMS notifications
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Notifications Settings */}
-          {activeSection === 'notifications' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Notification Settings</h2>
-              
-              {/* Email Notification Templates */}
-              <div className="mb-6">
-                <h3 className="text-base font-medium text-gray-900 mb-3">Email Templates</h3>
-                <div className="mb-3">
-                  <label htmlFor="templateType" className="block text-sm font-medium text-gray-700">Select Template</label>
-                  <select
-                    id="templateType"
-                    value={selectedTemplate}
-                    onChange={(e) => setSelectedTemplate(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="appointmentConfirmation">Appointment Confirmation</option>
-                    <option value="appointmentReminder">Appointment Reminder</option>
-                    <option value="appointmentCancellation">Appointment Cancellation</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Subject</label>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      value={isEditing 
-                        ? tempEditSettings.notifications.templates[selectedTemplate].subject 
-                        : settings.notifications.templates[selectedTemplate].subject}
-                      onChange={handleTemplateChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="body" className="block text-sm font-medium text-gray-700">Email Body</label>
-                    <textarea
-                      id="body"
-                      name="body"
-                      value={isEditing 
-                        ? tempEditSettings.notifications.templates[selectedTemplate].body 
-                        : settings.notifications.templates[selectedTemplate].body}
-                      onChange={handleTemplateChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      rows="6"
-                      disabled={!isEditing}
-                    ></textarea>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Available variables:</strong> {{patientName}}, {{doctorName}}, {{appointmentDate}}, {{appointmentTime}}, {{clinicName}}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Reminder Settings */}
-              <div>
-                <h3 className="text-base font-medium text-gray-900 mb-3">Appointment Reminders</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="sendReminders"
-                      name="enabled"
-                      checked={isEditing 
-                        ? tempEditSettings.notifications.sendReminders.enabled 
-                        : settings.notifications.sendReminders.enabled}
-                      onChange={handleReminderChange}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                      disabled={!isEditing}
-                    />
-                    <label htmlFor="sendReminders" className="ml-2 text-sm text-gray-700">
-                      Send appointment reminders
-                    </label>
-                  </div>
-                  
-                  {(isEditing ? tempEditSettings.notifications.sendReminders.enabled : settings.notifications.sendReminders.enabled) && (
-                    <div>
-                      <label htmlFor="reminderDays" className="block text-sm font-medium text-gray-700">Days before appointment</label>
-                      <input
-                        type="number"
-                        id="reminderDays"
-                        name="days"
-                        value={isEditing 
-                          ? tempEditSettings.notifications.sendReminders.days 
-                          : settings.notifications.sendReminders.days}
-                        onChange={handleReminderChange}
-                        className="mt-1 block w-full md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="0"
-                        max="7"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Backup Settings */}
-          {activeSection === 'backup' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Backup & Maintenance</h2>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="autoBackup"
-                    name="autoBackup"
-                    checked={isEditing ? tempEditSettings.backup.autoBackup : settings.backup.autoBackup}
-                    onChange={handleBackupChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    disabled={!isEditing}
-                  />
-                  <label htmlFor="autoBackup" className="ml-2 text-sm text-gray-700">
-                    Enable automatic backups
-                  </label>
-                </div>
-                
-                {(isEditing ? tempEditSettings.backup.autoBackup : settings.backup.autoBackup) && (
-                  <div className="space-y-4 ml-6">
-                    <div>
-                      <label htmlFor="backupFrequency" className="block text-sm font-medium text-gray-700">Backup Frequency</label>
-                      <select
-                        id="backupFrequency"
-                        name="backupFrequency"
-                        value={isEditing ? tempEditSettings.backup.backupFrequency : settings.backup.backupFrequency}
-                        onChange={handleBackupChange}
-                        className="mt-1 block w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        disabled={!isEditing}
-                      >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="backupTime" className="block text-sm font-medium text-gray-700">Backup Time</label>
-                      <input
-                        type="time"
-                        id="backupTime"
-                        name="backupTime"
-                        value={isEditing ? tempEditSettings.backup.backupTime : settings.backup.backupTime}
-                        onChange={handleBackupChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="retentionDays" className="block text-sm font-medium text-gray-700">Retention Period (days)</label>
-                      <input
-                        type="number"
-                        id="retentionDays"
-                        name="retentionDays"
-                        value={isEditing ? tempEditSettings.backup.retentionDays : settings.backup.retentionDays}
-                        onChange={handleBackupChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="1"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="storageLocation" className="block text-sm font-medium text-gray-700">Storage Location</label>
-                      <select
-                        id="storageLocation"
-                        name="storageLocation"
-                        value={isEditing ? tempEditSettings.backup.storageLocation : settings.backup.storageLocation}
-                        onChange={handleBackupChange}
-                        className="mt-1 block w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        disabled={!isEditing}
-                      >
-                        <option value="local">Local Storage</option>
-                        <option value="cloud">Cloud Storage</option>
-                      </select>
-                    </div>
+                      );
+                    })}
                   </div>
                 )}
-                
-                <div className="pt-4">
-                  <button 
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-                    disabled={!(!isEditing || tempEditSettings.backup.autoBackup)}
-                  >
-                    Backup Now
-                  </button>
-                </div>
               </div>
             </div>
-          )}
-          
-          {/* Security Settings */}
-          {activeSection === 'security' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-base font-medium text-gray-900 mb-3">Session Settings</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="sessionTimeout" className="block text-sm font-medium text-gray-700">Session Timeout (minutes)</label>
-                      <input
-                        type="number"
-                        id="sessionTimeout"
-                        name="sessionTimeout"
-                        value={isEditing ? tempEditSettings.security.sessionTimeout : settings.security.sessionTimeout}
-                        onChange={handleSecurityChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="5"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="loginAttempts" className="block text-sm font-medium text-gray-700">Maximum Login Attempts</label>
-                      <input
-                        type="number"
-                        id="loginAttempts"
-                        name="loginAttempts"
-                        value={isEditing ? tempEditSettings.security.loginAttempts : settings.security.loginAttempts}
-                        onChange={handleSecurityChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="1"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-base font-medium text-gray-900 mb-3">Password Policy</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="minLength" className="block text-sm font-medium text-gray-700">Minimum Password Length</label>
-                      <input
-                        type="number"
-                        id="minLength"
-                        name="passwordPolicy.minLength"
-                        value={isEditing ? tempEditSettings.security.passwordPolicy.minLength : settings.security.passwordPolicy.minLength}
-                        onChange={handleSecurityChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="6"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="requireUppercase"
-                        name="passwordPolicy.requireUppercase"
-                        checked={isEditing ? tempEditSettings.security.passwordPolicy.requireUppercase : settings.security.passwordPolicy.requireUppercase}
-                        onChange={handleSecurityChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="requireUppercase" className="ml-2 text-sm text-gray-700">
-                        Require uppercase letters
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="requireLowercase"
-                        name="passwordPolicy.requireLowercase"
-                        checked={isEditing ? tempEditSettings.security.passwordPolicy.requireLowercase : settings.security.passwordPolicy.requireLowercase}
-                        onChange={handleSecurityChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="requireLowercase" className="ml-2 text-sm text-gray-700">
-                        Require lowercase letters
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="requireNumbers"
-                        name="passwordPolicy.requireNumbers"
-                        checked={isEditing ? tempEditSettings.security.passwordPolicy.requireNumbers : settings.security.passwordPolicy.requireNumbers}
-                        onChange={handleSecurityChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="requireNumbers" className="ml-2 text-sm text-gray-700">
-                        Require numbers
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="requireSpecialChars"
-                        name="passwordPolicy.requireSpecialChars"
-                        checked={isEditing ? tempEditSettings.security.passwordPolicy.requireSpecialChars : settings.security.passwordPolicy.requireSpecialChars}
-                        onChange={handleSecurityChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="requireSpecialChars" className="ml-2 text-sm text-gray-700">
-                        Require special characters
-                      </label>
-                    </div>
-                    <div>
-                      <label htmlFor="expiryDays" className="block text-sm font-medium text-gray-700">Password Expiry (days)</label>
-                      <input
-                        type="number"
-                        id="expiryDays"
-                        name="passwordPolicy.expiryDays"
-                        value={isEditing ? tempEditSettings.security.passwordPolicy.expiryDays : settings.security.passwordPolicy.expiryDays}
-                        onChange={handleSecurityChange}
-                        className="mt-1 block md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        min="0"
-                        disabled={!isEditing}
-                      />
-                      <p className="mt-1 text-sm text-gray-500">Set to 0 for no expiry</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
