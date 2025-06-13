@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  Clock,
+  FileText,
   Settings,
   Menu
 } from 'lucide-react';
@@ -21,6 +21,7 @@ const navigation = [
   { name: 'Dashboard', href: '/doctor-dashboard', icon: LayoutDashboard },
   { name: 'Appointments', href: '/doctor-appointments', icon: Calendar },
   { name: 'Patients', href: '/doctor-patients', icon: Users },
+  { name: 'Reports', href: '/doctor-reports', icon: FileText },
   { name: 'Settings', href: '/doctor-settings', icon: Settings },
 ];
 
@@ -31,68 +32,81 @@ export default function DoctorLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { data, status } = useSession();
+  const { logout, data, status } = useSession();
   
-  // State for doctor profile - now using proper DoctorProfile type
+  // State for real doctor profile data
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Fallback user profile for compatibility
-  const [userProfile, setUserProfile] = useState({
-    name: '',
-    email: '',
-    department: ''
-  });
-  
-  // Fetch doctor profile data
+  // Fetch real doctor profile data
   useEffect(() => {
     const fetchDoctorProfile = async () => {
       if (status === 'authenticated' && data.user) {
         try {
           setLoading(true);
-          // Use the doctor settings API to get complete profile data
+          // Get real doctor profile data from API
           const profileData = await doctorSettingsClient.getProfile();
           setDoctorProfile(profileData);
-          
-          // Also set fallback userProfile for compatibility
-          setUserProfile({
-            name: `Dr. ${profileData.firstName || ''} ${profileData.lastName || ''}`,
-            email: profileData.email || data.user.email,
-            department: profileData.departmentName || 'Cardiology'
-          });
         } catch (error) {
           console.error('Error fetching doctor profile:', error);
-          
-          // Fallback to user data from session if API fails
-          setUserProfile({
-            name: `Dr. ${data.user.name || 'John Smith'}`,
-            email: data.user.email || 'john.smith@healthclinic.com',
-            department: 'Cardiology'
-          });
+          // If API fails, we can still show basic user info from session
+          setDoctorProfile(null);
         } finally {
           setLoading(false);
         }
+      } else if (status === 'unauthenticated') {
+        // Redirect to login if not authenticated
+        router.push('/login');
       }
     };
 
     fetchDoctorProfile();
-  }, [status, data.user]);
+  }, [status, data.user, router]);
 
-  // Handle logout
-  const handleLogout = () => {
-    // 清除用户角色信息
-    localStorage.removeItem('clinic-user-role');
-    
-    // 显示登出成功提示
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account",
-      variant: "default",
-    });
-    
-    // 重定向到登录页面
-    router.push('/login');
+  // Create user profile from session data (fallback if doctor profile API fails)
+  const userProfile = data.user ? {
+    name: `Dr. ${data.user.name || 'Doctor'}`,
+    email: data.user.email || '',
+    department: 'Medicine' // Default department if not available
+  } : undefined;
+
+  // Enhanced logout handler using SessionContext
+  const handleLogout = async () => {
+    try {
+      // Show loading state
+      toast({
+        title: "Logging out...",
+        description: "Please wait while we securely log you out",
+        variant: "default",
+      });
+      
+      // Use the enhanced logout from SessionContext
+      await logout();
+      
+      // Success message will be shown after redirect to login page
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  // Show loading state while fetching user data
+  if (status === 'loading' || (status === 'authenticated' && loading)) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-gray-600">Loading doctor dashboard...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

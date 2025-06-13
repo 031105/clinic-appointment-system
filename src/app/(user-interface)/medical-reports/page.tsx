@@ -8,6 +8,8 @@ import { Printer, Download, Calendar, Search, RefreshCcw } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { MedicalRecord } from '@/lib/api/patient-client';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function MedicalReportsPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function MedicalReportsPage() {
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isRetrying, setIsRetrying] = useState(false);
+  const reportRef = React.useRef<HTMLDivElement>(null);
   
   // Handle retry button click
   const handleRetry = async () => {
@@ -133,6 +136,18 @@ export default function MedicalReportsPage() {
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
+  };
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current || !selectedRecord) return;
+    const canvas = await html2canvas(reportRef.current);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`medical_report_${selectedRecord.id}.pdf`);
   };
 
   // Loading state
@@ -269,7 +284,7 @@ export default function MedicalReportsPage() {
       <div className="flex-1 p-6 overflow-y-auto">
         {selectedRecord ? (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6" ref={reportRef}>
               {/* Report Header */}
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -289,6 +304,15 @@ export default function MedicalReportsPage() {
                   >
                     <Printer className="h-4 w-4 mr-2" />
                     Print
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleExportPDF}
+                    className="flex items-center"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
                   </Button>
                 </div>
               </div>

@@ -3,25 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { SendNotificationRequest } from '@/lib/api/admin-dashboard-client';
-import { adminAppointmentsClient } from '@/lib/api/admin-appointments-client';
+import { adminAppointmentsClient, Doctor as AdminDoctor, Patient as AdminPatient } from '@/lib/api/admin-appointments-client';
 
 interface SendNotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSend: (data: SendNotificationRequest) => Promise<boolean>;
   isLoading: boolean;
-}
-
-interface Patient {
-  patient_id: number;
-  name: string;
-  email: string;
-}
-
-interface Doctor {
-  doctor_id: number;
-  name: string;
-  specialty: string;
 }
 
 export default function SendNotificationModal({
@@ -33,20 +21,33 @@ export default function SendNotificationModal({
   const [formData, setFormData] = useState<SendNotificationRequest>({
     title: '',
     message: '',
-    type: 'system',
-    target_users: 'all'
+    target_users: 'patients',
   });
 
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [patients, setPatients] = useState<AdminPatient[]>([]);
+  const [doctors, setDoctors] = useState<AdminDoctor[]>([]);
   const [selectedPatients, setSelectedPatients] = useState<number[]>([]);
   const [selectedDoctors, setSelectedDoctors] = useState<number[]>([]);
+  const [searchPatient, setSearchPatient] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Load patients and doctors when modal opens
   useEffect(() => {
     if (isOpen) {
       loadPatientsAndDoctors();
+    }
+  }, [isOpen]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        title: '',
+        message: '',
+        target_users: 'patients',
+      });
+      setSelectedPatients([]);
+      setSelectedDoctors([]);
     }
   }, [isOpen]);
 
@@ -63,45 +64,7 @@ export default function SendNotificationModal({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title.trim() || !formData.message.trim()) {
-      return;
-    }
-
-    // Prepare the notification data with specific user selections if applicable
-    let notificationData = { ...formData };
-    
-    if (formData.target_users === 'specific_patients' && selectedPatients.length > 0) {
-      notificationData = {
-        ...formData,
-        target_users: 'specific',
-        specific_user_ids: selectedPatients
-      } as any;
-    } else if (formData.target_users === 'specific_doctors' && selectedDoctors.length > 0) {
-      notificationData = {
-        ...formData,
-        target_users: 'specific',
-        specific_user_ids: selectedDoctors
-      } as any;
-    }
-
-    const success = await onSend(notificationData);
-    if (success) {
-      setFormData({
-        title: '',
-        message: '',
-        type: 'system',
-        target_users: 'all'
-      });
-      setSelectedPatients([]);
-      setSelectedDoctors([]);
-      onClose();
-    }
-  };
-
-  const handleInputChange = (field: keyof SendNotificationRequest, value: string) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Reset selections when target changes
@@ -111,45 +74,124 @@ export default function SendNotificationModal({
     }
   };
 
-  const handlePatientSelection = (patientId: number) => {
-    setSelectedPatients(prev => 
-      prev.includes(patientId) 
-        ? prev.filter(id => id !== patientId)
-        : [...prev, patientId]
-    );
+  const handlePatientSelection = (patientId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedPatients(prev => [...prev, patientId]);
+    } else {
+      setSelectedPatients(prev => prev.filter(id => id !== patientId));
+    }
   };
 
-  const handleDoctorSelection = (doctorId: number) => {
-    setSelectedDoctors(prev => 
-      prev.includes(doctorId) 
-        ? prev.filter(id => id !== doctorId)
-        : [...prev, doctorId]
-    );
+  const handleDoctorSelection = (doctorId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedDoctors(prev => [...prev, doctorId]);
+    } else {
+      setSelectedDoctors(prev => prev.filter(id => id !== doctorId));
+    }
+  };
+
+  const filteredPatients = patients.filter(p =>
+    `${p.first_name} ${p.last_name}`.toLowerCase().includes(searchPatient.toLowerCase())
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    let finalData = { ...formData };
+    
+    // Handle specific user selections
+    if (formData.target_users === 'specific_patients') {
+      finalData = {
+        ...formData,
+        target_users: 'specific',
+        specific_user_ids: selectedPatients
+      };
+    } else if (formData.target_users === 'specific_doctors') {
+      finalData = {
+        ...formData,
+        target_users: 'specific',
+        specific_user_ids: selectedDoctors
+      };
+    } else if (formData.target_users === 'specific') {
+      finalData = {
+        ...formData,
+        specific_user_ids: selectedPatients
+      };
+    }
+
+    const success = await onSend(finalData);
+    if (success) {
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
 
-  const showPatientSelection = formData.target_users === 'specific_patients';
-  const showDoctorSelection = formData.target_users === 'specific_doctors';
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Send Notification</h2>
           <button
             onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
             disabled={isLoading}
-            className="text-gray-400 hover:text-gray-600"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Target Users Select */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target</label>
+            <select
+              value={formData.target_users}
+              onChange={e => setFormData(prev => ({ ...prev, target_users: e.target.value as any }))}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
+            >
+              <option value="patients">All Patients</option>
+              <option value="specific">Specific Patients</option>
+            </select>
+          </div>
+          {/* If specific, show patient multi-select */}
+          {formData.target_users === 'specific' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Patients</label>
+              <input
+                type="text"
+                placeholder="Search patients..."
+                value={searchPatient}
+                onChange={e => setSearchPatient(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
+              />
+              <div className="max-h-40 overflow-y-auto border rounded p-2 bg-gray-50">
+                {filteredPatients.length === 0 ? (
+                  <div className="text-gray-400 text-sm">No patients found</div>
+                ) : (
+                  filteredPatients.map(p => (
+                    <label key={p.patient_id} className="flex items-center space-x-2 mb-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedPatients.includes(p.patient_id)}
+                        onChange={e => {
+                          if (e.target.checked) setSelectedPatients(prev => [...prev, p.patient_id]);
+                          else setSelectedPatients(prev => prev.filter(id => id !== p.patient_id));
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        disabled={isLoading}
+                      />
+                      <span className="text-sm">{p.first_name} {p.last_name} ({p.email})</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title
+              Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -164,137 +206,45 @@ export default function SendNotificationModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message
+              Message <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.message}
               onChange={(e) => handleInputChange('message', e.target.value)}
-              rows={4}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter notification message"
+              rows={4}
               required
               disabled={isLoading}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Type
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) => handleInputChange('type', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            >
-              <option value="system">System</option>
-              <option value="reminder">Reminder</option>
-              <option value="message">Message</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Target Users
-            </label>
-            <select
-              value={formData.target_users}
-              onChange={(e) => handleInputChange('target_users', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            >
-              <option value="all">All Users</option>
-              <option value="patients">All Patients</option>
-              <option value="doctors">All Doctors</option>
-              <option value="specific_patients">Specific Patients</option>
-              <option value="specific_doctors">Specific Doctors</option>
-            </select>
-          </div>
-
-          {/* Patient Selection */}
-          {showPatientSelection && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Patients ({selectedPatients.length} selected)
-              </label>
-              <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                {loading ? (
-                  <div className="text-center py-4">Loading patients...</div>
-                ) : patients.length > 0 ? (
-                  patients.map((patient) => (
-                    <label key={patient.patient_id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedPatients.includes(patient.patient_id)}
-                        onChange={() => handlePatientSelection(patient.patient_id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm">
-                        {patient.name} ({patient.email})
-                      </span>
-                    </label>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-gray-500">No patients found</div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Doctor Selection */}
-          {showDoctorSelection && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Doctors ({selectedDoctors.length} selected)
-              </label>
-              <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                {loading ? (
-                  <div className="text-center py-4">Loading doctors...</div>
-                ) : doctors.length > 0 ? (
-                  doctors.map((doctor) => (
-                    <label key={doctor.doctor_id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedDoctors.includes(doctor.doctor_id)}
-                        onChange={() => handleDoctorSelection(doctor.doctor_id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm">
-                        {doctor.name} - {doctor.specialty}
-                      </span>
-                    </label>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-gray-500">No doctors found</div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-4">
+          <div className="flex space-x-3 pt-4">
             <button
               type="button"
               onClick={onClose}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={
-                isLoading || 
-                !formData.title.trim() || 
-                !formData.message.trim() ||
-                (showPatientSelection && selectedPatients.length === 0) ||
-                (showDoctorSelection && selectedDoctors.length === 0)
-              }
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+              disabled={isLoading || !formData.title || !formData.message || (formData.target_users === 'specific' && selectedPatients.length === 0)}
             >
               {isLoading ? 'Sending...' : 'Send Notification'}
             </button>
           </div>
         </form>
+
+        {/* EmailJS Status Info */}
+        <div className="mt-4 p-3 bg-blue-50 rounded-md">
+          <p className="text-sm text-blue-700">
+            📧 <strong>Email Notifications:</strong> Users with email notifications enabled will also receive 
+            an email copy of this notification. Configure EmailJS in environment variables to enable email sending.
+          </p>
+        </div>
       </div>
     </div>
   );

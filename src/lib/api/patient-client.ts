@@ -257,7 +257,7 @@ const patientClient = {
   // 获取个人资料
   getProfile: async () => {
     try {
-      const response = await sessionHttpClient.get('/patients/profile');
+      const response = await sessionHttpClient.get('/patient-setting/profile');
       return handleApiResponse(response);
     } catch (error) {
       console.error('Get profile error:', error);
@@ -268,7 +268,7 @@ const patientClient = {
   // 更新个人资料
   updateProfile: async (data: ProfileUpdateRequest) => {
     try {
-      const response = await sessionHttpClient.put('/patients/profile', data);
+      const response = await sessionHttpClient.put('/patient-setting/profile', data);
       return handleApiResponse(response);
     } catch (error) {
       console.error('Update profile error:', error);

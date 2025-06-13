@@ -25,7 +25,6 @@ const protectedPaths = {
     '/admin-permissions',
     '/admin-settings',
     '/admin-users',
-    '/admin-doctors',
     '/admin-reports',
   ]
 };

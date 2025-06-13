@@ -36,6 +36,10 @@ export interface AdminNotification {
   is_read: boolean;
   created_at: string;
   data?: any;
+  user_id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface SendNotificationRequest {
@@ -44,6 +48,21 @@ export interface SendNotificationRequest {
   type?: 'system' | 'reminder' | 'message';
   target_users?: 'all' | 'patients' | 'doctors' | 'specific_patients' | 'specific_doctors' | 'specific';
   specific_user_ids?: number[];
+}
+
+export interface EmailNotificationData {
+  to_email: string;
+  to_name: string;
+  notification_title: string;
+  notification_message: string;
+  notification_type: 'system' | 'reminder' | 'message' | 'appointment';
+  notification_date: string;
+}
+
+export interface SendNotificationResponse {
+  recipients: number;
+  email_recipients: number;
+  email_data: EmailNotificationData[];
 }
 
 export interface GenerateReportRequest {
@@ -116,9 +135,7 @@ export const adminDashboardClient = {
   /**
    * Send notification to users
    */
-  async sendNotification(data: SendNotificationRequest): Promise<{
-    recipients: number;
-  }> {
+  async sendNotification(data: SendNotificationRequest): Promise<SendNotificationResponse> {
     const response = await httpClient.post('/admin/dashboard/notifications/send', data);
     
     if (response.data && response.data.data) {

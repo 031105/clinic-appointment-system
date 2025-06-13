@@ -96,6 +96,16 @@ export class AuthController {
         patientInfo,
       } = req.body;
 
+      // Debug logging
+      console.log('[Register] Request body:', {
+        email,
+        role,
+        firstName,
+        lastName,
+        patientInfo: patientInfo ? 'provided' : 'not provided',
+        patientInfoDetails: patientInfo
+      });
+
       // Verify OTP
       const verifyResult = await this.verifyOTP(email, otp, 'registration');
       if (!verifyResult.valid) {
@@ -170,21 +180,31 @@ export class AuthController {
             doctorInfo.consultationFee
           ]);
           
-        } else if (role === 'patient' && patientInfo) {
+        } else if (role === 'patient') {
+          // Always create a patient record for patient role users
+          console.log('[Register] Creating patient record for user:', userId);
+          console.log('[Register] Patient info data:', patientInfo);
+          
           const createPatientQuery = `
             INSERT INTO patients (
-              patient_id, date_of_birth, blood_type, height, weight, medical_history
+              patient_id, date_of_birth, gender, blood_type, height, weight
             ) VALUES ($1, $2, $3, $4, $5, $6)
           `;
           
-          await client.query(createPatientQuery, [
+          const patientData = [
             userId,
-            new Date(patientInfo.dateOfBirth),
-            patientInfo.bloodGroup,
-            patientInfo.height,
-            patientInfo.weight,
-            JSON.stringify({})
-          ]);
+            patientInfo?.dateOfBirth ? new Date(patientInfo.dateOfBirth) : null,
+            patientInfo?.gender || null,
+            patientInfo?.bloodGroup || null,
+            patientInfo?.height || null,
+            patientInfo?.weight || null
+          ];
+          
+          console.log('[Register] Inserting patient data:', patientData);
+          
+          await client.query(createPatientQuery, patientData);
+          
+          console.log('[Register] Patient record created successfully');
         }
 
         // Mark OTP as verified
@@ -390,12 +410,27 @@ export class AuthController {
     try {
       const { email } = req.body;
 
+      // Validate email format (additional server-side validation)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        throw new ApiError(400, 'Please provide a valid email address');
+      }
+
+      // Convert email to lowercase and trim whitespace
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // Check for rate limiting (basic implementation)
+      // In production, use Redis or similar for proper rate limiting
+      const clientIP = req.ip || req.connection.remoteAddress;
+      logger.info(`Password reset attempt for email: ${normalizedEmail} from IP: ${clientIP}`);
+
       // Find user
-      const userQuery = `SELECT user_id, email, first_name, last_name FROM users WHERE email = $1`;
-      const userResult = await dbClient.query(userQuery, [email]);
+      const userQuery = `SELECT user_id, email, first_name, last_name FROM users WHERE LOWER(email) = $1`;
+      const userResult = await dbClient.query(userQuery, [normalizedEmail]);
       
       if (userResult.rows.length === 0) {
-        // Don't reveal that the email doesn't exist
+        // Don't reveal that the email doesn't exist - return success but don't process
+        logger.info(`Password reset requested for non-existent email: ${normalizedEmail}`);
         return res.json({
           success: true,
           message: 'If an account exists with that email, a temporary password has been sent.',
@@ -403,9 +438,28 @@ export class AuthController {
       }
       
       const user = userResult.rows[0];
+      logger.info(`Password reset processing for user ID: ${user.user_id}, email: ${normalizedEmail}`);
+
+      // Check if user has reset password recently (prevent abuse)
+      const recentResetQuery = `
+        SELECT user_id FROM users 
+        WHERE user_id = $1 AND must_change_password = true 
+        AND updated_at > NOW() - INTERVAL '15 minutes'
+      `;
+      const recentResetResult = await dbClient.query(recentResetQuery, [user.user_id]);
+      
+      if (recentResetResult.rows.length > 0) {
+        logger.warn(`Multiple password reset attempts for user ${user.user_id} within 15 minutes`);
+        // Still return success to not reveal email existence
+        return res.json({
+          success: true,
+          message: 'If an account exists with that email, a temporary password has been sent.',
+        });
+      }
 
       // Generate temporary password
       const tempPassword = this.generateTempPassword();
+      logger.info(`Generated temporary password for user ${user.user_id}`);
       
       // Hash temporary password
       const salt = await bcrypt.genSalt(10);
@@ -414,22 +468,26 @@ export class AuthController {
       // Update user with temporary password
       const updatePasswordQuery = `
         UPDATE users
-        SET password_hash = $1, must_change_password = true
+        SET password_hash = $1, must_change_password = true, updated_at = NOW()
         WHERE user_id = $2
       `;
       
       await dbClient.query(updatePasswordQuery, [hashedTempPassword, user.user_id]);
+      logger.info(`Password updated for user ${user.user_id}, temporary password set`);
 
-      // For now, return temp password in response (in production, this would be sent via EmailJS from frontend)
+      // Return response with user data for email sending (only if account exists)
       res.json({
         success: true,
         message: 'Temporary password sent to your email',
-        // TODO: Remove this in production - temp password should only be sent via email
+        // Return user data for email sending (frontend will handle email via EmailJS)
         tempPassword: config.nodeEnv === 'development' ? tempPassword : undefined,
-        email: email,
+        email: normalizedEmail,
         userName: `${user.first_name} ${user.last_name}`
       });
+
+      logger.info(`Password reset completed successfully for user ${user.user_id}`);
     } catch (error) {
+      logger.error('Error in forgotPassword:', error);
       next(error);
     }
   }

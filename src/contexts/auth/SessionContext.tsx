@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { clearAllUserData, setupCrossTabLogout } from '@/utils/cache-utils';
 
 // 定义用户类型
 type User = {
@@ -101,7 +102,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           
           const userDataString = JSON.stringify(userData);
           
-          // 保存token和用户数据到localStorage
+          // 使用API返回的token，而不是重新构造
           localStorage.setItem('accessToken', data.user.token);
           localStorage.setItem('userData', userDataString);
           
@@ -120,7 +121,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         });
         setStatus('authenticated');
         
-        console.log('[SessionContext] Login successful');
+        console.log('[SessionContext] Login successful, user role:', data.user.role);
         return true;
       } else {
         console.error('[SessionContext] Login failed:', data.message);
@@ -132,30 +133,57 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // 登出
-  const logout = async (): Promise<void> => {
+  // Enhanced logout function with comprehensive cleanup
+  const logout = useCallback(async (): Promise<void> => {
     try {
-      // Only access localStorage in browser environment
-      if (typeof window !== 'undefined') {
-        // 清除localStorage中的数据
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('userData');
-        
-        // Also remove the cookies
-        Cookies.remove('accessToken', { path: '/' });
-        Cookies.remove('userData', { path: '/' });
-      }
+      console.log('[SessionContext] Starting comprehensive logout...');
       
-      // 更新状态
+      // Use the comprehensive cache clearing utility
+      await clearAllUserData({
+        includeServiceWorkerCache: true,
+        includeIndexedDB: true,
+        includeBroadcastChannel: true,
+        forceReload: false // We'll handle navigation manually
+      });
+      
+      // Update state
       setUser(null);
       setStatus('unauthenticated');
       
-      console.log('[SessionContext] Logged out');
+      console.log('[SessionContext] Comprehensive logout completed');
+      
+      // Navigate to login page
       router.push('/login');
+      
+      // Force reload after navigation to ensure complete cleanup
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      
     } catch (error) {
       console.error('[SessionContext] Logout error:', error);
+      // Even if there's an error, clear what we can and redirect
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      setUser(null);
+      setStatus('unauthenticated');
+      router.push('/login');
     }
-  };
+  }, [router]);
+
+  // Set up cross-tab logout listener
+  useEffect(() => {
+    const channel = setupCrossTabLogout(() => {
+      console.log('[SessionContext] Cross-tab logout triggered');
+      logout();
+    });
+
+    return () => {
+      channel?.close();
+    };
+  }, [logout]);
 
   // 初始化 - 从localStorage加载用户数据
   useEffect(() => {

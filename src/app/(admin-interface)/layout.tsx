@@ -6,7 +6,7 @@
 // import '@fullcalendar/timegrid/main.css';
 
 import React, { useState } from 'react';
-import { AdminSidebar } from '@/components/admin';
+import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
 import { 
   LayoutDashboard,
   Calendar,
@@ -14,30 +14,33 @@ import {
   Building2,
   UserCog,
   Settings,
-  Menu
+  Menu,
+  UserCheck,
+  FileText
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/Toaster';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
+import { useSession } from '@/contexts/auth/SessionContext';
 
 // Admin interface navigation items
 const navigation = [
   { name: 'Dashboard', href: '/admin-dashboard', icon: LayoutDashboard },
+  { name: 'Users', href: '/admin-users', icon: Users },
   { name: 'Appointments', href: '/admin-appointments', icon: Calendar },
-  { name: 'Patients', href: '/admin-patients', icon: Users },
   { name: 'Departments', href: '/admin-departments', icon: Building2 },
-  { name: 'Users', href: '/admin-permissions', icon: UserCog },
+  { name: 'Reports', href: '/admin-reports', icon: FileText },
   { name: 'Settings', href: '/admin-settings', icon: Settings },
 ];
 
 export default function AdminLayout({
   children,
-
 }: {
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const { logout } = useSession();
 
   // Sample user profile
   const userProfile = {
@@ -45,20 +48,28 @@ export default function AdminLayout({
     email: 'admin@clinic.com'
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    // 清除用户角色信息
-    localStorage.removeItem('clinic-user-role');
-    
-    // 显示登出成功提示
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account",
-      variant: "default",
-    });
-    
-    // 重定向到登录页面
-    router.push('/login');
+  // Enhanced logout handler using SessionContext
+  const handleLogout = async () => {
+    try {
+      // Show loading state
+      toast({
+        title: "Logging out...",
+        description: "Please wait while we securely log you out",
+        variant: "default",
+      });
+      
+      // Use the enhanced logout from SessionContext
+      await logout();
+      
+      // Success message will be shown after redirect to login page
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

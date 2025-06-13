@@ -5,9 +5,12 @@ import {
   DashboardStats,
   AdminNotification,
   SendNotificationRequest,
+  SendNotificationResponse,
+  EmailNotificationData,
   GenerateReportRequest,
   GetNotificationsParams
 } from '@/lib/api/admin-dashboard-client';
+import { sendSystemNotificationEmail, isEmailJSConfigured } from '@/utils/emailjs';
 
 export interface UseAdminDashboardState {
   stats: DashboardStats | null;
@@ -117,10 +120,62 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     try {
       updateState({ sendingNotification: true, error: null });
 
-      const result = await adminDashboardClient.sendNotification(data);
+      const result: SendNotificationResponse = await adminDashboardClient.sendNotification(data);
+      
+      // Send emails if EmailJS is configured and we have email recipients
+      if (isEmailJSConfigured() && result.email_data && result.email_data.length > 0) {
+        try {
+          console.log(`Sending emails to ${result.email_data.length} recipients...`);
+          
+          // Send emails in parallel with error handling for each
+          const emailPromises = result.email_data.map(async (emailData: EmailNotificationData) => {
+            try {
+              await sendSystemNotificationEmail(emailData);
+              return { success: true, email: emailData.to_email };
+            } catch (error) {
+              console.error(`Failed to send email to ${emailData.to_email}:`, error);
+              return { success: false, email: emailData.to_email, error };
+            }
+          });
+
+          const emailResults = await Promise.all(emailPromises);
+          const successfulEmails = emailResults.filter((result: { success: boolean }) => result.success).length;
+          const failedEmails = emailResults.filter((result: { success: boolean }) => !result.success).length;
+
+          if (successfulEmails > 0) {
+            console.log(`Successfully sent ${successfulEmails} notification emails`);
+            if (failedEmails > 0) {
+              toast.success(
+                `Notification sent to ${result.recipients} users. Emails sent to ${successfulEmails} recipients (${failedEmails} failed)`
+              );
+            } else {
+              toast.success(
+                `Notification sent to ${result.recipients} users with email notifications to ${successfulEmails} recipients`
+              );
+            }
+          } else if (failedEmails > 0) {
+            toast.error(
+              `Notification sent to ${result.recipients} users, but all ${failedEmails} emails failed to send`
+            );
+          }
+
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
+          toast.success(
+            `Notification sent to ${result.recipients} users, but email sending failed`
+          );
+        }
+      } else {
+        if (!isEmailJSConfigured()) {
+          toast.success(
+            `Notification sent to ${result.recipients} users. Email notifications disabled (EmailJS not configured)`
+          );
+        } else {
+          toast.success(`Notification sent to ${result.recipients} users`);
+        }
+      }
       
       updateState({ sendingNotification: false });
-      toast.success(`Notification sent to ${result.recipients} users`);
       
       // Refresh notifications after sending
       await fetchNotifications();

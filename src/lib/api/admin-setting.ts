@@ -15,12 +15,12 @@ export interface AdminProfile {
 
 const adminSettingClient = {
   getProfile: async () => {
-    const response = await httpClient.get('/admin-setting/profile');
+    const response = await httpClient.get('/admin/setting/profile');
     return response.data;
   },
   
   updateProfile: async (data: Partial<AdminProfile>) => {
-    const response = await httpClient.put('/admin-setting/profile', data);
+    const response = await httpClient.put('/admin/setting/profile', data);
     return response.data;
   },
 
@@ -28,7 +28,7 @@ const adminSettingClient = {
     const formData = new FormData();
     formData.append('profilePicture', file);
     
-    const response = await httpClient.post('/admin-setting/profile/picture', formData, {
+    const response = await httpClient.post('/admin/setting/profile/picture', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -38,7 +38,7 @@ const adminSettingClient = {
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await httpClient.post('/admin-setting/change-password', {
+    const response = await httpClient.post('/admin/setting/change-password', {
       currentPassword,
       newPassword
     });

@@ -9,6 +9,7 @@ import medicalRecordRoutes from './medical-record.routes';
 import doctorAppointmentRoutes from './doctor-appointment.routes';
 import doctorPatientsRoutes from './doctor-patients.routes';
 import doctorSettingRoutes from './doctor-setting.routes';
+import doctorMedicalRecordsRoutes from './doctor-medical-records.routes';
 import adminDepartmentsRoutes from './admin-departments.routes';
 import adminUsersRoutes from './admin-users.routes';
 import adminPatientsRoutes from './admin-patients.routes';
@@ -16,6 +17,7 @@ import adminAppointmentsRoutes from './admin-appointments.routes';
 import adminDashboardRoutes from './admin-dashboard.routes';
 import adminSettingsRoutes from './admin-settings.routes';
 import adminSettingRoutes from './admin-setting.routes';
+import adminMedicalRecordsRoutes from './admin-medical-records.routes';
 import { authenticate } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import doctorDashboardRoutes from './doctor-dashboard.routes';
@@ -34,66 +36,74 @@ export const setupRoutes = () => {
   // User routes (some protected, some public)
   router.use('/users', userRoutes);
 
-  // Dashboard routes - 分离公共和受保护的路由
+  // Dashboard routes - separate public and protected routes
   router.use('/dashboard', dashboardRoutes);
   
-  // 预约路由
+  // Appointment routes
   router.use('/appointments', appointmentRoutes);
 
-  // 患者设置路由
+  // Patient routes
   router.use('/patients', patientRoutes);
 
-  // 患者个人设置路由
-  logger.info('注册患者个人设置路由: /patient-setting');
+  // Patient personal settings routes
+  logger.info('Registering patient personal settings routes: /patient-setting');
   router.use('/patient-setting', patientSettingRoutes);
 
-  // 医疗记录路由
-  logger.info('注册医疗记录路由: /medical-records');
+  // Medical records routes
+  logger.info('Registering medical records routes: /medical-records');
   router.use('/medical-records', authenticate, medicalRecordRoutes);
 
-  // 医生预约管理路由
-  logger.info('注册医生预约管理路由: /doctors/appointments');
+  // Doctor appointment management routes
+  logger.info('Registering doctor appointment management routes: /doctors/appointments');
   router.use('/doctors/appointments', doctorAppointmentRoutes);
 
-  // 医生患者管理路由
-  logger.info('注册医生患者管理路由: /doctor-patients');
+  // Doctor patient management routes
+  logger.info('Registering doctor patient management routes: /doctor-patients');
   router.use('/doctor-patients', authenticate, doctorPatientsRoutes);
 
-  // 医生个人设置路由
-  logger.info('注册医生个人设置路由: /doctor-setting');
+  // Doctor personal settings routes
+  logger.info('Registering doctor personal settings routes: /doctor-setting');
   router.use('/doctor-setting', authenticate, doctorSettingRoutes);
 
+  // Doctor medical records routes
+  logger.info('Registering doctor medical records routes: /doctors/medical-records');
+  router.use('/doctors/medical-records', authenticate, doctorMedicalRecordsRoutes);
+
   // Doctor dashboard routes
-  logger.info('注册医生仪表盘路由: /doctors/dashboard');
+  logger.info('Registering doctor dashboard routes: /doctors/dashboard');
   router.use('/doctors/dashboard', authenticate, doctorDashboardRoutes);
 
   // Admin departments routes
-  logger.info('注册管理员部门管理路由: /admin/departments');
+  logger.info('Registering admin department management routes: /admin/departments');
   router.use('/admin/departments', authenticate, adminDepartmentsRoutes);
 
   // Admin users routes
-  logger.info('注册管理员用户管理路由: /admin/users');
+  logger.info('Registering admin user management routes: /admin/users');
   router.use('/admin/users', authenticate, adminUsersRoutes);
 
   // Admin patients routes
-  logger.info('注册管理员患者管理路由: /admin/patients');
+  logger.info('Registering admin patient management routes: /admin/patients');
   router.use('/admin/patients', authenticate, adminPatientsRoutes);
 
   // Admin appointments routes
-  logger.info('注册管理员预约管理路由: /admin/appointments');
+  logger.info('Registering admin appointment management routes: /admin/appointments');
   router.use('/admin/appointments', authenticate, adminAppointmentsRoutes);
 
+  // Admin medical records routes
+  logger.info('Registering admin medical records routes: /admin/medical-records');
+  router.use('/admin/medical-records', authenticate, adminMedicalRecordsRoutes);
+
   // Admin dashboard routes
-  logger.info('注册管理员仪表盘路由: /admin/dashboard');
+  logger.info('Registering admin dashboard routes: /admin/dashboard');
   router.use('/admin/dashboard', authenticate, adminDashboardRoutes);
 
   // Admin settings routes
-  logger.info('注册管理员设置管理路由: /admin/settings');
+  logger.info('Registering admin settings routes: /admin/settings');
   router.use('/admin/settings', authenticate, adminSettingsRoutes);
 
-  // Admin profile and personal settings routes
-  logger.info('注册管理员个人设置路由: /admin-setting');
-  router.use('/admin-setting', authenticate, adminSettingRoutes);
+  // Admin setting routes (alternative)
+  logger.info('Registering admin setting routes (alternative): /admin/setting');
+  router.use('/admin/setting', authenticate, adminSettingRoutes);
 
   return router;
 };

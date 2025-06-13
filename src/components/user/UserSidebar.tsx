@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import PatientImage from '@/components/PatientImage';
 
 // Define interface for the navigation items
 interface NavigationItem {
@@ -22,6 +23,21 @@ interface UserSidebarProps {
     role?: string;
     avatar?: string;
   };
+  patientProfile?: {
+    id: number;
+    userId: number;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      profile_image_blob?: string;
+    };
+    dateOfBirth?: string;
+    bloodGroup?: string;
+    height?: number;
+    weight?: number;
+  } | null;
   onLogout?: () => void;
 }
 
@@ -30,6 +46,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   isOpen,
   onClose,
   userProfile,
+  patientProfile,
   onLogout,
 }) => {
   const pathname = usePathname();
@@ -66,10 +83,17 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
         </div>
         
         {/* User Profile for Desktop */}
-        {userProfile && (
+        {(userProfile || patientProfile) && (
           <div className="border-t border-gray-200 p-2">
             <div className="flex justify-center">
-              {userProfile.avatar ? (
+              {patientProfile && patientProfile.user ? (
+                <PatientImage
+                  userId={patientProfile.userId}
+                  profileImageBlob={patientProfile.user.profile_image_blob}
+                  size="sm"
+                  rounded="full"
+                />
+              ) : userProfile?.avatar ? (
                 <img
                   className="h-10 w-10 rounded-full"
                   src={userProfile.avatar}
@@ -77,7 +101,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                  {userProfile.name.charAt(0)}
+                  {((patientProfile?.user?.firstName) || userProfile?.name)?.charAt(0)}
                 </div>
               )}
             </div>
@@ -147,10 +171,17 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
         </div>
         
         {/* Mobile User Profile */}
-        {userProfile && (
+        {(userProfile || patientProfile) && (
           <div className="border-t border-gray-200 p-2">
             <div className="flex justify-center">
-              {userProfile.avatar ? (
+              {patientProfile && patientProfile.user ? (
+                <PatientImage
+                  userId={patientProfile.userId}
+                  profileImageBlob={patientProfile.user.profile_image_blob}
+                  size="sm"
+                  rounded="full"
+                />
+              ) : userProfile?.avatar ? (
                 <img
                   className="h-10 w-10 rounded-full"
                   src={userProfile.avatar}
@@ -158,7 +189,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                  {userProfile.name.charAt(0)}
+                  {((patientProfile?.user?.firstName) || userProfile?.name)?.charAt(0)}
                 </div>
               )}
             </div>

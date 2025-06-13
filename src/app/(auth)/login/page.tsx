@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/use-toast';
+import { useSession } from '@/contexts/auth/SessionContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useSession(); // 使用SessionContext的login方法
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,75 +24,39 @@ export default function LoginPage() {
     try {
       // 显示登录中的提示
       toast({
-        title: "登录中",
-        description: "正在验证您的登录信息...",
+        title: "Logging in...",
+        description: "Verifying your credentials...",
       });
       
-      // 直接调用登录API
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // 使用SessionContext的login方法
+      const success = await login(email, password);
       
-      const data = await response.json();
-      console.log('[Login Frontend] 登录响应:', data); // Debug log
-  
-      if (!response.ok || !data.success) {
-        console.error('Login error:', data.message);
-        setError('登录失败，请检查您的邮箱和密码');
+      if (success) {
+        console.log('[Login Page] 登录成功，重定向到主页');
+        
+        // 显示成功提示
         toast({
-          title: "登录失败",
-          description: "邮箱或密码错误，请重试。",
+          title: "Login successful",
+          description: "Welcome back! Redirecting to your dashboard...",
+        });
+        
+        // 简单重定向到主页，让主页面根据用户角色处理后续重定向
+        router.replace('/');
+      } else {
+        console.error('[Login Page] 登录失败');
+        setError('Login failed, please check your email and password');
+        toast({
+          title: "Login failed",
+          description: "Incorrect email or password. Please try again.",
           variant: "destructive",
         });
-      } else {
-        console.log('[Login Frontend] 用户数据:', data.user); // Debug log
-        console.log('[Login Frontend] 用户角色:', data.user.role); // Debug log
-        
-        // 登录成功，将token和用户信息保存到localStorage
-        // 构造简化的token格式：user_id:email:role
-        const token = `${data.user.id}:${data.user.email}:${data.user.role}`;
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('userData', JSON.stringify({
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.name,
-          firstName: data.user.firstName,
-          lastName: data.user.lastName,
-          role: data.user.role
-        }));
-        
-        // 根据用户角色重定向到对应页面
-        let redirectPath = '/user-dashboard';
-        
-        console.log('[Login Frontend] 检查角色重定向:', data.user.role); // Debug log
-        
-        if (data.user.role === 'admin') {
-          redirectPath = '/admin-dashboard';
-          console.log('[Login Frontend] 重定向到admin页面'); // Debug log
-        } else if (data.user.role === 'doctor') {
-          redirectPath = '/doctor-dashboard';
-          console.log('[Login Frontend] 重定向到doctor页面'); // Debug log
-        } else {
-          // For patients
-          redirectPath = '/user-dashboard';
-          console.log('[Login Frontend] 重定向到patient页面'); // Debug log
-        }
-        
-        console.log('[Login Frontend] 最终重定向路径:', redirectPath); // Debug log
-        
-        // 使用replace而不是push来避免浏览器历史问题
-        router.replace(redirectPath);
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('发生了意外错误，请稍后重试');
+      console.error('[Login Page] 登录错误:', err);
+      setError('An unexpected error occurred. Please try again later.');
       toast({
-        title: "登录失败",
-        description: "发生了意外错误，请稍后重试。",
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {

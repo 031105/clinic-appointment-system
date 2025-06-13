@@ -118,17 +118,39 @@ const authClient = {
     }
   },
   
-  // 退出登录
+  // Enhanced logout function
   logout: async () => {
     try {
-      // 清理本地存储中的令牌
-      localStorage.removeItem('accessToken');
+      console.log('[AuthClient] Starting logout cleanup...');
       
-      return { success: true, message: '已成功退出登录' };
+      // Only access browser APIs in browser environment
+      if (typeof window !== 'undefined') {
+        // Clear localStorage
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('clinic-user-role');
+        
+        // Clear any other stored user data
+        const localStorageKeys = Object.keys(localStorage);
+        localStorageKeys.forEach(key => {
+          if (key.includes('user') || key.includes('auth') || key.includes('token') || key.includes('clinic')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+      }
+      
+      console.log('[AuthClient] Logout cleanup completed');
+      return { success: true, message: 'Successfully logged out' };
     } catch (error) {
       console.error('Logout error:', error);
-      // 即使失败，也清理本地存储
-      localStorage.removeItem('accessToken');
+      // Even if there's an error, clear what we can
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
       throw error;
     }
   },

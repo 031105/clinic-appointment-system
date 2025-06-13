@@ -18,6 +18,7 @@ import GenerateReportModal from './components/GenerateReportModal';
 import CreateAppointmentModal from './components/CreateAppointmentModal';
 import { PatientRegistrationModal } from '@/components/admin/PatientRegistrationModal';
 import { useAdminPatients } from '@/hooks/admin/useAdminPatients';
+import AdminNotificationsModal from './components/AdminNotificationsModal';
 
 export default function AdminDashboard() {
   const {
@@ -41,6 +42,7 @@ export default function AdminDashboard() {
   const [showCreateAppointmentModal, setShowCreateAppointmentModal] = useState(false);
   const [showRegisterPatientModal, setShowRegisterPatientModal] = useState(false);
   const [dateRange, setDateRange] = useState<'week'>('week');
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
 
   // Handle notification click to mark as read
   const handleNotificationClick = async (notification: AdminNotification) => {
@@ -277,12 +279,12 @@ export default function AdminDashboard() {
           </div>
           
           {notifications.length > 0 && (
-            <Link
-              href="/admin-notifications"
+            <button
+              onClick={() => setShowNotificationsModal(true)}
               className="text-blue-600 text-sm font-medium mt-4 block hover:text-blue-700"
             >
               View All Notifications
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -413,6 +415,8 @@ export default function AdminDashboard() {
         onClose={() => setShowRegisterPatientModal(false)}
         onSubmit={handlePatientRegistration}
       />
+
+      <AdminNotificationsModal isOpen={showNotificationsModal} onClose={() => setShowNotificationsModal(false)} />
     </div>
   );
 }

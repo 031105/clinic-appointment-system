@@ -264,8 +264,13 @@ export class AdminDashboardController {
           n.type,
           n.is_read,
           n.created_at,
-          n.data
+          n.data,
+          u.user_id,
+          u.email,
+          u.first_name,
+          u.last_name
         FROM notifications n
+        JOIN users u ON n.user_id = u.user_id
         ${whereClause}
         ORDER BY n.created_at DESC
         LIMIT $1 OFFSET $2
@@ -302,61 +307,61 @@ export class AdminDashboardController {
   // Send notification
   async sendNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      const { title, message, type = 'system', target_users = 'all' } = req.body;
+      const { title, message, target_users = 'patients', specific_user_ids } = req.body;
 
-      logger.info('Sending admin notification', { title, type, target_users });
+      logger.info('Sending admin notification', { title, target_users, specific_user_ids });
 
       if (!title || !message) {
         throw new ApiError(400, 'Title and message are required');
       }
 
-      // Get target user IDs
-      let userIds: number[] = [];
-      
-      if (target_users === 'all') {
-        const allUsersQuery = `SELECT user_id FROM users WHERE status = 'active'`;
-        const usersResult = await dbClient.query(allUsersQuery);
-        userIds = usersResult.rows.map(row => row.user_id);
-      } else if (target_users === 'patients') {
-        const patientsQuery = `
-          SELECT u.user_id 
-          FROM users u 
-          JOIN patients p ON u.user_id = p.patient_id 
-          WHERE u.status = 'active'
-        `;
+      let users = [];
+      if (target_users === 'patients') {
+        // 查所有 active 患者
+        const patientsQuery = `SELECT u.user_id, u.email, u.first_name, u.last_name FROM users u JOIN patients p ON u.user_id = p.patient_id WHERE u.status = 'active' AND u.email IS NOT NULL`;
         const patientsResult = await dbClient.query(patientsQuery);
-        userIds = patientsResult.rows.map(row => row.user_id);
-      } else if (target_users === 'doctors') {
-        const doctorsQuery = `
-          SELECT u.user_id 
-          FROM users u 
-          JOIN doctors d ON u.user_id = d.doctor_id 
-          WHERE u.status = 'active'
-        `;
-        const doctorsResult = await dbClient.query(doctorsQuery);
-        userIds = doctorsResult.rows.map(row => row.user_id);
+        users = patientsResult.rows;
+      } else if (target_users === 'specific' && Array.isArray(specific_user_ids) && specific_user_ids.length > 0) {
+        // 查指定患者
+        const patientsQuery = `SELECT u.user_id, u.email, u.first_name, u.last_name FROM users u JOIN patients p ON u.user_id = p.patient_id WHERE u.user_id = ANY($1) AND u.status = 'active' AND u.email IS NOT NULL`;
+        const patientsResult = await dbClient.query(patientsQuery, [specific_user_ids]);
+        users = patientsResult.rows;
+      } else {
+        return res.status(400).json({ error: 'Invalid target_users or specific_user_ids' });
       }
 
-      // Insert notifications for all target users
+      // 插入 notifications 记录
       const insertQuery = `
         INSERT INTO notifications (user_id, title, message, type, created_at)
         VALUES ($1, $2, $3, $4, NOW())
+        RETURNING notification_id
       `;
-
-      const promises = userIds.map(userId => 
-        dbClient.query(insertQuery, [userId, title, message, type])
+      const notificationPromises = users.map(user => 
+        dbClient.query(insertQuery, [user.user_id, title, message, 'system'])
       );
+      await Promise.all(notificationPromises);
 
-      await Promise.all(promises);
+      // 返回邮件数据，字段与 EmailJS 模板变量完全一致
+      const emailData = users.map(user => ({
+        to_email: user.email,
+        to_name: `${user.first_name} ${user.last_name}`,
+        notification_title: title,
+        notification_message: message,
+        notification_type: 'system',
+        notification_date: new Date().toLocaleDateString()
+      }));
 
-      logger.info(`Notification sent to ${userIds.length} users`);
+      logger.info(`Notification sent to ${users.length} patients, all eligible for email`);
 
       res.status(201).json({
         success: true,
-        message: `Notification sent to ${userIds.length} users`,
-        data: { recipients: userIds.length }
+        message: `Notification sent to ${users.length} patients`,
+        data: {
+          recipients: users.length,
+          email_recipients: users.length,
+          email_data: emailData
+        }
       });
-
     } catch (error) {
       logger.error('Failed to send notification:', error);
       if (error instanceof ApiError) {

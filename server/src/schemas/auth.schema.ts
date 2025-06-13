@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-// Common fields
+// Common fields - More reasonable password validation
 const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
   .max(100, 'Password must be at most 100 characters')
   .regex(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-    'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+    'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
   );
 
 const emailSchema = z
@@ -15,19 +15,19 @@ const emailSchema = z
   .email('Invalid email format')
   .max(255, 'Email must be at most 255 characters');
 
-// Register schema
+// Register schema - removed confirmPassword since it's handled on frontend
 export const registerSchema = z.object({
   body: z.object({
     email: emailSchema,
+    otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d{6}$/, 'OTP must contain only numbers'),
     password: passwordSchema,
-    confirmPassword: z.string(),
     firstName: z.string().min(2, 'First name must be at least 2 characters'),
     lastName: z.string().min(2, 'Last name must be at least 2 characters'),
     phone: z
       .string()
       .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
       .optional(),
-    role: z.enum(['patient', 'doctor']),
+    role: z.enum(['patient', 'doctor']).default('patient'),
     // Additional fields for doctors
     doctorInfo: z
       .object({
@@ -47,9 +47,6 @@ export const registerSchema = z.object({
         weight: z.number().optional(),
       })
       .optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
   }),
 });
 
@@ -121,41 +118,12 @@ export const resendOTPSchema = z.object({
   }),
 });
 
-// Initial registration schema (before OTP verification)
+// Initial registration schema (before OTP verification) - simplified
 export const initialRegisterSchema = z.object({
   body: z.object({
     email: emailSchema,
-    password: passwordSchema,
-    confirmPassword: z.string(),
     firstName: z.string().min(2, 'First name must be at least 2 characters'),
     lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-    phone: z
-      .string()
-      .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
-      .optional(),
-    role: z.enum(['patient', 'doctor']),
-    // Additional fields for doctors
-    doctorInfo: z
-      .object({
-        specializations: z.array(z.string()).min(1, 'At least one specialization is required'),
-        qualifications: z.array(z.string()).min(1, 'At least one qualification is required'),
-        experienceYears: z.number().min(0),
-        departmentId: z.number(),
-        consultationFee: z.number().min(0),
-      })
-      .optional(),
-    // Additional fields for patients
-    patientInfo: z
-      .object({
-        dateOfBirth: z.string(),
-        bloodGroup: z.string().optional(),
-        height: z.number().optional(),
-        weight: z.number().optional(),
-      })
-      .optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
   }),
 });
 
