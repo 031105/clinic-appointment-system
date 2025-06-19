@@ -1,0 +1,27 @@
+2,13,Medical Record Updated,Your medical record has been updated with recent test results.,system,"{'"record_id'": 1, '"redirect_url'": '"/medical-records/view/1'"}",t,,2025-05-08 12:40:06.772308+08
+5,1,System Maintenance,"Scheduled system maintenance on Nov 15, 2023 at 2:00 AM.",system,"{'"redirect_url'": '"/admin/system-alerts'"}",t,,2025-05-08 12:40:06.772308+08
+1,13,Upcoming Appointment Reminder,You have an appointment with Dr. Smith tomorrow at 10:00 AM.,appointment,"{'"redirect_url'": '"/appointments/details/1'", '"appointment_id'": 1}",t,2025-05-31 22:31:18.716225+08,2025-05-08 12:40:06.772308+08
+4,3,New Patient Review,You have received a new 5-star review from a patient.,system,"{'"review_id'": 1, '"redirect_url'": '"/reviews/view/1'"}",t,2025-05-31 22:31:20.030559+08,2025-05-08 12:40:06.772308+08
+3,3,New Appointment Scheduled,A new appointment has been scheduled for November 10th at 9:30 AM.,appointment,"{'"redirect_url'": '"/appointments/details/2'", '"appointment_id'": 2}",t,2025-06-01 21:19:45.626884+08,2025-05-08 12:40:06.772308+08
+6,13,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.755571+08
+8,5,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.771493+08
+7,14,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.771749+08
+9,21,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.773241+08
+10,23,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.773111+08
+11,17,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.781874+08
+12,18,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.782417+08
+13,19,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.78268+08
+14,58,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.782816+08
+15,22,Appointment Reminder,Tomorrow will be your appointment.,system,{},f,,2025-06-13 16:25:12.783114+08
+21,137,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:24.971283+08,2025-06-13 16:25:12.786427+08
+23,24,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:25.754381+08,2025-06-13 16:25:12.786666+08
+22,138,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:26.32147+08,2025-06-13 16:25:12.786929+08
+20,136,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:27.686943+08,2025-06-13 16:25:12.786357+08
+18,135,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:28.00728+08,2025-06-13 16:25:12.78543+08
+19,25,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:28.388901+08,2025-06-13 16:25:12.785041+08
+17,134,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:29.333874+08,2025-06-13 16:25:12.784779+08
+16,66,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 16:56:29.670818+08,2025-06-13 16:25:12.784231+08
+24,15,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 17:02:01.881437+08,2025-06-13 16:25:12.787419+08
+25,16,Appointment Reminder,Tomorrow will be your appointment.,system,{},t,2025-06-13 17:05:45.722643+08,2025-06-13 16:25:12.788108+08
+26,66,Test,Test,system,{},f,,2025-06-13 17:16:02.687222+08
+27,66,test,test,system,{},f,,2025-06-13 17:24:12.717482+08

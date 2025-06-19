@@ -98,14 +98,44 @@ setup_database() {
             exit 1
         fi
         
-        # Data setup
-        if [ -f "database_data.sql" ]; then
-            print_status "Loading database data..."
-            psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "database_data.sql" > /dev/null 2>&1
-            print_success "Database data loaded"
-        else
-            print_warning "Data file 'database_data.sql' not found. Skipping data import."
-        fi
+        # Import data from CSV files
+        print_status "Importing data from CSV files..."
+        
+        # Define the order of tables for import (based on dependencies)
+        CSV_FILES=(
+            "roles.csv"
+            "users.csv"
+            "departments.csv"
+            "doctors.csv"
+            "patients.csv"
+            "services.csv"
+            "admins.csv"
+            "appointments.csv"
+            "medical_records.csv"
+            "emergency_contacts.csv"
+            "patient_allergies.csv"
+            "reviews.csv"
+            "notifications.csv"
+            "system_settings.csv"
+            "email_verifications.csv"
+        )
+        
+        # Import each CSV file
+        for csv_file in "${CSV_FILES[@]}"; do
+            if [ -f "$csv_file" ]; then
+                table_name="${csv_file%.csv}"
+                print_status "Importing data into $table_name table..."
+                
+                # Use COPY command to import CSV data
+                psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "\COPY $table_name FROM '$csv_file' WITH CSV" 2>/dev/null || {
+                    print_warning "Failed to import $csv_file. This might be due to constraints or data format issues."
+                }
+            else
+                print_warning "CSV file $csv_file not found. Skipping."
+            fi
+        done
+        
+        print_success "Data import completed"
     fi
     
     # System settings
@@ -142,6 +172,12 @@ verify_setup() {
         print_error "Missing core tables: ${MISSING_TABLES[*]}"
         exit 1
     fi
+    
+    # Check if data was imported successfully
+    for table in "${CORE_TABLES[@]}"; do
+        ROW_COUNT=$(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM $table;" 2>/dev/null | xargs || echo "0")
+        print_status "Table $table contains $ROW_COUNT rows"
+    done
     
     # Check if system settings exist
     SETTINGS_COUNT=$(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM system_settings;" 2>/dev/null | xargs || echo "0")

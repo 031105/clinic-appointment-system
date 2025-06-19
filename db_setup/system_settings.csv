@@ -1,0 +1,45 @@
+1,clinic_name,HealthCare Clinic,general,string,Name of the clinic,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+2,clinic_logo,"",general,file,Clinic logo file path,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+3,clinic_phone,"",general,string,Clinic contact phone number,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+4,clinic_email,"",general,string,Clinic contact email address,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+5,clinic_address,"",general,string,Clinic physical address,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+6,clinic_website,"",general,string,Clinic website URL,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+7,timezone,Malaysia (UTC+8),general,string,System timezone,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+8,working_hours_monday,"{'"start'": '"09:00'", '"end'": '"17:00'", '"enabled'": true}",working_hours,json,Monday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+9,working_hours_tuesday,"{'"start'": '"09:00'", '"end'": '"17:00'", '"enabled'": true}",working_hours,json,Tuesday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+10,working_hours_wednesday,"{'"start'": '"09:00'", '"end'": '"17:00'", '"enabled'": true}",working_hours,json,Wednesday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+11,working_hours_thursday,"{'"start'": '"09:00'", '"end'": '"17:00'", '"enabled'": true}",working_hours,json,Thursday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+12,working_hours_friday,"{'"start'": '"09:00'", '"end'": '"17:00'", '"enabled'": true}",working_hours,json,Friday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+13,working_hours_saturday,"{'"start'": '"09:00'", '"end'": '"13:00'", '"enabled'": true}",working_hours,json,Saturday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+14,working_hours_sunday,"{'"start'": '"09:00'", '"end'": '"13:00'", '"enabled'": false}",working_hours,json,Sunday working hours,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+15,break_time_start,12:00,working_hours,string,Break time start,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+16,break_time_end,13:00,working_hours,string,Break time end,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+17,holiday_mode,false,working_hours,boolean,Holiday mode enabled,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+18,appointment_duration_default,30,appointments,number,Default appointment duration in minutes,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+19,appointment_advance_booking_days,30,appointments,number,How many days in advance patients can book,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+20,appointment_cancellation_hours,24,appointments,number,Minimum hours before appointment to allow cancellation,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+21,appointment_reminder_hours,24,appointments,number,Hours before appointment to send reminder,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+22,appointment_auto_confirm,false,appointments,boolean,Auto-confirm appointments,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+23,appointment_overbooking_allowed,false,appointments,boolean,Allow overbooking,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+24,appointment_buffer_time,10,appointments,number,Buffer time between appointments in minutes,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+25,email_notifications_enabled,true,notifications,boolean,Enable email notifications,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+26,sms_notifications_enabled,false,notifications,boolean,Enable SMS notifications,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+27,appointment_confirmation_email,true,notifications,boolean,Send appointment confirmation emails,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+28,appointment_reminder_email,true,notifications,boolean,Send appointment reminder emails,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+29,appointment_cancellation_email,true,notifications,boolean,Send appointment cancellation emails,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+30,admin_new_appointment_notification,true,notifications,boolean,Notify admin of new appointments,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+31,doctor_appointment_notification,true,notifications,boolean,Notify doctors of appointments,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+32,backup_enabled,true,backup,boolean,Enable automatic backups,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+33,backup_frequency,daily,backup,string,"Backup frequency (daily, weekly, monthly)",t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+34,backup_retention_days,30,backup,number,How many days to keep backups,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+35,backup_location,local,backup,string,Backup storage location,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+36,last_backup_date,"",backup,string,Last backup execution date,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+37,session_timeout_minutes,120,security,number,Session timeout in minutes,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+38,password_min_length,8,security,number,Minimum password length,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+39,password_require_uppercase,true,security,boolean,Require uppercase in passwords,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+40,password_require_lowercase,true,security,boolean,Require lowercase in passwords,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+41,password_require_numbers,true,security,boolean,Require numbers in passwords,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+42,password_require_symbols,false,security,boolean,Require symbols in passwords,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+43,failed_login_attempts_limit,5,security,number,Failed login attempts before lockout,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+44,lockout_duration_minutes,15,security,number,Account lockout duration in minutes,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192
+45,two_factor_auth_enabled,false,security,boolean,Enable two-factor authentication,t,2025-06-01 22:39:46.096192,2025-06-01 22:39:46.096192

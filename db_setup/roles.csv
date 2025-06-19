@@ -1,0 +1,3 @@
+1,admin,System Administrator,"{'"all'": true}",2025-05-08 12:40:06.402433+08,2025-05-08 12:40:06.402433+08
+2,doctor,Medical Doctor,"{'"patients'": true, '"appointments'": true, '"medical_records'": true}",2025-05-08 12:40:06.402433+08,2025-05-08 12:40:06.402433+08
+3,patient,Patient User,"{'"appointments'": {'"view'": true, '"create'": true}, '"medical_records'": {'"view'": true}}",2025-05-08 12:40:06.402433+08,2025-05-08 12:40:06.402433+08

@@ -1,0 +1,2 @@
+1,system_admin,"{'"manage_users'": true, '"view_reports'": true, '"manage_doctors'": true, '"manage_patients'": true, '"manage_settings'": true, '"manage_departments'": true}",2025-05-08 12:40:06.815878+08,2025-05-08 12:40:06.815878+08
+2,clinic_manager,"{'"view_reports'": true, '"manage_doctors'": true, '"manage_patients'": true, '"manage_appointments'": true}",2025-05-08 12:40:06.815878+08,2025-05-08 12:40:06.815878+08

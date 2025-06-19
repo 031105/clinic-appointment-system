@@ -38,10 +38,10 @@ A comprehensive web-based clinic management system built with Next.js 14, Node.j
 
 ### Prerequisites
 - Node.js 18.0.0 or higher
-- PostgreSQL 14.0 or higher (can be auto-installed)
+- PostgreSQL 14.0 or higher
 - npm or yarn package manager
 
-### 🎯 One-Click Deployment (Recommended)
+### 🎯 Quick Setup
 
 1. **Get the Project**
    ```bash
@@ -49,15 +49,15 @@ A comprehensive web-based clinic management system built with Next.js 14, Node.j
    cd clinic-appointment-system
    ```
 
-2. **Run One-Click Setup**
+2. **Database Setup**
    ```bash
    cd db_setup
-   ./DEPLOY_EVERYTHING.sh
+   ./setup_database.sh
+   cd ..
    ```
 
 3. **Install Dependencies & Start**
    ```bash
-   cd ..
    npm install
    cd server && npm install && cd ..
    ./start.sh
@@ -74,9 +74,14 @@ A comprehensive web-based clinic management system built with Next.js 14, Node.j
 # Create PostgreSQL database
 createdb -U postgres clinic_appointment_system
 
-# Import database structure and data
+# Import database schema
 cd db_setup
-psql -U postgres -d clinic_appointment_system -f complete_database_backup.sql
+psql -U postgres -d clinic_appointment_system -f database_schema.sql
+
+# Import data from CSV files
+# Example for one table:
+psql -U postgres -d clinic_appointment_system -c "\COPY roles FROM 'roles.csv' WITH CSV"
+# Repeat for other CSV files in the correct order
 ```
 
 #### 2. Environment Configuration
@@ -215,9 +220,9 @@ clinic-appointment-system/
 │   └── server/src/migrations/   # Database migrations
 ├── 📁 Database Setup
 │   ├── db_setup/                # Database deployment scripts
-│   │   ├── DEPLOY_EVERYTHING.sh # One-click deployment
-│   │   ├── complete_database_backup.sql # Full database backup
-│   │   └── setup_database.sh    # Database-only setup
+│   │   ├── database_schema.sql  # Database schema
+│   │   ├── *.csv                # CSV data files for each table
+│   │   └── setup_database.sh    # Database setup script
 └── 📁 Configuration
     ├── package.json             # Frontend dependencies
     ├── server/package.json      # Backend dependencies
@@ -285,6 +290,9 @@ pg_dump clinic_appointment_system > backup.sql
 
 # Restore backup
 psql -d clinic_appointment_system -f backup.sql
+
+# Export table data to CSV
+psql -U postgres -d clinic_appointment_system -c "COPY table_name TO 'table_name.csv' WITH CSV"
 ```
 
 ## 🛡️ Security Features
@@ -364,6 +372,18 @@ For support and questions:
 3. Check the GitHub issues for common problems
 4. Ensure all environment variables are correctly configured
 
+## 🔄 Recent Updates
+
+### Database Setup
+- Updated database setup to use CSV files for data import
+- Consolidated setup scripts into a single `setup_database.sh` script
+- Added support for importing data from CSV files
+
+### UI Enhancements
+- Added emoji icons to departments
+- Improved doctor profile image handling with blob storage
+- Enhanced UI components for better user experience
+
 ---
 
-**🎉 Ready to deploy? Run `./db_setup/DEPLOY_EVERYTHING.sh` and get started in minutes!** 
+**🎉 Ready to deploy? Run `./db_setup/setup_database.sh` to set up your database and get started!** 

@@ -1,0 +1,30 @@
+1,1,ECG (Electrocardiogram),Electrocardiogram to monitor heart rhythm and electrical activity,150.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+2,1,Echocardiogram,Ultrasound of the heart to assess heart function and structure,300.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+3,1,Stress Test,Exercise stress test to evaluate heart function under physical stress,250.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+4,1,Holter Monitor,24-hour continuous heart rhythm monitoring,200.00,15,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+6,2,Well-child Visit,Routine checkup for healthy children including growth assessment,100.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+7,2,Vaccination,Childhood immunizations and vaccine administration,50.00,15,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+8,2,Pediatric Consultation,General pediatric consultation for illness or concerns,120.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+9,2,Growth Assessment,Comprehensive evaluation of child growth and development,80.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+10,2,Behavioral Assessment,Evaluation of child behavior and developmental milestones,150.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+11,3,Skin Consultation,General dermatological examination and consultation,120.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+12,3,Mole Removal,Surgical removal of moles and skin lesions,200.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+13,3,Acne Treatment,Treatment for acne and related skin conditions,150.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+14,3,Skin Biopsy,Tissue sample collection for pathological examination,180.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+15,3,Chemical Peel,Cosmetic treatment for skin rejuvenation,250.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+16,4,Joint Consultation,Orthopedic consultation for joint problems,150.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+17,4,X-ray Analysis,Radiological examination and analysis of bones/joints,200.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+18,4,Physical Therapy Session,Rehabilitation therapy for musculoskeletal conditions,100.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+19,4,Arthroscopy,Minimally invasive joint surgery,600.00,90,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+20,4,Fracture Treatment,Treatment and casting for bone fractures,300.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+21,5,Neurological Examination,Comprehensive neurological assessment,180.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+22,5,EEG (Electroencephalogram),Brain wave monitoring and analysis,250.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+23,5,Cognitive Assessment,Evaluation of cognitive function and memory,200.00,60,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+24,5,EMG (Electromyography),Nerve and muscle function testing,220.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+25,5,Brain MRI Review,Review and interpretation of brain MRI scans,150.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+26,6,Vision Test,Comprehensive eye examination and vision testing,80.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+27,6,Eye Examination,Detailed eye health examination,120.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+28,6,Glaucoma Screening,Screening for glaucoma and eye pressure testing,150.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+29,6,Retinal Examination,Detailed examination of the retina,200.00,45,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+30,6,Contact Lens Fitting,Contact lens consultation and fitting,100.00,30,t,2025-05-30 01:14:04.11621+08,2025-05-30 01:14:04.11621+08
+5,1,Cardiac Catheterization,Invasive procedure to examine heart blood vessels,800.00,120,t,2025-05-30 01:14:04.11621+08,2025-05-30 22:57:21.094549+08
