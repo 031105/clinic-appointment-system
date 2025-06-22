@@ -464,3 +464,96 @@
 2025-06-13 14:15:45:1545 [31merror[39m: [31mFailed to get doctor medical records stats: malformed array literal: "[]"[39m
 2025-06-13 14:15:45:1545 [31merror[39m: [31mError: Failed to get medical records statistics[39m
 2025-06-13 17:06:28:628 [31merror[39m: [31mError: User already exists[39m
+2025-06-22 10:24:14:2414 [31merror[39m: [31mError: User already exists[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mFailed to get doctor medical records stats: malformed array literal: "[]"[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mFailed to get doctor medical records stats: malformed array literal: "[]"[39m
+2025-06-22 10:28:47:2847 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:37:10:3710 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:37:10:3710 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:37:10:3710 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:37:10:3710 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:40:35:4035 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:40:35:4035 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:40:35:4035 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:40:35:4035 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:40:50:4050 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:40:50:4050 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:41:00:410 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:41:00:410 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:41:00:410 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:41:00:410 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:42:16:4216 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:42:16:4216 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:42:16:4216 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:42:16:4216 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:42:19:4219 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:43:26:4326 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:43:27:4327 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:43:27:4327 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:43:27:4327 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:43:27:4327 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:43:48:4348 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:43:48:4348 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:43:48:4348 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:43:48:4348 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:43:49:4349 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:46:52:4652 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:46:52:4652 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:46:52:4652 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 10:46:52:4652 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 10:50:45:5045 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 11:02:36:236 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 11:02:36:236 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 11:02:36:236 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 11:02:36:236 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mFailed to get doctor medical records stats: malformed array literal: "[]"[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mFailed to get doctor medical records stats: malformed array literal: "[]"[39m
+2025-06-22 20:19:09:199 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 20:55:31:5531 [31merror[39m: [31mQuery error: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:31:5531 [31merror[39m: [31mFailed to create appointment: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:31:5531 [31merror[39m: [31mError: Failed to create appointment[39m
+2025-06-22 20:55:32:5532 [31merror[39m: [31mQuery error: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:32:5532 [31merror[39m: [31mFailed to create appointment: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:32:5532 [31merror[39m: [31mError: Failed to create appointment[39m
+2025-06-22 20:55:35:5535 [31merror[39m: [31mQuery error: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:35:5535 [31merror[39m: [31mFailed to create appointment: null value in column "end_datetime" of relation "appointments" violates not-null constraint[39m
+2025-06-22 20:55:35:5535 [31merror[39m: [31mError: Failed to create appointment[39m
+2025-06-22 21:01:19:119 [31merror[39m: [31mQuery error: invalid input value for enum appointment_status: "pending"[39m
+2025-06-22 21:01:19:119 [31merror[39m: [31mFailed to remove doctor: invalid input value for enum appointment_status: "pending"[39m
+2025-06-22 21:01:19:119 [31merror[39m: [31mError: Failed to remove doctor[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mQuery error: malformed array literal: "[]"[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mFailed to get admin medical records statistics: malformed array literal: "[]"[39m
+2025-06-22 21:02:28:228 [31merror[39m: [31mError: Failed to get medical records statistics[39m
+2025-06-22 21:03:46:346 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 21:03:46:346 [31merror[39m: [31mError: Failed to get setting categories[39m
+2025-06-22 21:03:46:346 [31merror[39m: [31mFailed to get setting categories: Cannot read properties of undefined (reading 'getCategoryDisplayName')[39m
+2025-06-22 21:03:46:346 [31merror[39m: [31mError: Failed to get setting categories[39m

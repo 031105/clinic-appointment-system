@@ -11,12 +11,15 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  Building2,
+  Building,
   UserCog,
   Settings,
   Menu,
   UserCheck,
-  FileText
+  FileText,
+  Eye,
+  BarChart,
+  Shield,
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/Toaster';
 import { useRouter } from 'next/navigation';
@@ -26,12 +29,13 @@ import { useSession } from '@/contexts/auth/SessionContext';
 // Admin interface navigation items
 const navigation = [
   { name: 'Dashboard', href: '/admin-dashboard', icon: LayoutDashboard },
-  { name: 'Users', href: '/admin-users', icon: Users },
+  { name: 'Users', href: '/admin-users', icon: UserCog },
+  { name: 'Patients', href: '/admin-patients', icon: Users },
   { name: 'Appointments', href: '/admin-appointments', icon: Calendar },
-  { name: 'Departments', href: '/admin-departments', icon: Building2 },
-  { name: 'Reports', href: '/admin-reports', icon: FileText },
-  { name: 'Settings', href: '/admin-settings', icon: Settings },
-];
+  { name: 'Departments', href: '/admin-departments', icon: Building },
+  { name: 'Reports', href: '/admin-reports', icon: BarChart },
+  { name: 'Settings', href: '/admin-settings', icon: Settings }]
+;
 
 export default function AdminLayout({
   children,
