@@ -16,7 +16,7 @@
 
 ### 3. 验证配置
 - Service ID: `service_q237ahi`
-- Public Key: `M0mQX4l49-XmuzBLw`
+- Public Key: `your_public_key_here`
 
 ## 🚀 功能映射
 

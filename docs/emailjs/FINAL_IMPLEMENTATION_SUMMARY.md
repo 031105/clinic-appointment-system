@@ -28,7 +28,7 @@
 ### ✅ 环境配置
 ```bash
 NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_q237ahi
-NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=M0mQX4l49-XmuzBLw
+NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key_here
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ```
 

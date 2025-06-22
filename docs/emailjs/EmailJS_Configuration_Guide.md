@@ -40,7 +40,7 @@
 ### 步骤4: 配置Service
 确保您的EmailJS服务配置正确：
 - Service ID: `service_q237ahi`
-- Public Key: `M0mQX4l49-XmuzBLw`
+- Public Key: `your_public_key_here`
 
 ## 📋 模板参数说明
 

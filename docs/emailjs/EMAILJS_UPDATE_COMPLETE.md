@@ -19,7 +19,7 @@ Based on successful testing results, all EmailJS configuration has been updated 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_zdk8m9i  # ✅ UPDATED
-NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=M0mQX4l49-XmuzBLw
+NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key_here
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -27,7 +27,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```bash
 # EmailJS Configuration
 EMAILJS_SERVICE_ID=service_zdk8m9i  # ✅ ADDED
-EMAILJS_PUBLIC_KEY=M0mQX4l49-XmuzBLw  # ✅ ADDED
+EMAILJS_PUBLIC_KEY=your_public_key_here  # ✅ ADDED
 ```
 
 ### EmailJS Dashboard Templates
@@ -38,7 +38,7 @@ EMAILJS_PUBLIC_KEY=M0mQX4l49-XmuzBLw  # ✅ ADDED
 
 ### Service Details
 - **Service ID**: `service_zdk8m9i` (NEW, TESTED, WORKING)
-- **Public Key**: `M0mQX4l49-XmuzBLw` (VALIDATED)
+- **Public Key**: `your_public_key_here` (VALIDATED)
 - **Templates**: 2 multi-purpose templates handling 4 email scenarios
 
 ### Email Functions Ready

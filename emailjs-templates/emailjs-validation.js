@@ -18,7 +18,7 @@ const REQUIRED_CONFIG = {
 const CURRENT_CONFIG = {
   SERVICE_ID_OLD: 'service_q237ahi',    // Previous service ID
   SERVICE_ID_NEW: 'service_zdk8m9i',    // New service ID you mentioned
-  PUBLIC_KEY: 'M0mQX4l49-XmuzBLw',
+  PUBLIC_KEY: 'your_public_key_here',
 };
 
 // Test email data
